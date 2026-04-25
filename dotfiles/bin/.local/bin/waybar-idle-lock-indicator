@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -euo pipefail
+
+STATE_FILE="$HOME/.local/state/hypr/idle-lock.mode"
+
+if [[ -f "$STATE_FILE" ]]; then
+  mode=$(<"$STATE_FILE")
+else
+  if pgrep -x hypridle >/dev/null; then
+    mode="lock+screenoff"
+  else
+    mode="disabled"
+  fi
+fi
+
+if [[ $mode == "disabled" ]]; then
+  printf '%s\n' '{"text": "󰖙", "tooltip": "Idle handling disabled", "class": "active"}'
+elif [[ $mode == "screenoff-only" ]]; then
+  printf '%s\n' '{"text": "󱫖", "tooltip": "Idle lock disabled (screen off only)", "class": "active"}'
+else
+  printf '%s\n' '{"text": "", "tooltip": "Idle lock enabled (lock + screen off)"}'
+fi

@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Usage: exec-host <comma separated allowed hostnames> <command>
+# Alternatively, prepend with ! to negate the check:
+# Usage: exec-host !<comma separated disallowed hostnames> <command>
+
+current_hostname=$(hostname)
+allowed_hosts=$1
+shift
+IFS=',' read -ra HOST_ARRAY <<< "$allowed_hosts"
+negate_check=false
+if [[ "${HOST_ARRAY[0]}" == !* ]]; then
+    negate_check=true
+    HOST_ARRAY[0]="${HOST_ARRAY[0]:1}"
+fi
+
+if $negate_check; then
+    for host in "${HOST_ARRAY[@]}"; do
+        if [[ "$current_hostname" == "$host" ]]; then
+            exit 0
+        fi
+    done
+    "$@"
+    exit $?
+else
+    for host in "${HOST_ARRAY[@]}"; do
+        if [[ "$current_hostname" == "$host" ]]; then
+            "$@"
+            exit $?
+        fi
+    done
+fi
