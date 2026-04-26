@@ -1,6 +1,0 @@
-[settings]
-
-[tools]
-node = "22"
-poetry = "2.3.2"
-uv = "latest"

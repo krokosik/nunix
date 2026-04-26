@@ -1,0 +1,23 @@
+{
+  lib,
+  ...
+}:
+{
+  options = {
+    isVirtual = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Whether the system is running in a virtual environment";
+    };
+    latestZFSKernel = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Use latest available ZFS compatible kernel";
+    };
+    username = lib.mkOption {
+      type = lib.types.str;
+      default = "krokosik";
+      description = "Username for the main user account";
+    };
+  };
+}

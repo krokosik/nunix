@@ -1,0 +1,45 @@
+{
+  config,
+  ...,
+}:
+{
+  users.users.root = {
+    ## hash: mkpasswd -m SHA-512 -s (initial password: rootpassword)
+    initialHashedPassword = "$6$SJ9TnC7TNPD86lkT$mXAlVO2L6aIaA9mtrCQTWTKNyZbETKZ2XhHOoDPWMFGnZF3vdqIBtHmHVJICNTP/yCgj28OMAsAm8wC1JM1Ui/";
+  };
+
+  # Normal user
+  users.users.${config.username} = {
+    isNormalUser = true;
+    group = "${config.username}";
+    extraGroups = [
+      "libvirtd"
+      "networkmanager"
+      "users"
+      "wheel"
+    ];
+    uid = 1000;
+    # initial password: ${config.username}
+    initialHashedPassword = "$6$4uca2AGtTNxwo1bt$JJwaaNTqKF6ddXE9xLqWdmTZpElZZ5KNHEbj4jqAVY5QVknWKB4lCvzlMPZ0VLivh8FcmpGbkx5bVJhT1URpz0";
+    # keys: id_ed25519.pub
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMKb4VxsZXBODsfl98C8eP4ofNQxrDv//KhhAhOLyRd2 krokosik@legion"
+    ];
+  };
+  users.groups.${config.username} = {
+    gid = 1000;
+  };
+
+  # Setup PAM to use SSH key as sudo auth if available.
+  security = {
+    sudo.execWheelOnly = true;
+
+    pam = {
+      rssh = {
+        enable = true;
+        settings.auth_key_file = "/etc/ssh/authorized_keys.d/${config.username}";
+      };
+      services.sudo.rssh = true;
+    };
+  };
+}

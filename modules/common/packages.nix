@@ -1,0 +1,30 @@
+{
+  pkgs,
+  ...
+}:
+{
+  # General systemwide packages
+  environment.systemPackages = with pkgs; [
+    btop
+    curl
+    dust
+    eza
+    fastfetch
+    fd
+    fzf
+    git
+    hwinfo
+    jq
+    lazydocker
+    lazygit
+    nix-tree
+    pciutils
+    python3
+    ripgrep
+    rsync
+    starship
+    wget
+    usbutils
+    zoxide
+  ];
+}
