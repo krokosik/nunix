@@ -4,6 +4,8 @@
   ...
 }:
 {
+  users.mutableUsers = false;
+
   sops.secrets.login_password_hash.neededForUsers = true;
 
   users.users.root = {
