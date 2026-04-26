@@ -59,6 +59,8 @@ in
     '';
     # Show installed packages
     ni = "nix-store --query --requisites /run/current-system/sw | cut -d- -f2- | sort | less";
+    # Rebuild system
+    nrb = "sudo nixos-rebuild switch --flake ${flakePath}#${config.networking.hostName}";
   };
 
   # System maintenance
