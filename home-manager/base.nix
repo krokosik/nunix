@@ -15,7 +15,7 @@ in
 
   sops = {
     age.keyFile = "${config.xdg.configHome}/sops/age/keys.txt";
-    defaultSopsFile = "${secretspath}/${config.networking.hostName}/secrets.yaml";
+    defaultSopsFile = "${secretspath}/${osConfig.networking.hostName}/secrets.yaml";
   };
 
   # This value determines the Home Manager release that your

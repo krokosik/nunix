@@ -10,5 +10,6 @@
     extraSpecialArgs = {
       inherit inputs outputs pkgs;
     };
+    sharedModules = [ inputs.sops-nix.homeManagerModules.sops ];
   };
 }
