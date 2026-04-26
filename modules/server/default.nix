@@ -1,6 +1,6 @@
 {
   imports = [
-    ./msmtp.nix
+    # ./msmtp.nix
     ./neovim.nix
   ];
 }
