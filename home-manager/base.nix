@@ -8,6 +8,10 @@ let
   secretspath = builtins.toString inputs.my-secrets;
 in
 {
+  imports = [
+    ./common
+  ];
+
   home.username = osConfig.username;
   home.homeDirectory = "/home/${osConfig.username}";
   # Let Home Manager install and manage itself.
