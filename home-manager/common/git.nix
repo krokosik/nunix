@@ -1,4 +1,8 @@
 {
+  osConfig,
+  ...
+}:
+{
   programs.git = {
     enable = true;
     settings = {
@@ -13,7 +17,7 @@
       advice.mergeConflict = false;
       credential.helper = [
         "libsecret"
-        "oauth"
+        "oauth${if osConfig.networking.hostName == "osiris" then " -device" else ""}"
       ];
       filter.lfs = {
         clean = "git-lfs clean -- %f";
