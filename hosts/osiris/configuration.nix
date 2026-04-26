@@ -7,7 +7,7 @@
   imports = [
     # Include the results of the hardware scan.
     ./disko-config.nix
-    # ./hardware-configuration.nix
+    ./hardware-configuration.nix
     ../../modules/boot.nix
     #../modules/boot-grub.nix  # Grub required for Hetzner VPS CHANGEME
     ../../modules/common

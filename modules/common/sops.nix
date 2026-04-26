@@ -10,6 +10,8 @@ in
   # Sops-nix
   sops = {
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    age.keyFile = "/nix/persist/var/lib/sops-nix/key.txt";
+    age.generateKey = true;
     defaultSopsFile = "${secretspath}/${config.networking.hostName}/secrets.yaml";
   };
   # Set github access token for nixpkgs
