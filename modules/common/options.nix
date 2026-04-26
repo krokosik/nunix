@@ -19,5 +19,10 @@
       default = "krokosik";
       description = "Username for the main user account";
     };
+    role = lib.mkOption {
+      type = lib.types.enum [ "desktop" "shared" "server" ];
+      default = "server"; # least privileged by default
+      description = "Role of the machine, used to conditionally enable/disable certain services and configurations";
+    };
   };
 }
