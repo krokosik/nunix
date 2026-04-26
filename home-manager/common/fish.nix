@@ -187,8 +187,6 @@
   programs.fd.enable = true;
   programs.bat.enable = true;
   programs.tealdeer.enable = true;
-  
-  programs.man.generateCaches = false; # because it's suuuper slow
 
   home.packages = [ pkgs.fish ];
 }

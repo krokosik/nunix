@@ -5,6 +5,8 @@
     VISUAL = "nvim";
   };
 
+  documentation.man.generateCaches = false;
+
   ## Add ~/.local/bin to $PATH
   environment.localBinInPath = true;
 }
