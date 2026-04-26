@@ -13,11 +13,14 @@
     fd
     fzf
     git
+    git-credential-oauth
+    git-lfs
     hwinfo
     jq
     lazydocker
     lazygit
     nix-tree
+    unstable.opencode
     pciutils
     python3
     ripgrep
