@@ -61,6 +61,8 @@ in
     ni = "nix-store --query --requisites /run/current-system/sw | cut -d- -f2- | sort | less";
     # Rebuild system
     nrb = "sudo nixos-rebuild switch --flake ${flakePath}#${config.networking.hostName}";
+    # Pull nunix and nunix-secrets repos
+    nl = "git -C /home/${user}/Work/nunix pull && git -C /home/${user}/Work/nunix-secrets pull";
   };
 
   # System maintenance
