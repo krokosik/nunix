@@ -10,6 +10,7 @@
   };
 
   users.defaultUserShell = pkgs.fish;
+  programs.fish.enable = true;
 
   # Normal user
   users.users.${config.username} = {
