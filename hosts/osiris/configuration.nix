@@ -11,6 +11,7 @@
     ../../modules/boot.nix
     #../modules/boot-grub.nix  # Grub required for Hetzner VPS CHANGEME
     ../../modules/common
+    ../../modules/server
     ../../modules/zfs.nix
     ../../home-manager/home-manager.nix
     inputs.disko.nixosModules.disko
