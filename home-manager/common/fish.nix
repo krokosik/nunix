@@ -33,6 +33,7 @@
       jctl = "journalctl -p 3 -xb";
       ff = "fzf --preview 'bat --style=numbers --color=always {}'";
       c = "opencode";
+      gti = "ghostty_terminfo_push";
     };
     functions = {
       fish_greeting = "";
@@ -84,6 +85,22 @@
           else
               nvim $argv
           end
+        '';
+      };
+      ghostty_terminfo_push = {
+        description = "Install xterm-ghostty terminfo on remote host";
+        body = ''
+          if test (count $argv) -lt 1
+              echo "Usage: ghostty_terminfo_push <ssh-target> [ssh args...]"
+              return 2
+          end
+
+          if not command -q infocmp
+              echo "infocmp is required locally"
+              return 1
+          end
+
+          infocmp -x xterm-ghostty | ssh $argv -- tic -x -
         '';
       };
       zd = {
