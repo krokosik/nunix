@@ -9,6 +9,7 @@
     ./smartmon.nix
     ./sops.nix
     ./sshd.nix
+    ./timesyncd.nix
     ./tz_locale.nix
     ./users.nix
   ];

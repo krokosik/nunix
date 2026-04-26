@@ -2,11 +2,19 @@
 {
   programs.fish = {
     enable = true;
-  
+
     plugins = [
       {
         name = "plugin-git";
         src = pkgs.fishPlugins.plugin-git.src;
+      }
+      {
+        name = "fzf";
+        src = pkgs.fishPlugins.fzf-fish.src;
+      }
+      {
+        name = "bass";
+        src = pkgs.fishPlugins.bass.src;
       }
     ];
     shellAliases = {
@@ -163,6 +171,23 @@
     enable = true;
     enableFishIntegration = true;
   };
+
+  programs.eza = {
+    enable = true;
+    icons = "auto";
+    git = true;
+    enableFishIntegration = true;
+  };
+
+  programs.lazygit = {
+    enable = true;
+    enableFishIntegration = true;
+  };
+
+  programs.fd.enable = true;
+  programs.bat.enable = true;
+  programs.tealdeer.enable = true;
+  
 
   home.packages = [ pkgs.fish ];
 }
