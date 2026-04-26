@@ -2,6 +2,7 @@
 {
   programs.fish = {
     enable = true;
+  
     plugins = [
       {
         name = "plugin-git";
@@ -150,8 +151,6 @@
       if command -v zoxide >/dev/null
           alias cd="zd"
       end
-
-      mise activate fish | source || true
     '';
   };
 

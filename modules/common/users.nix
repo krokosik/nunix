@@ -1,5 +1,6 @@
 {
   config,
+  pkgs,
   ...
 }:
 {
@@ -7,6 +8,8 @@
     ## hash: mkpasswd -m SHA-512 -s (initial password: rootpassword)
     initialHashedPassword = "$6$foNFb4DIEmWrZKtq$TZj8iVMQ40/JSO8or9f89bi9j0wkwbwMSvJAMjB1SDo6dwtwa1sbTXka81MUthFTnG75.i.PO0jg8c5b8E1R50";
   };
+
+  users.defaultUserShell = pkgs.fish;
 
   # Normal user
   users.users.${config.username} = {
