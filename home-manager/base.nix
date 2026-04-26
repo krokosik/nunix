@@ -1,5 +1,6 @@
 {
   config,
+  osConfig,
   inputs,
   ...
 }:
@@ -7,14 +8,14 @@ let
   secretspath = builtins.toString inputs.my-secrets;
 in
 {
-  home.username = config.username;
-  home.homeDirectory = "/home/${config.username}";
+  home.username = osConfig.username;
+  home.homeDirectory = "/home/${osConfig.username}";
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
   sops = {
     age.keyFile = "${config.xdg.configHome}/sops/age/keys.txt";
-    defaultSopsFile = "${secretspath}/homeserver/secrets.yaml";
+    defaultSopsFile = "${secretspath}/${config.networking.hostName}/secrets.yaml";
   };
 
   # This value determines the Home Manager release that your
