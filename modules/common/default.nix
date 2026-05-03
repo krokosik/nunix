@@ -6,6 +6,7 @@
     ./nix.nix
     ./options.nix
     ./packages.nix
+    ./resolved.nix
     ./smartmon.nix
     ./sops.nix
     ./sshd.nix
