@@ -1,4 +1,12 @@
-{ pkgs, ... }:
+{
+  pkgs,
+  osConfig,
+  lib,
+  ...
+}:
+let
+  isServer = osConfig.role == "server";
+in
 {
   programs.fish = {
     enable = true;
@@ -17,35 +25,46 @@
         src = pkgs.fishPlugins.bass.src;
       }
     ];
-    shellAliases = {
-      ls = "eza -al --color=always --group-directories-first --icons";
-      la = "eza -a --color=always --group-directories-first --icons";
-      ll = "eza -l --color=always --group-directories-first --icons";
-      lt = "eza -aT --color=always --group-directories-first --icons";
-      ".." = "cd ..";
-      "..." = "cd ../..";
-      "...." = "cd ../../..";
-      "....." = "cd ../../../..";
-      "......" = "cd ../../../../..";
-      dir = "dir --color=auto";
-      vdir = "vdir --color=auto";
-      grep = "grep --color=auto";
-      fgrep = "fgrep --color=auto";
-      egrep = "egrep --color=auto";
-      hw = "hwinfo --short";
-      d = "docker";
-      dc = "docker compose";
-      smbup = "sudo systemctl start smb";
-      smbdown = "sudo systemctl stop smb";
-      please = "sudo";
-      tb = "nc termbin.com 9999";
-      jctl = "journalctl -p 3 -xb";
-      ff = "fzf --preview 'bat --style=numbers --color=always {}'";
-      c = "opencode";
-      gti = "ghostty_terminfo_push";
-    };
-    functions = {
-      fish_greeting = "";
+    shellAliases =
+      {
+        ls = "eza -al --color=always --group-directories-first --icons";
+        la = "eza -a --color=always --group-directories-first --icons";
+        ll = "eza -l --color=always --group-directories-first --icons";
+        lt = "eza -aT --color=always --group-directories-first --icons";
+        ".." = "cd ..";
+        "..." = "cd ../..";
+        "...." = "cd ../../..";
+        "....." = "cd ../../../..";
+        "......" = "cd ../../../../..";
+        dir = "dir --color=auto";
+        vdir = "vdir --color=auto";
+        grep = "grep --color=auto";
+        fgrep = "fgrep --color=auto";
+        egrep = "egrep --color=auto";
+        hw = "hwinfo --short";
+        d = "docker";
+        dc = "docker compose";
+        smbup = "sudo systemctl start smb";
+        smbdown = "sudo systemctl stop smb";
+        please = "sudo";
+        tb = "nc termbin.com 9999";
+        jctl = "journalctl -p 3 -xb";
+        ff = "fzf --preview 'bat --style=numbers --color=always {}'";
+        c = "opencode";
+        gti = "ghostty_terminfo_push";
+      }
+      // lib.optionalAttrs isServer {
+        dps = "docker ps -a";
+        dcup = "docker compose --profile all -f $DOCKER_PATH/docker-compose-(hostname).yml up -d";
+        dcdown = "docker compose --profile all -f $DOCKER_PATH/docker-compose-(hostname).yml down";
+        dclogs = "docker compose --profile all -f $DOCKER_PATH/docker-compose-(hostname).yml logs -f --tail=50";
+        dcrec = "docker compose --profile all -f $DOCKER_PATH/docker-compose-(hostname).yml up -d --force-recreate";
+        dcpull = "docker compose --profile all -f $DOCKER_PATH/docker-compose-(hostname).yml pull";
+        cscli = "docker compose --profile all -f $DOCKER_PATH/docker-compose-(hostname).yml exec -t crowdsec cscli";
+      };
+    functions =
+      {
+        fish_greeting = "";
       __history_previous_command = {
         body = ''
           switch (commandline -t)
@@ -123,7 +142,15 @@
           end
         '';
       };
-    };
+    }
+      // lib.optionalAttrs isServer {
+        trlogs = {
+          description = "Tail traefik access and error logs";
+          body = ''
+            tail -f -n 50 $DOCKER_PATH/logs/(hostname)/traefik/access.log $DOCKER_PATH/logs/(hostname)/traefik/traefik.log
+          '';
+        };
+      };
     interactiveShellInit = ''
       set -gx MANROFFOPT -c
       set -gx MANPAGER "sh -c 'col -bx | bat -l man -p'"
@@ -159,6 +186,8 @@
       if command -v zoxide >/dev/null
           alias cd="zd"
       end
+    '' + lib.optionalString isServer ''
+      set -gx DOCKER_PATH $HOME/krokosik-web-services
     '';
   };
 
