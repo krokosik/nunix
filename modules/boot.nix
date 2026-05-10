@@ -4,7 +4,7 @@
   ...
 }:
 {
-  # Systemd-boot Configuration with plymouth
+  # Systemd-boot Configuration
   boot = {
     consoleLogLevel = 0;
     kernelParams = [
@@ -27,10 +27,5 @@
         canTouchEfiVariables = true;
       };
     };
-    plymouth =
-      lib.mkIf (config.networking.hostName == "laptop" || config.networking.hostName == "office")
-        {
-          enable = true;
-        };
   };
 }
