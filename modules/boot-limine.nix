@@ -1,5 +1,6 @@
 {
   config,
+  pkgs,
   lib,
   ...
 }:
@@ -31,7 +32,7 @@
         enable = true;
         configurationLimit = 10;
         efiSupport = pkgs.stdenv.hostPlatform.isEfi;
-        enrollConfig = boot.loader.limine.panicOnChecksumMismatch;
+        enrollConfig = true;
         secureBoot = {
           enable = true;
         };
@@ -49,7 +50,7 @@
             branding = "NixOS Bootloader";
             brandingColor = "9ece6a";
           };
-        }
+        };
       };
       efi = {
         efiSysMountPoint = "/boot";
