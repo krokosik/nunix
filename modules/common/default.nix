@@ -3,6 +3,7 @@
     ./dhcp.nix
     ./env.nix
     ./fwupd.nix
+    ./firewall.nix
     ./nix.nix
     ./options.nix
     ./packages.nix

@@ -4,20 +4,17 @@
     enable = true;
     trustedInterfaces = [ "tailscale0" ];
     allowedUDPPorts = [ config.services.tailscale.port ];
-  };
-
-  networking.nftables = {
-    enable = true;
-
-    # Allow Docker DNS traffic to local DNS server
-    ruleset = ''
-      table inet filter {
-        chain input {
-          ip saddr 172.16.0.0/12 ip daddr 172.17.0.1 udp dport 53 accept
-        }
-      }
+    extraInputRules = ''
+      ip saddr 172.16.0.0/12 udp dport 53 accept
+      ip saddr 172.16.0.0/12 tcp dport 53 accept
+      ip saddr 192.168.90.0/24 udp dport 53 accept
+      ip saddr 192.168.90.0/24 tcp dport 53 accept
+      ip saddr 192.168.91.0/24 udp dport 53 accept
+      ip saddr 192.168.91.0/24 tcp dport 53 accept
     '';
   };
+
+  networking.nftables.enable = true;
 
   # Force tailscaled to use nftables (Critical for clean nftables-only systems)
   # This avoids the "iptables-compat" translation layer issues.
