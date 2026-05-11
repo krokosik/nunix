@@ -51,5 +51,5 @@ new-host name:
     git add ./hosts/{{name}}
     @echo "✅ Done!"
 
-deploy-new host target-host:
-    nix run github:nix-community/nixos-anywhere -- -i ~/.ssh/id_kws --generate-hardware-config nixos-facter ./hosts/{{host}}/facter.json --flake .#{{host}} --target-host {{target-host}}
+deploy-new host:
+    nix run github:nix-community/nixos-anywhere -- --generate-hardware-config nixos-facter ./hosts/{{host}}/facter.json --flake .#{{host}} --target-host {{host}}
