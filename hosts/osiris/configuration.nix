@@ -7,7 +7,7 @@
   imports = [
     # Include the results of the hardware scan.
     ./disko-config.nix
-    ./hardware-configuration.nix
+    # ./hardware-configuration.nix # Uncomment if not using facter.json
     ../../modules/boot.nix
     #../modules/boot-grub.nix  # Grub required for Hetzner VPS CHANGEME
     ../../modules/common
@@ -21,7 +21,9 @@
     inputs.sops-nix.nixosModules.sops
   ];
 
-  isVirtual = true; # Define if a VPS/VM or container
+  hardware.facter.reportPath = ./facter.json;
+
+  isVirtual = false; # Define if a VPS/VM or container
   latestZFSKernel = true; # Set to use latest available ZFS compatible kernel
 
   home-manager.users.${config.username} = {
