@@ -2,7 +2,6 @@
   imports = [
     ./env.nix
     ./fwupd.nix
-    ./nftables.nix
     ./nix.nix
     ./options.nix
     ./packages.nix
