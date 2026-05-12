@@ -10,8 +10,6 @@
     ../../modules/server
     ../../modules/avahi.nix
     ../../modules/boot.nix
-    ../../modules/docker.nix
-    ../../modules/intel-gpu.nix
     ../../modules/zfs.nix
     ../../home-manager/home-manager.nix
     inputs.disko.nixosModules.disko
@@ -21,7 +19,7 @@
 
   hardware.facter.reportPath = ./facter.json;
 
-  isVirtual = false; # Define if a VPS/VM or container
+  isVirtual = true; # Define if a VPS/VM or container
   latestZFSKernel = true; # Set to use latest available ZFS compatible kernel
 
   home-manager.users.${config.username} = {
@@ -32,7 +30,7 @@
 
   role = "server"; # Set role of the machine (desktop/shared/server)
 
-  networking.hostId = "aec20762"; # head -c4 /dev/urandom | od -A none -t x4
+  networking.hostId = "98165cf2"; # head -c4 /dev/urandom | od -A none -t x4
   networking.networkmanager.enable = true;
 
   # Swap (zram)

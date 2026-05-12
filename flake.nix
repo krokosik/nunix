@@ -39,9 +39,6 @@
     let
       inherit (self) outputs;
       # Helper function to create a nixos system configuration
-      # Usage:
-      #   Default x86_64:  mkSystem { host = "hostname"; };
-      #   Custom system:   mkSystem { host = "hostname"; system = "aarch64-linux"; };
       mkSystem =
         {
           host,
@@ -52,6 +49,7 @@
             { nixpkgs.hostPlatform = system; }
             ./hosts/${host}/configuration.nix
           ];
+          networking.hostName = host;
           specialArgs = {
             inherit inputs outputs;
           };
@@ -60,6 +58,7 @@
     {
       nixosConfigurations = {
         osiris = mkSystem { host = "osiris"; };
+        anubis = mkSystem { host = "anubis"; system = "aarch64-linux"; };
       };
 
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt-tree;
