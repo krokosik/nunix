@@ -9,7 +9,7 @@
   sops.secrets.login_password_hash.neededForUsers = true;
 
   users.users.root = {
-    hashedPasswordFile = config.sops.secrets.login_password_hash.path;
+    hashedPasswordFile = config.sops.secrets.login_password_hash.path; # Create with: echo -n "password" | mkpasswd -s
   };
 
   users.defaultUserShell = pkgs.fish;
@@ -26,7 +26,7 @@
       "wheel"
     ];
     uid = 1000;
-    hashedPasswordFile = config.sops.secrets.login_password_hash.path;
+    hashedPasswordFile = config.sops.secrets.login_password_hash.path; # Create with: echo -n "password" | mkpasswd -s
     # keys: id_ed25519.pub
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMKb4VxsZXBODsfl98C8eP4ofNQxrDv//KhhAhOLyRd2 krokosik@legion"

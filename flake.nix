@@ -24,6 +24,11 @@
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    crowdsec = {
+      url = "git+https://codeberg.org/kampka/nix-flake-crowdsec.git";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -35,7 +40,7 @@
       home-manager,
       sops-nix,
       ...
-    }@inputs:
+    } @ inputs:
     let
       inherit (self) outputs;
       # Helper function to create a nixos system configuration
