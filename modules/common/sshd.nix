@@ -14,5 +14,7 @@
     ClientAliveCountMax 1000
   '';
 
+  boot.kernel.sysctl."net.ipv4.tcp_mtu_probing" = 1; # Solve common flakiness with SSH
+
   networking.firewall.allowedTCPPorts = [ 22 ];
 }
