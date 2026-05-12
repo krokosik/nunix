@@ -11,22 +11,21 @@ in
       labels.type = "syslog";
     };
   in {
-    enable = true;
     allowLocalJournalAccess = true;
     settings = {
       crowdsec_service.acquisition_path = acquisitions_file;
     };
   };
 
-  nixpkgs.overlays = [inputs.crowdsec.overlays.default];
+  # nixpkgs.overlays = [inputs.crowdsec.overlays.default];
 
-  services.crowdsec-firewall-bouncer = {
-    enable = true;
-    settings = {
-      api_key = "<api-key>";
-      api_url = "http://localhost:8080";
-    };
-  };
+  # services.crowdsec-firewall-bouncer = {
+  #   enable = true;
+  #   settings = {
+  #     api_key = "<api-key>";
+  #     api_url = "http://localhost:8080";
+  #   };
+  # };
 
   sops.secrets.crowdsec_enroll_key = {
     sopsFile = "${secretspath}/server/secrets.yaml";
