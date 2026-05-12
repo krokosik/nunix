@@ -46,10 +46,9 @@
         }:
         nixpkgs.lib.nixosSystem {
           modules = [
-            { nixpkgs.hostPlatform = system; }
+            { nixpkgs.hostPlatform = system; networking.hostName = host; }
             ./hosts/${host}/configuration.nix
           ];
-          networking.hostName = host;
           specialArgs = {
             inherit inputs outputs;
           };

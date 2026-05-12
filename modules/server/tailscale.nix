@@ -1,4 +1,7 @@
-{ config, ... }:
+{ config, inputs, ... }:
+let
+  secretspath = builtins.toString inputs.my-secrets;
+in
 {
   services.tailscale = {
     enable = true;
@@ -9,6 +12,7 @@
     ];
   };
   sops.secrets.tailscale_server_auth_key = {
+    sopsFile = "${secretspath}/server/secrets.yaml";
     owner = "root";
     mode = "0400";
   };
