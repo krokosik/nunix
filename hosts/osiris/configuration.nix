@@ -5,15 +5,13 @@
 }:
 {
   imports = [
-    # Include the results of the hardware scan.
     ./disko-config.nix
-    # ./hardware-configuration.nix # Uncomment if not using facter.json
-    ../../modules/boot.nix
-    #../modules/boot-grub.nix  # Grub required for Hetzner VPS CHANGEME
     ../../modules/common
     ../../modules/server
-    ../../modules/docker.nix
     ../../modules/avahi.nix
+    ../../modules/boot.nix
+    ../../modules/docker.nix
+    ../../modules/intel-gpu.nix
     ../../modules/zfs.nix
     ../../home-manager/home-manager.nix
     inputs.disko.nixosModules.disko
