@@ -23,6 +23,11 @@ deploy-remote host ip="":
 repl host=localhost:
     nix repl ".#nixosConfigurations.{{host}}" --show-trace 
 
+# Enter the project devshell with all required tooling
+[group("utils")]
+dev:
+    nix develop . 
+
 # Repair the Nix store by verifying and checking the contents, and attempting to repair any issues found.
 [group("nix utils")]
 repair-store:

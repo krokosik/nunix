@@ -38,6 +38,7 @@
     } @ inputs:
     let
       inherit (self) outputs;
+      pkgs = nixpkgs.legacyPackages.x86_64-linux;
       # Helper function to create a nixos system configuration
       mkSystem =
         {
@@ -60,6 +61,20 @@
         anubis = mkSystem { host = "anubis"; system = "aarch64-linux"; };
       };
 
-      formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt-tree;
+      formatter.x86_64-linux = pkgs.nixfmt-tree;
+
+      devShells.x86_64-linux.default = pkgs.mkShell {
+        packages = with pkgs; [
+          nixfmt-tree
+          nixd
+          nh
+          sops
+          age
+          ssh-to-age
+          nix-prefetch
+          just
+          git
+        ];
+      };
     };
 }
