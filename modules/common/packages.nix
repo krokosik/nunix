@@ -19,7 +19,7 @@
     jq
     lazydocker
     lazygit
-    unstable.ncurses
+    ncurses
     nix-tree
     unstable.opencode
     pciutils
