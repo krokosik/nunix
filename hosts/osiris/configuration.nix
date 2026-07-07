@@ -10,6 +10,7 @@
     ../../modules/server
     ../../modules/avahi.nix
     ../../modules/boot.nix
+    ../../modules/disable-deep-sleep.nix
     ../../modules/docker.nix
     ../../modules/intel-gpu.nix
     ../../modules/zfs.nix
