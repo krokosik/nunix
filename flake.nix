@@ -16,7 +16,7 @@
     };
 
     my-secrets = {
-      url = "path:../nunix-secrets";
+      url = "/home/krokosik/Work/nunix-secrets";
       flake = false;
     };
 
