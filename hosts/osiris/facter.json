@@ -27,8 +27,8 @@
     },
     "bluetooth": [
       {
-        "index": 41,
-        "attached_to": 40,
+        "index": 40,
+        "attached_to": 39,
         "class_list": [
           "usb",
           "bluetooth"
@@ -109,8 +109,8 @@
         "module_alias": "usb:v0BDApB85Bd0000dcE0dsc01dp01icE0isc01ip01in00"
       },
       {
-        "index": 44,
-        "attached_to": 40,
+        "index": 43,
+        "attached_to": 39,
         "class_list": [
           "usb",
           "bluetooth"
@@ -651,7 +651,6 @@
         "fpu_exception": false,
         "cpuid_level": 32,
         "write_protect": false,
-        "tlb_size": 32392,
         "clflush_size": 64,
         "cache_alignment": 64,
         "address_sizes": {
@@ -744,86 +743,6 @@
       },
       {
         "index": 38,
-        "attached_to": 9,
-        "class_list": [
-          "disk",
-          "ide",
-          "block_device"
-        ],
-        "bus_type": {
-          "hex": "0085",
-          "name": "IDE",
-          "value": 133
-        },
-        "slot": {
-          "bus": 1,
-          "number": 0
-        },
-        "base_class": {
-          "hex": "0106",
-          "name": "Mass Storage Device",
-          "value": 262
-        },
-        "sub_class": {
-          "hex": "0000",
-          "name": "Disk",
-          "value": 0
-        },
-        "vendor": {
-          "hex": "0000",
-          "name": "M.2",
-          "value": 0
-        },
-        "device": {
-          "hex": "0000",
-          "name": "SSD 512GB",
-          "value": 0
-        },
-        "revision": {
-          "hex": "0000",
-          "name": "6A0",
-          "value": 0
-        },
-        "serial": "D5BISP31202103",
-        "model": "M.2 SSD 512GB",
-        "sysfs_id": "/class/block/sda",
-        "sysfs_bus_id": "1:0:0:0",
-        "sysfs_device_link": "/devices/pci0000:00/0000:00:17.0/ata2/host1/target1:0:0/1:0:0:0",
-        "unix_device_names": [
-          "/dev/disk/by-id/ata-M.2_SSD_512GB_D5BISP31202103",
-          "/dev/disk/by-path/pci-0000:00:17.0-ata-2",
-          "/dev/disk/by-path/pci-0000:00:17.0-ata-2.0",
-          "/dev/sda"
-        ],
-        "resources": [
-          {
-            "type": "disk_geo",
-            "cylinders": 62260,
-            "heads": 255,
-            "sectors": 63,
-            "size": "0x0",
-            "geo_type": "logical"
-          },
-          {
-            "type": "size",
-            "unit": "sectors",
-            "value_1": 1000215216,
-            "value_2": 512
-          }
-        ],
-        "driver": "ahci",
-        "driver_module": "ahci",
-        "drivers": [
-          "ahci",
-          "sd"
-        ],
-        "driver_modules": [
-          "ahci",
-          "sd_mod"
-        ]
-      },
-      {
-        "index": 39,
         "attached_to": 0,
         "class_list": [
           "disk",
@@ -843,7 +762,7 @@
         "sysfs_id": "/class/block/zram0",
         "unix_device_names": [
           "/dev/disk/by-label/zram0",
-          "/dev/disk/by-uuid/c157182f-261d-499a-b375-f8f69fa0f223",
+          "/dev/disk/by-uuid/1fbd57bb-35ef-4799-8036-6e1254b5d40c",
           "/dev/zram0"
         ],
         "resources": [
@@ -930,7 +849,7 @@
     ],
     "hub": [
       {
-        "index": 40,
+        "index": 39,
         "attached_to": 33,
         "class_list": [
           "usb",
@@ -1017,7 +936,7 @@
         "module_alias": "usb:v1D6Bp0002d0618dc09dsc00dp01ic09isc00ip00in00"
       },
       {
-        "index": 42,
+        "index": 41,
         "attached_to": 33,
         "class_list": [
           "usb",
@@ -1094,7 +1013,7 @@
         "module_alias": "usb:v1D6Bp0003d0618dc09dsc00dp03ic09isc00ip00in00"
       },
       {
-        "index": 43,
+        "index": 42,
         "attached_to": 11,
         "class_list": [
           "usb",
@@ -1181,7 +1100,7 @@
         "module_alias": "usb:v1D6Bp0002d0618dc09dsc00dp01ic09isc00ip00in00"
       },
       {
-        "index": 45,
+        "index": 44,
         "attached_to": 11,
         "class_list": [
           "usb",
@@ -1337,7 +1256,7 @@
         "resources": [
           {
             "type": "hwaddr",
-            "address": 101
+            "address": 54
           },
           {
             "type": "io",
@@ -1541,6 +1460,38 @@
     "network_interface": [
       {
         "index": 47,
+        "attached_to": 0,
+        "class_list": [
+          "network_interface"
+        ],
+        "base_class": {
+          "hex": "0107",
+          "name": "Network Interface",
+          "value": 263
+        },
+        "sub_class": {
+          "hex": "0080",
+          "name": "Network Interface",
+          "value": 128
+        },
+        "model": "Network Interface",
+        "sysfs_id": "/class/net/ip6tnl0",
+        "unix_device_names": [
+          "ip6tnl0"
+        ],
+        "resources": [
+          {
+            "type": "phwaddr",
+            "address": 97
+          }
+        ],
+        "driver": "ip6tnl",
+        "drivers": [
+          "ip6tnl"
+        ]
+      },
+      {
+        "index": 59,
         "attached_to": 8,
         "class_list": [
           "network_interface"
@@ -1564,7 +1515,7 @@
         "resources": [
           {
             "type": "hwaddr",
-            "address": 101
+            "address": 54
           },
           {
             "type": "phwaddr",
@@ -1581,61 +1532,7 @@
         ]
       },
       {
-        "index": 48,
-        "attached_to": 0,
-        "class_list": [
-          "network_interface"
-        ],
-        "base_class": {
-          "hex": "0107",
-          "name": "Network Interface",
-          "value": 263
-        },
-        "sub_class": {
-          "hex": "0080",
-          "name": "Network Interface",
-          "value": 128
-        },
-        "model": "Network Interface",
-        "sysfs_id": "/class/net/ip6tnl0",
-        "unix_device_names": [
-          "ip6tnl0"
-        ],
-        "resources": [
-          {
-            "type": "phwaddr",
-            "address": 56
-          }
-        ],
-        "driver": "ip6tnl",
-        "drivers": [
-          "ip6tnl"
-        ]
-      },
-      {
-        "index": 49,
-        "attached_to": 0,
-        "class_list": [
-          "network_interface"
-        ],
-        "base_class": {
-          "hex": "0107",
-          "name": "Network Interface",
-          "value": 263
-        },
-        "sub_class": {
-          "hex": "0000",
-          "name": "Loopback",
-          "value": 0
-        },
-        "model": "Loopback network interface",
-        "sysfs_id": "/class/net/lo",
-        "unix_device_names": [
-          "lo"
-        ]
-      },
-      {
-        "index": 50,
+        "index": 88,
         "attached_to": 14,
         "class_list": [
           "network_interface"
@@ -1673,6 +1570,28 @@
         ],
         "driver_modules": [
           "r8169"
+        ]
+      },
+      {
+        "index": 99,
+        "attached_to": 0,
+        "class_list": [
+          "network_interface"
+        ],
+        "base_class": {
+          "hex": "0107",
+          "name": "Network Interface",
+          "value": 263
+        },
+        "sub_class": {
+          "hex": "0000",
+          "name": "Loopback",
+          "value": 0
+        },
+        "model": "Loopback network interface",
+        "sysfs_id": "/class/net/lo",
+        "unix_device_names": [
+          "lo"
         ]
       }
     ],
@@ -3189,7 +3108,7 @@
           270582939710,
           274877907007,
           408021893184,
-          1189705941087
+          1172526071903
         ]
       }
     ],
