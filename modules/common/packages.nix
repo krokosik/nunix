@@ -15,6 +15,7 @@
     git
     git-credential-oauth
     git-lfs
+    ghostty.terminfo
     hwinfo
     jq
     lazydocker
