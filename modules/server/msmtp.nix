@@ -11,7 +11,7 @@
 
   users.groups.msmtp = { };
 
-  sops.secrets.email-password = {
+  sops.secrets.proton.smtp-token = {
     mode = "0440";
     group = "msmtp";
   };
@@ -21,18 +21,18 @@
     setSendmail = true;
     defaults = {
       aliases = "/etc/aliases";
-      port = 465;
+      port = 587;
       tls_trust_file = "/etc/ssl/certs/ca-certificates.crt";
       tls = true;
-      auth = true;
-      tls_starttls = false;
+      auth = "login";
+      tls_starttls = true;
     };
     accounts = {
       default = {
-        host = "smtp.fastmail.com";
-        passwordeval = "cat ${config.sops.secrets.email-password.path}";
-        user = "scott@firecat53.net";
-        from = "noreply@firecat53.net";
+        host = "smtp.protonmail.ch";
+        passwordeval = "cat ${config.sops.secrets.proton.smtp-token.path}";
+        user = "osiris@krokosik.com";
+        from = "osiris@krokosik.com";
       };
     };
   };
