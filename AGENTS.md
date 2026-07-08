@@ -77,6 +77,9 @@ Adding a host (per README): add `mkSystem` entry in `flake.nix`, add sops
 keys in `nunix-secrets`, set `networking.hostId`
 (`head -c4 /dev/urandom | od -A none -t x4`).
 
+Searching nixos options, also useful for checking if a package is natively supported:
+`nh search options <option>` (e.g. `nh search options networking.firewall`).
+
 ## Custom options (`modules/common/options.nix`)
 
 Read by other modules — set per-host in `hosts/<name>/configuration.nix`:
