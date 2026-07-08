@@ -24,5 +24,10 @@
       default = "server"; # least privileged by default
       description = "Role of the machine, used to conditionally enable/disable certain services and configurations";
     };
+    systemEmail = lib.mkOption {
+      type = lib.types.str;
+      default = "krokosik@pm.me";
+      description = "Destination address for system email reports (e.g. root mail)";
+    };
   };
 }

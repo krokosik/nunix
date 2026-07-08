@@ -11,6 +11,12 @@
 
   users.groups.msmtp = { };
 
+  environment.etc."aliases".text = ''
+    root: ${config.systemEmail}
+    postmaster: root
+    abuse: root
+  '';
+
   sops.secrets."proton/smtp_token" = {
     mode = "0440";
     group = "msmtp";
