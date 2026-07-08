@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "references": {
+    "web-services": {
+      "path": "~/Work/krokosik-web-services",
+      "description": "Legacy web services running via a docker compose stack. The compose folder has all the docker files. Currently deployed on osiris via Docker. Provided as context for future migrations into the nunix flake, with a native NixOS module first approach. Migration will be incremental; over time all services should migrate into the flake. Ignore the scripts directory."
+    },
+    "nunix-secrets": {
+      "path": "../nunix-secrets",
+      "description": "Per-host secrets for the nunix flake (secrets.yaml under anubis, common, osiris, server). Used by the NixOS configuration, likely via sops-nix or similar. Reference for resolving secret names and structure during service migrations."
+    }
+  }
+}
