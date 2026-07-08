@@ -11,7 +11,7 @@
 
   users.groups.msmtp = { };
 
-  sops.secrets."proton/smtp-token" = {
+  sops.secrets."proton/smtp_token" = {
     mode = "0440";
     group = "msmtp";
   };
@@ -30,7 +30,7 @@
     accounts = {
       default = {
         host = "smtp.protonmail.ch";
-        passwordeval = "cat ${config.sops.secrets."proton/smtp-token".path}";
+        passwordeval = "cat ${config.sops.secrets."proton/smtp_token".path}";
         user = "osiris@krokosik.com";
         from = "osiris@krokosik.com";
       };
