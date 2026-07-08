@@ -9,5 +9,13 @@
       "path": "../nunix-secrets",
       "description": "Per-host secrets for the nunix flake (secrets.yaml under anubis, common, osiris, server). Used by the NixOS configuration, likely via sops-nix or similar. Reference for resolving secret names and structure during service migrations."
     }
+  },
+  "permission": {
+    "external_directory": {
+      "/nix/**": "allow"
+    },
+    "edit": {
+      "/nix/**": "deny"
+    }
   }
 }
