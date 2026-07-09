@@ -6,6 +6,8 @@
 {
   imports = [
     ./disko-config.nix
+    ./services/crowdsec.nix
+    ./services/haproxy.nix
     ../../modules/common
     ../../modules/server
     ../../modules/avahi.nix
