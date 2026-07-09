@@ -15,7 +15,17 @@
       push.autoSetupRemote = true;
       core.editor = "nvim";
       advice.mergeConflict = false;
-      credential.helper = if osConfig.role == "server" then ["cache --timeout 3600" "oauth -device"] else ["libsecret" "oauth"];
+      credential.helper =
+        if osConfig.role == "server" then
+          [
+            "cache --timeout 3600"
+            "oauth -device"
+          ]
+        else
+          [
+            "libsecret"
+            "oauth"
+          ];
       filter.lfs = {
         clean = "git-lfs clean -- %f";
         smudge = "git-lfs smudge -- %f";

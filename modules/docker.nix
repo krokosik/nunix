@@ -19,7 +19,7 @@
   #   unitConfig = {
   #     DefaultDependencies = false;
   #   };
-  #   wantedBy = lib.mkForce []; 
+  #   wantedBy = lib.mkForce [];
   # };
   users.users.${config.username}.extraGroups = [ "docker" ];
   environment.systemPackages = with pkgs; [

@@ -1,3 +1,6 @@
 {
-  boot.kernelParams = [ "intel_idle.max_cstate=1" "processor.max_cstate=1" ];
+  boot.kernelParams = [
+    "intel_idle.max_cstate=1"
+    "processor.max_cstate=1"
+  ];
 }

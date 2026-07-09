@@ -35,7 +35,7 @@
       home-manager,
       sops-nix,
       ...
-    } @ inputs:
+    }@inputs:
     let
       inherit (self) outputs;
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
@@ -47,7 +47,10 @@
         }:
         nixpkgs.lib.nixosSystem {
           modules = [
-            { nixpkgs.hostPlatform = system; networking.hostName = host; }
+            {
+              nixpkgs.hostPlatform = system;
+              networking.hostName = host;
+            }
             ./hosts/${host}/configuration.nix
           ];
           specialArgs = {
@@ -58,7 +61,10 @@
     {
       nixosConfigurations = {
         osiris = mkSystem { host = "osiris"; };
-        anubis = mkSystem { host = "anubis"; system = "aarch64-linux"; };
+        anubis = mkSystem {
+          host = "anubis";
+          system = "aarch64-linux";
+        };
       };
 
       formatter.x86_64-linux = pkgs.nixfmt-tree;

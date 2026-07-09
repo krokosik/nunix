@@ -8,7 +8,10 @@
     enable = true;
   };
 
-  home.packages = [ pkgs.xdg-utils pkgs.xdg-terminal-exec ];
+  home.packages = [
+    pkgs.xdg-utils
+    pkgs.xdg-terminal-exec
+  ];
   xdg.mime.enable = true;
 
   xdg.terminalExec.enable = true;
