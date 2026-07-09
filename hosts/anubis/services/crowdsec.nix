@@ -63,7 +63,8 @@ in
   sops.secrets = {
     crowdsec_lapi = {
       sopsFile = "${secretspath}/anubis/crowdsec-lapi.yaml";
-      format = "binary";
+      format = "yaml";
+      key = "";
       owner = config.services.crowdsec.user;
       group = config.services.crowdsec.group;
       mode = "0400";
