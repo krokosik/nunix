@@ -28,32 +28,15 @@ To add a host:
    DNS 'A' records if needed.
 2. SSH into the new box and update the disk device name(s) and partition layout
    (if needed) in disko-config.nix.
-3. `just deploy-new <host>` to install NixOS and the configuration for the new host.
-4. If problems arise, add `--no-reboot` to the above command so you can
-   troubleshoot the new install.
-5. [[#post-install]]
-
-### Post install
-
-1. *new host* Generate SSH keys per [SSH key generation](#ssh-key-generation-new-or-rebuilt-host) above.
-2. *existing host* Sync ~/nixos/ directory to new machine (including nixos configs and secrets)
-3. *existing host* Update sops key after reinstall. Commit and sync then rebuild.
+3. Make sure the hostname and username are set in the same way as for the target host, so that connecting via ssh keeps working.
+4. Prepare ssh key and add it to the secrets config:
 ```bash
-nix shell nixpkgs#ssh-to-age nixpkgs#sops
-ssh-keyscan <hostname> | ssh-to-age
-# Set `&<hostname> age.....` in nixos-secrets/.sops.yaml
-sops updatekeys nixos-secrets/<hostname>/secrets.yml
-sops updatekeys nixos-secrets/common/secrets.yml
-git add .sops.yaml <homename>/ && git commit -m 'Update sops keys'
+mkdir -p /tmp/nixos-anywhere-extra/etc/ssh
+ssh-keygen -t ed25519 -N "" -f /tmp/nixos-anywhere-extra/etc/ssh/ssh_host_ed25519_key
 ```
-        
-4. *existing host* `nix flake update` and rebuild flake on target machine after
-   sops key is updated.
-<!-- 5. *new host* `sudo nmcli connection import type wireguard file
-   /etc/wireguard/wg0.conf`
-   for networkmanager.
-6. Update syncthing device ID's if necessary. Re-add servers on phones and
-   wife's laptop if needed.
-7. *existing host* `echo nixos/flake.lock > ~/nixos/.stignore` (keep flake.lock
-   from syncing) -->
+5. Add the public key to the secrets config and run `sops updatekeys` on relevant files.
+6. Commit the changes in the secrets repo.
+7. `just deploy-new <host>` to install NixOS and the configuration for the new host.
+8. If problems arise, add `--no-reboot` to the above command so you can
+   troubleshoot the new install.
         

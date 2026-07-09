@@ -58,4 +58,4 @@ new-host name:
 
 [group("nixos deploy")]
 deploy-new host:
-    nix run github:nix-community/nixos-anywhere -- --generate-hardware-config nixos-facter ./hosts/{{host}}/facter.json --flake .#{{host}} --target-host {{host}}
+    nix run github:nix-community/nixos-anywhere -- --generate-hardware-config nixos-facter ./hosts/{{host}}/facter.json --flake .#{{host}} --target-host {{host}} --extra-files /tmp/nixos-anywhere-extra
