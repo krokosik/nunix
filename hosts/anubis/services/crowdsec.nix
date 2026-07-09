@@ -5,7 +5,7 @@
   ...
 }:
 let
-  secretspath = builtins.toString inputs.my-secrets;
+  secretspath = toString inputs.my-secrets;
 in
 {
   services.crowdsec = {

@@ -1,7 +1,11 @@
 {
   config,
+  inputs,
   ...
 }:
+let
+  secretspath = toString inputs.my-secrets;
+in
 {
   ### Msmtp
   #### Note: see vps/prometheus.nix for how to use systemd load credentials
@@ -17,7 +21,9 @@
     abuse: root
   '';
 
-  sops.secrets."proton/smtp_token" = {
+  sops.secrets.smtp_token = {
+    sopsFile = "${secretspath}/server/secrets.yaml";
+    key = "proton/smtp_token";
     mode = "0440";
     group = "msmtp";
   };
@@ -36,7 +42,7 @@
     accounts = {
       default = {
         host = "smtp.protonmail.ch";
-        passwordeval = "cat ${config.sops.secrets."proton/smtp_token".path}";
+        passwordeval = "cat ${config.sops.secrets.smtp_token.path}";
         user = "osiris@krokosik.com";
         from = "osiris@krokosik.com";
       };

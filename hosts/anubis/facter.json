@@ -1752,8 +1752,8 @@
         "sysfs_bus_id": "0:0:0:1",
         "sysfs_device_link": "/devices/pci0000:00/0000:00:05.7/0000:18:00.0/virtio2/host0/target0:0:0/0:0:0:1",
         "unix_device_names": [
-          "/dev/disk/by-id/scsi-3603995d143054fea87c8bfab987e2d82",
-          "/dev/disk/by-id/wwn-0x603995d143054fea87c8bfab987e2d82",
+          "/dev/disk/by-id/scsi-3603bbb5e85b046078fdd753ef7a5f21a",
+          "/dev/disk/by-id/wwn-0x603bbb5e85b046078fdd753ef7a5f21a",
           "/dev/disk/by-path/pci-0000:18:00.0-scsi-0:0:0:1",
           "/dev/sda"
         ],
