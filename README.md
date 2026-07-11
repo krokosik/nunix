@@ -33,6 +33,7 @@ To add a host:
 ```bash
 mkdir -p /tmp/nixos-anywhere-extra/etc/ssh
 ssh-keygen -t ed25519 -N "" -f /tmp/nixos-anywhere-extra/etc/ssh/ssh_host_ed25519_key
+cat /tmp/nixos-anywhere-extra/etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age
 ```
 5. Add the public key to the secrets config and run `sops updatekeys` on relevant files.
 6. Commit the changes in the secrets repo.
