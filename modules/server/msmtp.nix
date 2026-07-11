@@ -1,18 +1,8 @@
 {
   config,
-  inputs,
   ...
 }:
-let
-  secretspath = toString inputs.my-secrets;
-in
 {
-  ### Msmtp
-  #### Note: see vps/prometheus.nix for how to use systemd load credentials
-  #### for services with DynamicUser=true so that the credential permissions can
-  #### be kept at 0400
-  #### Otherwise, add any service that needs access to the 'msmtp' group
-
   users.groups.msmtp = { };
 
   environment.etc."aliases".text = ''
@@ -22,10 +12,8 @@ in
   '';
 
   sops.secrets.smtp_token = {
-    sopsFile = "${secretspath}/server/secrets.yaml";
     key = "proton/smtp_token";
-    mode = "0440";
-    group = "msmtp";
+    mode = "0400";
   };
 
   programs.msmtp = {
@@ -42,10 +30,14 @@ in
     accounts = {
       default = {
         host = "smtp.protonmail.ch";
-        passwordeval = "cat ${config.sops.secrets.smtp_token.path}";
-        user = "osiris@krokosik.com";
-        from = "osiris@krokosik.com";
+        passwordeval = "cat /run/credentials/msmtp.service/smtp_token";
+        user = "${config.networking.hostName}@${config.publicDomain}";
+        from = "${config.networking.hostName}@${config.publicDomain}";
       };
     };
   };
+
+  systemd.services.msmtp.serviceConfig.LoadCredential = [
+    "smtp_token:${config.sops.secrets.smtp_token.path}"
+  ];
 }

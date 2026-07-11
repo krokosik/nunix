@@ -11,7 +11,7 @@ in
   services.crowdsec = {
     enable = true;
     autoUpdateService = true;
-    name = "anubis";
+    name = "${config.networking.hostName}";
 
     hub.collections = [
       "crowdsecurity/sshd"
@@ -37,7 +37,7 @@ in
 
     settings = {
       general.api.server.enable = false;
-      lapi.credentialsFile = config.sops.secrets.crowdsec_lapi.path;
+      lapi.credentialsFile = "/run/credentials/crowdsec.service/lapi_credentials.yaml";
     };
   };
 
@@ -46,34 +46,33 @@ in
     # LAPI lives on osiris, so we authenticate via apiKeyPath instead of
     # auto-registering against a local crowdsec service.
     registerBouncer.enable = lib.mkForce false;
-    secrets.apiKeyPath = config.sops.secrets.crowdsec_bouncer_key.path;
+    secrets.apiKeyPath = "/run/credentials/crowdsec-firewall-bouncer.service/crowdsec_bouncer_key";
     settings = {
-      api_url = "https://crowdsec.ts.krokosik.com/";
+      api_url = "https://crowdsec.${config.privateDomain}/";
       insecure_skip_verify = false;
       deny_action = "DROP";
       supported_decisions_types = [ "ban" ];
     };
   };
 
-  # The upstream module sets DynamicUser=true, which assigns a random UID
-  # per boot. We override to false so the named `crowdsec` system user can
-  # read the sops-owned local_api_credentials.yaml file directly.
-  systemd.services.crowdsec.serviceConfig.DynamicUser = lib.mkForce false;
+  systemd.services.crowdsec.serviceConfig.LoadCredential = [
+    "lapi_credentials.yaml:${config.sops.secrets.crowdsec_lapi.path}"
+  ];
+  systemd.services.crowdsec-firewall-bouncer.serviceConfig.LoadCredential = [
+    "crowdsec_bouncer_key:${config.sops.secrets.crowdsec_bouncer_key.path}"
+  ];
 
   sops.secrets = {
     crowdsec_lapi = {
-      sopsFile = "${secretspath}/anubis/crowdsec-lapi.yaml";
+      sopsFile = "${secretspath}/${config.networking.hostName}/crowdsec-lapi.yaml";
       format = "yaml";
       key = "";
-      owner = config.services.crowdsec.user;
-      group = config.services.crowdsec.group;
       mode = "0400";
       restartUnits = [ "crowdsec.service" ];
     };
     crowdsec_bouncer_key = {
-      sopsFile = "${secretspath}/anubis/secrets.yaml";
       key = "crowdsec_bouncer_key";
-      mode = "0440";
+      mode = "0400";
       restartUnits = [ "crowdsec-firewall-bouncer.service" ];
     };
   };

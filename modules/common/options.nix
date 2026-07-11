@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   ...
 }:
@@ -32,6 +33,16 @@
       type = lib.types.str;
       default = "krokosik@pm.me";
       description = "Destination address for system email reports (e.g. root mail)";
+    };
+    publicDomain = lib.mkOption {
+      type = lib.types.str;
+      default = "krokosik.com";
+      description = "Public domain name for the system, used for email and other services";
+    };
+    privateDomain = lib.mkOption {
+      type = lib.types.str;
+      default = "ts.${config.publicDomain}"; 
+      description = "Internal domain name, automatically derived from publicDomain";
     };
   };
 }
