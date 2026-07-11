@@ -6,6 +6,7 @@
 {
   imports = [
     ./disko-config.nix
+    ./services
     ../../modules/common
     ../../modules/server
     ../../modules/avahi.nix

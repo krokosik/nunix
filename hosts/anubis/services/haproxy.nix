@@ -1,9 +1,13 @@
-{ ... }:
+{ config, ... }:
 {
   services.haproxy = {
     enable = true;
     config = ''
+      # HAProxy Configuration - serving only as a proxy for the homeserver, with rate limiting and connection limiting
+      # Utilizes the PROXY protocol to pass the original client IP to the homeserver
+      # requires the homeserver to be configured to accept the PROXY protocol on its ports
       global
+        # note the systemd socket is used for the stats socket
         stats socket /run/haproxy/api.sock user haproxy group haproxy mode 660 level admin expose-fd listeners
         log stdout format raw local0 info
 
@@ -31,7 +35,7 @@
 
       backend http-backend
         balance roundrobin
-        server localserver 100.100.250.77:80 check send-proxy-v2
+        server localserver ${config.homeserverPrivateIp}:80 check send-proxy-v2
 
       # --- HTTPS (Port 443) Frontend ---
       frontend https-frontend
@@ -48,11 +52,10 @@
 
       backend https-backend
         balance roundrobin
-        server localserver 100.100.250.77:443 check send-proxy-v2
+        server localserver ${config.homeserverPrivateIp}:443 check send-proxy-v2
     '';
   };
 
-  # Your firewall is already perfectly set up for this
   networking.firewall.allowedTCPPorts = [
     80
     443

@@ -44,5 +44,15 @@
       default = "ts.${config.publicDomain}"; 
       description = "Internal domain name, automatically derived from publicDomain";
     };
+    vpsPrivateIp = lib.mkOption {
+      type = lib.types.str;
+      default = "100.72.36.37";
+      description = "Private IP address of the VPS";
+    };
+    homeserverPrivateIp = lib.mkOption {
+      type = lib.types.str;
+      default = "100.100.250.77";
+      description = "Private IP address of the homeserver";
+    };
   };
 }
