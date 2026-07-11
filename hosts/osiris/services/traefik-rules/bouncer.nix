@@ -1,11 +1,13 @@
 { config, ... }:
 {
-  services.traefik.dynamicConfigOptions.http.middlewares = {
-
+  services.traefik.staticConfigOptions = {
     experimental.plugins.crowdsec = {
       moduleName = "github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin";
       version = "v1.5.1";
     };
+  };
+
+  services.traefik.dynamicConfigOptions.http.middlewares = {
 
     middlewares-crowdsec-bouncer.plugin.crowdsec = {
       enabled = true;
@@ -25,7 +27,7 @@
     };
 
   };
-  
+
   sops.secrets.crowdsec_bouncer_traefik_key = {
     key = "crowdsec/traefik_bouncer_key";
     mode = "0440";

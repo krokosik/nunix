@@ -1,10 +1,12 @@
 {
-  services.traefik.dynamicConfigOptions.http.middlewares = {
-
+  services.traefik.staticConfigOptions = {
     experimental.plugins.geoblock = {
       moduleName = "github.com/nscuro/traefik-plugin-geoblock";
       version = "v0.14.0";
     };
+  };
+
+  services.traefik.dynamicConfigOptions.http.middlewares = {
 
     middlewares-geoblock.plugin.geoblock = {
       enabled = true;
