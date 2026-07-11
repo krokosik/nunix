@@ -116,17 +116,20 @@
     mode = "0440";
     owner = config.users.users.traefik.name;
     group = config.users.users.traefik.group;
+    restartUnits = [ "traefik.service" ];
   };
   sops.secrets.cf_zone_api_token = {
     key = "cf/zone_api_token";
     mode = "0440";
     owner = config.users.users.traefik.name;
     group = config.users.users.traefik.group;
+    restartUnits = [ "traefik.service" ];
   };
   sops.secrets.cloudflare_email = {
     key = "cf/email";
     mode = "0440";
     owner = config.users.users.traefik.name;
     group = config.users.users.traefik.group;
+    restartUnits = [ "traefik.service" ];
   };
 }

@@ -33,5 +33,6 @@
     mode = "0440";
     owner = config.users.users.traefik.name;
     group = config.users.users.traefik.group;
+    restartUnits = [ "traefik.service" ];
   };
 }

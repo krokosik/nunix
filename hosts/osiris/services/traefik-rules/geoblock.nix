@@ -10,7 +10,7 @@
 
     middlewares-geoblock.plugin.geoblock = {
       enabled = true;
-      databaseFilePath = "/var/lib/traefik/plugins/IP2LOCATION-LITE-DB1.IPV6.BIN";
+      databaseFilePath = "/var/lib/traefik/plugins-storage/IP2LOCATION-LITE-DB1.IPV6.BIN";
       allowedCountries = [
         "PL"
         "FR"
