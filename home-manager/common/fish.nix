@@ -52,7 +52,7 @@ in
       c = "opencode";
       gti = "ghostty_terminfo_push";
     }
-    // lib.optionalAttrs isServer {
+    // lib.optionalAttrs (osConfig.networking.hostName == "osiris") { # to be removed after migrating services
       dps = "docker ps -a";
       dcup = "docker compose --profile all -f $DOCKER_PATH/docker-compose-(hostname).yml up -d";
       dcdown = "docker compose --profile all -f $DOCKER_PATH/docker-compose-(hostname).yml down";
@@ -141,7 +141,7 @@ in
         '';
       };
     }
-    // lib.optionalAttrs isServer {
+    // lib.optionalAttrs (osConfig.networking.hostName == "osiris") { # to be updated after migrating services
       trlogs = {
         description = "Tail traefik access and error logs";
         body = ''
