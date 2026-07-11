@@ -6,7 +6,7 @@
   users.users.traefik.extraGroups = [ "docker" ];
 
   services.traefik = {
-    enable = true;
+    enable = false;
 
     staticConfigOptions = {
       global = {
