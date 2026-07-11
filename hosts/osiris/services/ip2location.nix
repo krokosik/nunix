@@ -33,7 +33,7 @@
       cd /var/lib/traefik/plugins-storage
       
       # Download the zipped database using the SOPS token
-      ${pkgs.curl}/bin/curl -L -s -o db.zip "https://www.ip2location.com/download/?token=''${IP2LOCATION_TOKEN}&file=DB1LITEIPV6"
+      ${pkgs.curl}/bin/curl -L -s -o db.zip "https://www.ip2location.com/download?token=''${IP2LOCATION_TOKEN}&file=DB1LITEBINIPV6"
       
       # Unzip only the BIN file, overwriting the old one
       ${pkgs.unzip}/bin/unzip -o db.zip IP2LOCATION-LITE-DB1.IPV6.BIN
