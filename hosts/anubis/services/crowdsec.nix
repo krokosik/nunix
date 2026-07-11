@@ -46,7 +46,7 @@ in
     # LAPI lives on osiris, so we authenticate via apiKeyPath instead of
     # auto-registering against a local crowdsec service.
     registerBouncer.enable = lib.mkForce false;
-    secrets.apiKeyPath = "/run/credentials/crowdsec-firewall-bouncer.service/crowdsec_bouncer_key";
+    secrets.apiKeyPath = config.sops.secrets.crowdsec_bouncer_key.path;
     settings = {
       api_url = "https://crowdsec.${config.privateDomain}/";
       insecure_skip_verify = false;
@@ -57,9 +57,6 @@ in
 
   systemd.services.crowdsec.serviceConfig.LoadCredential = [
     "lapi_credentials.yaml:${config.sops.secrets.crowdsec_lapi.path}"
-  ];
-  systemd.services.crowdsec-firewall-bouncer.serviceConfig.LoadCredential = [
-    "crowdsec_bouncer_key:${config.sops.secrets.crowdsec_bouncer_key.path}"
   ];
 
   sops.secrets = {
