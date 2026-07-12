@@ -1,6 +1,7 @@
 {
-  inputs,
   config,
+  inputs,
+  lib,
   pkgs,
   ...
 }:
@@ -8,6 +9,10 @@ let
   secretspath = toString inputs.my-secrets;
 in
 {
+  environment.etc."crowdsec/config.yaml".source =
+    (pkgs.formats.yaml { }).generate "crowdsec.yaml"
+      config.services.crowdsec.settings.general;
+
   services.crowdsec = {
     enable = true;
     autoUpdateService = true;
@@ -51,10 +56,14 @@ in
     ];
 
     settings = {
-      console.tokenFile = "/run/credentials/crowdsec.service/console_token";
+      # broken conditional in upstream
+      # console.tokenFile = config.sops.secrets.crowdsec_console_token.path;
+      capi.credentialsFile = "/var/lib/crowdsec/state/online_api_credentials.yaml";
+      lapi.credentialsFile = "/var/lib/crowdsec/state/local_api_credentials.yaml";
       general.api.server = {
         enable = true;
         listen_uri = "127.0.0.1:8420";
+        console_path = "/var/lib/crowdsec/state/console.yaml";
       };
     };
   };
@@ -69,14 +78,12 @@ in
     };
   };
 
-  dynamicConfigOptions.http = {
-    services = {
-      crowdsec-svc = {
-        loadBalancer.server.url = "http://${config.services.crowdsec.settings.general.api.server.listen_uri}";
-      };
-    };
-    routers = {
-      crowdsec-rtr = {
+  services.traefik = {
+    dynamicConfigOptions.http = {
+      services.crowdsec-svc.loadBalancer.servers = [
+        { url = "http://${config.services.crowdsec.settings.general.api.server.listen_uri}"; }
+      ];
+      routers.crowdsec-rtr = {
         rule = "Host(`crowdsec.${config.privateDomain}`)";
         entryPoints = [ "websecure" ];
         service = "crowdsec-svc";
@@ -85,61 +92,63 @@ in
     };
   };
 
-  systemd.services.crowdsec.serviceConfig.LoadCredential = [
-    "console_token.yaml:${config.sops.secrets.crowdsec_console_token.path}"
-  ];
-
-  sops.templates."vps.env".content = ''
-    MACHINE_PWD=${config.sops.placeholder.crowdsec_vps_machine_password}
-    BOUNCER_KEY=${config.sops.placeholder.crowdsec_vps_bouncer_key}
-  '';
-
-  systemd.services.crowdsec-register-vps =
+  systemd.services.crowdsec =
     let
       vpsHostname = "anubis";
     in
     {
-      description = "Declaratively register VPS in CrowdSec";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "crowdsec.service" ];
       serviceConfig = {
-        Type = "oneshot";
-        User = config.users.users.crowdsec.name;
-        EnvironmentFile = config.sops.templates."vps.env".path;
+        DynamicUser = lib.mkForce false;
+        StateDirectory = "crowdsec";
       };
-      script = ''
-        cscli=${pkgs.crowdsec}/bin/cscli
+      postStart = ''
+        export USER=${config.users.users.crowdsec.name}
+        CSCLI="/run/current-system/sw/bin/cscli"
 
-        # Inject VPS Agent (Machine) if not already registered
-        if ! $cscli machines list -o json | ${pkgs.jq}/bin/jq -e '.[] | select(.machineId == "${vpsHostname}")' > /dev/null; then
-           $cscli machines add ${vpsHostname} --password "$MACHINE_PWD"
+        if ! $CSCLI console status -o raw | ${pkgs.gnugrep}/bin/grep -q "true"; then
+          $CSCLI console enroll "$(< ${config.sops.secrets.crowdsec_console_token.path})" --name ${config.services.crowdsec.name}
         fi
 
-        # Inject VPS Bouncer if not already registered
-        if ! $cscli bouncers list -o json | ${pkgs.jq}/bin/jq -e '.[] | select(.name == "${vpsHostname}-bouncer")' > /dev/null; then
-           $cscli bouncers add ${vpsHostname}-bouncer --key "$BOUNCER_KEY"
+        # Inject VPS Agent (anubis)
+        if ! $CSCLI machines list -o json | ${pkgs.jq}/bin/jq -e '.[] | select(.machineId == "${vpsHostname}")' > /dev/null; then
+           $CSCLI machines add ${vpsHostname} --password "$(< ${config.sops.secrets.crowdsec_vps_machine_password.path})" -f - > /dev/null
+        fi
+
+        # Inject VPS Bouncer
+        if ! $CSCLI bouncers list -o json | ${pkgs.jq}/bin/jq -e '.[] | select(.name == "${vpsHostname}-bouncer")' > /dev/null; then
+           $CSCLI bouncers add ${vpsHostname}-bouncer --key "$(< ${config.sops.secrets.crowdsec_vps_bouncer_key.path})"
+        fi
+
+        # Inject Traefik Bouncer
+        if ! $CSCLI bouncers list -o json | ${pkgs.jq}/bin/jq -e '.[] | select(.name == "traefik-bouncer")' > /dev/null; then
+           $CSCLI bouncers add traefik-bouncer --key "$(< ${config.sops.secrets.crowdsec_traefik_bouncer_key.path})"
         fi
       '';
     };
+
+  systemd.services.crowdsec-update-hub.serviceConfig.DynamicUser = lib.mkForce false;
+  systemd.services.crowdsec-firewall-bouncer.serviceConfig.DynamicUser = lib.mkForce false;
+  systemd.services.crowdsec-firewall-bouncer-register.serviceConfig.DynamicUser = lib.mkForce false;
 
   sops.secrets = {
     crowdsec_console_token = {
       key = "crowdsec/console_token";
       mode = "0400";
-      owner = config.users.users.crowdsec.name or "nobody";
-      group = config.users.users.crowdsec.group or "nogroup";
+      owner = config.users.users.crowdsec.name;
       restartUnits = [ "crowdsec.service" ];
     };
     crowdsec_vps_machine_password = {
       sopsFile = "${secretspath}/server/secrets.yaml";
       key = "crowdsec/vps_machine_password";
       mode = "0400";
+      owner = config.users.users.crowdsec.name;
       restartUnits = [ "crowdsec.service" ];
     };
     crowdsec_vps_bouncer_key = {
       sopsFile = "${secretspath}/server/secrets.yaml";
       key = "crowdsec/vps_bouncer_key";
       mode = "0400";
+      owner = config.users.users.crowdsec.name;
       restartUnits = [ "crowdsec.service" ];
     };
   };
