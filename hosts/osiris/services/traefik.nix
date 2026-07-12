@@ -15,7 +15,7 @@ in
   config = lib.mkMerge [
     {
       services.traefik = {
-        enable = false;
+        enable = true;
 
         staticConfigOptions = {
           global = {
