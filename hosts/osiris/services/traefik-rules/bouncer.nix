@@ -1,5 +1,8 @@
-{ config, ... }:
-{
+{ config, lib, ... }:
+let
+  cfg = config.services.traefik;
+in
+lib.mkIf cfg.enable {
   services.traefik.staticConfigOptions = {
     experimental.plugins.crowdsec = {
       moduleName = "github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin";
