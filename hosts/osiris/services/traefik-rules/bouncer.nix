@@ -19,7 +19,7 @@ lib.mkIf cfg.enable {
       crowdsecAppsecFailureBlock = true;
       crowdsecAppsecUnreachableBlock = true;
       crowdsecLapiScheme = "http";
-      crowdsecLapiHost = "127.0.0.1:8080";
+      crowdsecLapiHost = "127.0.0.1:8420";
       crowdsecLapiKeyFile = config.sops.secrets.crowdsec_bouncer_traefik_key.path;
       clientTrustedIPs = [
         "10.0.0.0/8"
