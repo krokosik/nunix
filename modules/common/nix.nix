@@ -6,8 +6,7 @@
 }:
 let
   user = config.username;
-  ref = if builtins.elem config.networking.hostName [ ] then "" else "?ref=main";
-  flakePath = "/home/${user}/Work/nunix${ref}";
+  flakePath = "/home/${user}/Work/nunix";
 in
 {
   nix.settings = {
@@ -30,6 +29,14 @@ in
     config = {
       safe."directory" = "/home/${user}/Work/nunix";
     };
+  };
+
+  # Enable nh
+  programs.nh = {
+    enable = true;
+    clean.enable = true;
+    clean.extraArgs = "--keep 5 --keep-since 4d";
+    flake = flakePath;
   };
 
   # Add unstable to flake registry to use locally (e.g. `nix run nixpkgs-unstable#hatch`)

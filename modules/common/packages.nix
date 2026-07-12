@@ -21,7 +21,6 @@
     lazydocker
     lazygit
     ncurses
-    unstable.nh
     nix-tree
     unstable.opencode
     pciutils
