@@ -19,7 +19,7 @@ in
 
         staticConfigOptions = {
           global = {
-            checkNewVersion = true;
+            checkNewVersion = false;
             sendAnonymousUsage = false;
           };
 
@@ -60,7 +60,7 @@ in
               };
             };
             traefik = {
-              address = ":8080";
+              address = ":8000";
             };
           };
 
@@ -121,6 +121,15 @@ in
               Referer = "keep";
             };
           };
+        };
+      };
+
+      dynamicConfigOptions.http.routers = {
+        traefik-dashboard = {
+          rule = "Host(`traefik.${config.privateDomain}`)";
+          entryPoints = [ "websecure" ];
+          service = "api@internal";
+          middlewares = [ "chain-authentik" ];
         };
       };
     }
