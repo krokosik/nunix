@@ -11,7 +11,7 @@ in
   services.crowdsec = {
     enable = true;
     autoUpdateService = true;
-    name = "${config.networking.hostName}";
+    name = config.networking.hostName;
 
     hub.collections = [
       "crowdsecurity/sshd"
@@ -46,7 +46,7 @@ in
     # LAPI lives on osiris, so we authenticate via apiKeyPath instead of
     # auto-registering against a local crowdsec service.
     registerBouncer.enable = lib.mkForce false;
-    secrets.apiKeyPath = config.sops.secrets.crowdsec_bouncer_key.path;
+    secrets.apiKeyPath = config.sops.secrets.crowdsec_vps_bouncer_key.path;
     settings = {
       api_url = "https://crowdsec.${config.privateDomain}/";
       insecure_skip_verify = false;
@@ -56,19 +56,25 @@ in
   };
 
   systemd.services.crowdsec.serviceConfig.LoadCredential = [
-    "lapi_credentials.yaml:${config.sops.secrets.crowdsec_lapi.path}"
+    "lapi_credentials.yaml:${config.sops.templates."lapi_credentials.yaml".path}"
   ];
 
+  sops.templates."lapi_credentials.yaml".content = ''
+    url: https://crowdsec.${config.privateDomain}/
+    login: ${config.services.crowdsec.name}
+    password: ${config.sops.placeholder.crowdsec_vps_machine_password}
+  '';
+
   sops.secrets = {
-    crowdsec_lapi = {
-      sopsFile = "${secretspath}/${config.networking.hostName}/crowdsec-lapi.yaml";
-      format = "yaml";
-      key = "";
+    crowdsec_vps_machine_password = {
+      sopsFile = "${secretspath}/server/secrets.yaml";
+      key = "crowdsec/vps_machine_password";
       mode = "0400";
       restartUnits = [ "crowdsec.service" ];
     };
-    crowdsec_bouncer_key = {
-      key = "crowdsec_bouncer_key";
+    crowdsec_vps_bouncer_key = {
+      sopsFile = "${secretspath}/server/secrets.yaml";
+      key = "crowdsec/vps_bouncer_key";
       mode = "0400";
       restartUnits = [ "crowdsec-firewall-bouncer.service" ];
     };

@@ -1,8 +1,5 @@
 { config, lib, ... }:
-let
-  cfg = config.services.traefik;
-in
-lib.mkIf cfg.enable {
+lib.mkIf (config.services.traefik.enable && config.services.crowdsec.enable) {
   services.traefik.staticConfigOptions = {
     experimental.plugins.crowdsec = {
       moduleName = "github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin";
@@ -19,8 +16,8 @@ lib.mkIf cfg.enable {
       crowdsecAppsecFailureBlock = true;
       crowdsecAppsecUnreachableBlock = true;
       crowdsecLapiScheme = "http";
-      crowdsecLapiHost = "127.0.0.1:8420";
-      crowdsecLapiKeyFile = config.sops.secrets.crowdsec_bouncer_traefik_key.path;
+      crowdsecLapiHost = config.services.crowdsec.settings.general.api.server.listen_uri;
+      crowdsecLapiKeyFile = config.sops.secrets.crowdsec_traefik_bouncer_key.path;
       clientTrustedIPs = [
         "10.0.0.0/8"
         "172.16.0.0/12"
@@ -31,7 +28,7 @@ lib.mkIf cfg.enable {
 
   };
 
-  sops.secrets.crowdsec_bouncer_traefik_key = {
+  sops.secrets.crowdsec_traefik_bouncer_key = {
     key = "crowdsec/traefik_bouncer_key";
     mode = "0440";
     owner = config.users.users.traefik.name;

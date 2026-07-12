@@ -52,14 +52,14 @@ in
       c = "opencode";
       gti = "ghostty_terminfo_push";
     }
-    // lib.optionalAttrs (osConfig.networking.hostName == "osiris") { # to be removed after migrating services
+    // lib.optionalAttrs (osConfig.networking.hostName == "osiris") {
+      # to be removed after migrating services
       dps = "docker ps -a";
       dcup = "docker compose --profile all -f $DOCKER_PATH/docker-compose-(hostname).yml up -d";
       dcdown = "docker compose --profile all -f $DOCKER_PATH/docker-compose-(hostname).yml down";
       dclogs = "docker compose --profile all -f $DOCKER_PATH/docker-compose-(hostname).yml logs -f --tail=50";
       dcrec = "docker compose --profile all -f $DOCKER_PATH/docker-compose-(hostname).yml up -d --force-recreate";
       dcpull = "docker compose --profile all -f $DOCKER_PATH/docker-compose-(hostname).yml pull";
-      cscli = "docker compose --profile all -f $DOCKER_PATH/docker-compose-(hostname).yml exec -t crowdsec cscli";
     };
     functions = {
       fish_greeting = "";
@@ -140,14 +140,7 @@ in
           end
         '';
       };
-    }
-    // lib.optionalAttrs (osConfig.networking.hostName == "osiris") { # to be updated after migrating services
-      trlogs = {
-        description = "Tail traefik access and error logs";
-        body = ''
-          tail -f -n 50 $DOCKER_PATH/logs/(hostname)/traefik/access.log $DOCKER_PATH/logs/(hostname)/traefik/traefik.log
-        '';
-      };
+
     };
     interactiveShellInit = ''
       set -gx MANROFFOPT -c

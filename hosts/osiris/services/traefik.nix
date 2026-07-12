@@ -122,16 +122,17 @@ in
             };
           };
         };
-      };
 
-      dynamicConfigOptions.http.routers = {
-        traefik-dashboard = {
-          rule = "Host(`traefik.${config.privateDomain}`)";
-          entryPoints = [ "websecure" ];
-          service = "api@internal";
-          middlewares = [ "chain-authentik" ];
+        dynamicConfigOptions.http.routers = {
+          traefik-dashboard = {
+            rule = "Host(`traefik.${config.privateDomain}`)";
+            entryPoints = [ "websecure" ];
+            service = "api@internal";
+            middlewares = [ "chain-authentik" ];
+          };
         };
       };
+
     }
 
     (lib.mkIf cfg.enable {
