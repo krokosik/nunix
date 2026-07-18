@@ -1,6 +1,6 @@
 {
   imports = [
-    ./dhcp.nix
+    # ./dhcp.nix
     ./env.nix
     ./fwupd.nix
     ./firewall.nix

@@ -32,7 +32,7 @@
   role = "server"; # Set role of the machine (desktop/shared/server)
 
   networking.hostId = "98165cf2"; # head -c4 /dev/urandom | od -A none -t x4
-  networking.networkmanager.enable = true;
+  networking.useNetworkd = true;
 
   # Swap (zram)
   zramSwap.enable = true;
