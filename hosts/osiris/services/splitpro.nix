@@ -31,11 +31,16 @@ in
   # hash in the nix store/git repo) and create pg_cron extension (per-DB;
   # NixOS has no ensureExtensions). DB ownership is declarative via
   # ensureDBOwnership, so no ALTER DATABASE here.
+  # Grant splitpro access to the cron schema (created by pg_cron, owned by
+  # postgres) so the app can manage its scheduled jobs.
   # postgresql-setup.postStart is types.lines — merges with postgresql.nix.
   systemd.services.postgresql-setup.postStart = lib.mkAfter ''
     PGPW=$(cat ${config.sops.secrets.splitpro_db_password.path})
     psql -d postgres -c "ALTER USER \"${dbUser}\" WITH PASSWORD '$PGPW';"
     psql -d "${dbUser}" -c "CREATE EXTENSION IF NOT EXISTS pg_cron;"
+    psql -d "${dbUser}" -c "GRANT USAGE ON SCHEMA cron TO \"${dbUser}\";"
+    psql -d "${dbUser}" -c "GRANT ALL ON ALL TABLES IN SCHEMA cron TO \"${dbUser}\";"
+    psql -d "${dbUser}" -c "GRANT ALL ON ALL SEQUENCES IN SCHEMA cron TO \"${dbUser}\";"
   '';
 
   # --- Sops secrets ---
