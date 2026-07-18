@@ -41,7 +41,7 @@
     };
     privateDomain = lib.mkOption {
       type = lib.types.str;
-      default = "ts.${config.publicDomain}"; 
+      default = "ts.${config.publicDomain}";
       description = "Internal domain name, automatically derived from publicDomain";
     };
     vpsPrivateIp = lib.mkOption {

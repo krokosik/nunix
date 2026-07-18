@@ -4,7 +4,9 @@
     enable = true;
     settings = {
       AccountID = 1328988;
-      LicenseKey = { _secret = config.sops.secrets.geoip_license_key.path; };
+      LicenseKey = {
+        _secret = config.sops.secrets.geoip_license_key.path;
+      };
       EditionIDs = [
         "GeoLite2-ASN"
         "GeoLite2-City"
@@ -15,7 +17,7 @@
   };
 
   sops.secrets.geoip_license_key = {
-      key = "geoip/license_key";
-      mode = "0400";
-    };
+    key = "geoip/license_key";
+    mode = "0400";
+  };
 }
