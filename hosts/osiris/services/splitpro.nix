@@ -91,6 +91,8 @@ in
   ];
 
   # --- Docker container ---
+  # Force docker backend (oci-containers defaults to podman on this host)
+  virtualisation.oci-containers.backend = "docker";
   virtualisation.oci-containers.containers.splitpro = {
     image = "ossapps/splitpro:v2.1.4";
     user = "1000:1000";
@@ -132,7 +134,9 @@ in
     };
   };
 
-  # Container depends on postgres being fully set up (DB, user, extension created)
+  # Container depends on postgres being fully set up (DB, user, extension created).
+  # docker backend creates docker-<name>.service with ExecStart; we only add
+  # ordering constraints (merge into the generated unit, not replace it).
   systemd.services.docker-splitpro = {
     after = [ "postgresql.target" ];
     requires = [ "postgresql.target" ];
