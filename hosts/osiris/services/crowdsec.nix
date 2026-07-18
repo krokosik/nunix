@@ -78,6 +78,11 @@ in
     };
   };
 
+  systemd.services.traefik = lib.mkIf config.services.traefik.enable {
+    after = [ "crowdsec.service" ];
+    wants = [ "crowdsec.service" ];
+  };
+
   services.traefik = {
     dynamicConfigOptions.http = {
       services.crowdsec-svc.loadBalancer.servers = [

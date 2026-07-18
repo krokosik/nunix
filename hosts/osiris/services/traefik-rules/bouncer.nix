@@ -31,8 +31,11 @@ lib.mkIf (config.services.traefik.enable && config.services.crowdsec.enable) {
   sops.secrets.crowdsec_traefik_bouncer_key = {
     key = "crowdsec/traefik_bouncer_key";
     mode = "0440";
-    owner = config.users.users.traefik.name;
+    owner = config.users.users.crowdsec.name;
     group = config.users.users.traefik.group;
-    restartUnits = [ "traefik.service" ];
+    restartUnits = [
+      "traefik.service"
+      "crowdsec.service"
+    ];
   };
 }
