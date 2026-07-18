@@ -82,7 +82,7 @@
           just
           git
         ];
-        shellHook = ''exec fish'';
+        shellHook = "exec fish";
       };
     };
 }
