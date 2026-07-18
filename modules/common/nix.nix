@@ -85,7 +85,7 @@ in
   };
   # Allow nixos-upgrade to restart on failure (e.g. when laptop wakes up before network connection is set)
   systemd.services.nixos-upgrade = {
-    preStart = "${pkgs.host}/bin/host ${user}.net"; # Check network connectivity
+    preStart = "${pkgs.host}/bin/host ${config.publicDomain}"; # Check network connectivity
     serviceConfig = {
       Restart = "on-failure";
       RestartSec = "120";
