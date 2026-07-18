@@ -22,7 +22,6 @@
     lazygit
     ncurses
     nix-tree
-    unstable.opencode
     pciutils
     python3
     ripgrep

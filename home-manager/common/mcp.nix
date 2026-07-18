@@ -1,0 +1,5 @@
+{
+  programs.mcp = {
+    enable = false;
+  };
+}

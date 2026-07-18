@@ -31,8 +31,10 @@
     publicShare = "${config.home.homeDirectory}";
     videos = "${config.home.homeDirectory}/media/videos";
     templates = "${config.home.homeDirectory}";
+    projects = "${config.home.homeDirectory}/work";
     extraConfig = {
       XDG_SCREENSHOTS_DIR = "${config.home.homeDirectory}/media/screenshots";
     };
+    setSessionVariables = true;
   };
 }
