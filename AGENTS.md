@@ -22,6 +22,13 @@ to `virtualisation.oci-containers`/docker-compose only with justification.
 Ignore the legacy `scripts/` directory. Each migration: explain the
 native-module approach, ask before proceeding, note any secret wiring.
 
+**Service-first architecture**: each service module (e.g. `splitpro.nix`)
+owns its DB users, extensions, and postgres settings. `postgresql.nix` stays
+server-level only (enableTCPIP, authentication, firewall, superuser
+password, backup). Secrets live in service-specific sops blocks (e.g.
+`splitpro:`), not a generic `postgresql:` block. See the `service-migration`
+skill for the full migration runbook and postgres patterns.
+
 ## Critical gotchas
 
 - **Secrets are a separate local repo.** `my-secrets` flake input points at
@@ -31,6 +38,10 @@ native-module approach, ask before proceeding, note any secret wiring.
   sets `flakePath = /home/<user>/Work/nunix?ref=main`, so the local repo
   must have `main` checked out and changes committed for autoUpgrade to see
   them. Uncommitted edits are not picked up.
+- **`flake.lock` must be bumped when `my-secrets` changes.** Run
+  `nix flake lock --update-input my-secrets` after editing secrets, then
+  commit `flake.lock`. Otherwise the nix build uses a stale secrets hash
+  and sops-install-secrets fails with "key not found".
 - **Hardware is via nixos-facter, not `hardware-configuration.nix`.** Each
   host sets `hardware.facter.reportPath = ./facter.json` (committed).
 - **`justfile` is not yet ready and should be adjusted** — recipes may be
