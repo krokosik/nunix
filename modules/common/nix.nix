@@ -73,16 +73,16 @@ in
   };
 
   # System maintenance
-  system.autoUpgrade = {
-    enable = true;
-    flake = "${flakePath}#${config.networking.hostName}";
-    flags = [
-      "-L"
-    ];
-    dates = "04:40";
-    persistent = true;
-    randomizedDelaySec = "45min";
-  };
+  # system.autoUpgrade = {
+  #   enable = true;
+  #   flake = "${flakePath}#${config.networking.hostName}";
+  #   flags = [
+  #     "-L"
+  #   ];
+  #   dates = "04:40";
+  #   persistent = true;
+  #   randomizedDelaySec = "45min";
+  # };
   # Allow nixos-upgrade to restart on failure (e.g. when laptop wakes up before network connection is set)
   systemd.services.nixos-upgrade = {
     preStart = "${pkgs.host}/bin/host ${config.publicDomain}"; # Check network connectivity
