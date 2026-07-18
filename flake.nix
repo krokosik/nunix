@@ -71,7 +71,6 @@
 
       devShells.x86_64-linux.default = pkgs.mkShell {
         packages = with pkgs; [
-          fish
           nixfmt-tree
           nixd
           nh
@@ -82,7 +81,6 @@
           just
           git
         ];
-        shellHook = "exec fish";
       };
     };
 }
