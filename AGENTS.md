@@ -24,8 +24,6 @@ native-module approach, ask before proceeding, note any secret wiring.
 
 ## Critical gotchas
 
-- **`flake.lock` is gitignored.** Never commit it. Each machine keeps its
-  own lockfile.
 - **Secrets are a separate local repo.** `my-secrets` flake input points at
   `~/Work/nunix-secrets` (`flake = false`, path input) — the flake does not
   build without it. Per-host `secrets.yaml` + `common/` + `server/`.
