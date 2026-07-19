@@ -160,19 +160,22 @@ in
         };
 
         dynamicConfigOptions.http = {
-          services = lib.mapAttrs (name: svc: {
-            "${name}-svc".loadBalancer.servers = [
-              { url = "http://127.0.0.1:${toString svc.port}"; }
-            ];
-          }) config.myTraefikServices;
+          services = lib.mapAttrs' (
+            name: svc:
+            lib.nameValuePair "${name}-svc" {
+              loadBalancer.servers = [
+                { url = "http://127.0.0.1:${toString svc.port}"; }
+              ];
+            }
+          ) config.myTraefikServices;
 
           routers =
-            lib.mapAttrs (name: svc: {
+            (lib.mapAttrs (name: svc: {
               rule = "Host(`${name}.${if svc.public then config.publicDomain else config.privateDomain}`)";
               entryPoints = [ "websecure" ];
               service = "${name}-svc";
               middlewares = svc.chain;
-            }) config.myTraefikServices
+            }) config.myTraefikServices)
             // {
               traefik-dashboard = {
                 rule = "Host(`traefik.${config.privateDomain}`)";
