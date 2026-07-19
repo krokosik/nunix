@@ -34,18 +34,24 @@ skill for the full migration runbook and postgres patterns.
 - **Secrets are a separate local repo.** `my-secrets` flake input points at
   `~/Work/nunix-secrets` (`flake = false`, path input) — the flake does not
   build without it. Per-host `secrets.yaml` + `common/` + `server/`.
-- **autoUpgrade pulls from local `main` ref.** `modules/common/nix.nix`
-  sets `flakePath = /home/<user>/Work/nunix?ref=main`, so the local repo
-  must have `main` checked out and changes committed for autoUpgrade to see
-  them. Uncommitted edits are not picked up.
 - **`flake.lock` must be bumped when `my-secrets` changes.** Run
   `nix flake lock --update-input my-secrets` after editing secrets, then
   commit `flake.lock`. Otherwise the nix build uses a stale secrets hash
   and sops-install-secrets fails with "key not found".
 - **Hardware is via nixos-facter, not `hardware-configuration.nix`.** Each
   host sets `hardware.facter.reportPath = ./facter.json` (committed).
-- **`justfile` is not yet ready and should be adjusted** — recipes may be
-  stale or incomplete. Verify against actual state before relying on them.
+- Never `find /nix/store` or anything equivalent. Prefer using
+  `nix flake archive --json`.
+- Do not execute `nix flake archive --json` with commands that actually search
+  over the result of that, as it forces the user to review every single time.
+  Run `nix flake archive --json` once, then refer to its output literally in
+  other, separate find commands. Not like `NIXPKGS=/nix/store/... rg $NIXPKGS`,
+  not like `np=/nix/store/...; sed -n 258,275p "$np/lib/modules.nix"`,
+  _literally_, without any variables.
+- Never use non-new `nix` commands. Prefer `nix build` over `nix-build` and so
+  on. Always prefer new (nix3) commands.
+- Never use python to parse json if jq can do it fine, jq avoids permission
+  prompts.
 
 ## Commands
 
@@ -63,11 +69,11 @@ nix fmt .         # uses formatter.x86_64-linux = nixfmt-tree
 nix flake check   # closest thing to validation; no test suite exists
 ```
 
-Deploy (via justfile — see caveat above):
+Deploy (via justfile):
 
 ```
-just deploy-local              # nh os switch .          (current host)
-just deploy-remote <host> [ip] # nixos-rebuild switch --flake .#<host> --target-host <user>@<host> --use-remote-sudo
+just deploy-local              # deploy on the current machine
+just deploy-remote <host> [ip] # deploy on a remote host (ssh)
 just repl [host]               # nix repl ".#nixosConfigurations.<host>"
 ```
 
@@ -114,3 +120,32 @@ Read by other modules — set per-host in `hosts/<name>/configuration.nix`:
   `tag:server` on server hosts.
 - Commit messages: short imperative, capitalized, no conventional-commit
   prefix, no body (e.g. `Add ghostty terminfo`, `Fix password key typo`).
+- Prefer `lib.lists.singleton` over a single item list.
+- Always `let inherit (lib.<path>) foo;` with full paths like `lib.lists.head`,
+  never `inherit (lib) foo` unless `foo` has no submodule path.
+- Always prefer `${getExe pkgs.something}` over bare command names in shell
+  aliases. Use `package = getExe pkgs.something` when there are multiple usages.
+- Leave an empty line between unrelated options.
+- Never put values in `let` bindings that duplicate module system options. If a
+  value is set through `config.*`, always reference it through `config.*`. `let`
+  bindings for hardcoded values that could be overridden via the module system
+  are forbidden. `let` is fine for computed derivations, helper functions, and
+  `getExe` shortcuts.
+- Prefer destructuring attrset arguments when it improves clarity. Use
+  `{ home, ... }:` instead of `value: value.home` where it makes sense.
+- Always put `/* lang */` before multiline code strings, e.g. `/* bash */ ''`.
+- Category/section comments should be uppercase with no period, e.g. `# DOCK`,
+  not `# Dock.`.
+- Prefer setting individual options with `mkIf` over wrapping entire attrsets.
+  Use `foo.bar = mkIf condition value;` not
+  `foo = mkIf condition { bar = value; };` when possible.
+- Inline package definitions should use `pkgs.callPackage` with destructured
+  args, e.g. `pkgs.callPackage ({ stdenv, writeText }: ...) { }`.
+- For inline source code in packages, use `writeText` directly in the `src`
+  attribute rather than a separate `let` binding.
+- Do not use `builtins.` in modules.
+- Never use `rec` ever. Worst case, define a custom `fix`.
+- Do not use shortform CLI arguments if longform exists in source files. It's
+  only OK for interactive use. (and never when providing scripts to the user)
+- Never use `toString` for paths that need to preserve derivation contexts.
+  Always `"${path}"`.
