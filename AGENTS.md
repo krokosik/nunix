@@ -52,6 +52,12 @@ skill for the full migration runbook and postgres patterns.
   on. Always prefer new (nix3) commands.
 - Never use python to parse json if jq can do it fine, jq avoids permission
   prompts.
+- When investigating with `nix eval`, always bundle multiple invocation together,
+  returning a single curated json object.
+- When checking systemd unit properties, use `systemctl show <unit> -P <property1> -P <property2>`
+  rather than calling `systemctl cat` and parsing the output.
+- Suspected broken unit configs can be checked with `systemd-analyze verify <unit>`.
+- When dealing with psql, prefer single-string queries over a sequence of psql commands.
 
 ## Commands
 
