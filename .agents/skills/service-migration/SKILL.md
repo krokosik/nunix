@@ -210,7 +210,7 @@ extraOptions = [
   "--label=traefik.enable=true"
   "--label=traefik.http.routers.<name>-rtr.entrypoints=websecure"
   "--label=traefik.http.routers.<name>-rtr.rule=Host(`<sub>.${config.publicDomain}`)"
-  "--label=traefik.http.routers.<name>-rtr.middlewares=chain-no-auth@file"  # or chain-authentik
+  "--label=traefik.http.routers.<name>-rtr.middlewares=chain-no-auth"  # or chain-authentik
   "--label=traefik.http.routers.<name>-rtr.service=<name>-svc"
   "--label=traefik.http.services.<name>-svc.loadbalancer.server.port=3000"
   "--label=traefik.docker.network=traefik_proxy"

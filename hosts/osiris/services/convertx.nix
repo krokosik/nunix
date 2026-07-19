@@ -15,7 +15,7 @@
       "--label=traefik.enable=true"
       "--label=traefik.http.routers.convertx-rtr.entrypoints=websecure"
       "--label=traefik.http.routers.convertx-rtr.rule=Host(`convertx.${config.publicDomain}`)"
-      "--label=traefik.http.routers.convertx-rtr.middlewares=chain-authentik@file"
+      "--label=traefik.http.routers.convertx-rtr.middlewares=chain-authentik"
       "--label=traefik.http.routers.convertx-rtr.service=convertx-svc"
       "--label=traefik.http.services.convertx-svc.loadbalancer.server.port=3000"
       "--label=traefik.docker.network=traefik_proxy"

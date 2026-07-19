@@ -13,7 +13,7 @@
       "--label=traefik.enable=true"
       "--label=traefik.http.routers.bentopdf-rtr.entrypoints=websecure"
       "--label=traefik.http.routers.bentopdf-rtr.rule=Host(`pdf.${config.publicDomain}`)"
-      "--label=traefik.http.routers.bentopdf-rtr.middlewares=chain-authentik@file"
+      "--label=traefik.http.routers.bentopdf-rtr.middlewares=chain-authentik"
       "--label=traefik.http.routers.bentopdf-rtr.service=bentopdf-svc"
       "--label=traefik.http.services.bentopdf-svc.loadbalancer.server.port=8080"
       "--label=traefik.docker.network=traefik_proxy"

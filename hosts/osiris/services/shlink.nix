@@ -16,7 +16,7 @@
       "--label=traefik.enable=true"
       "--label=traefik.http.routers.shlink-rtr.entrypoints=websecure"
       "--label=traefik.http.routers.shlink-rtr.rule=Host(`s.${config.publicDomain}`)"
-      "--label=traefik.http.routers.shlink-rtr.middlewares=chain-no-auth@file"
+      "--label=traefik.http.routers.shlink-rtr.middlewares=chain-no-auth"
       "--label=traefik.http.routers.shlink-rtr.service=shlink-svc"
       "--label=traefik.http.services.shlink-svc.loadbalancer.server.port=8080"
       "--label=traefik.docker.network=traefik_proxy"
