@@ -12,7 +12,7 @@
     ../../modules/avahi.nix
     ../../modules/boot.nix
     ../../modules/disable-deep-sleep.nix
-    ../../modules/docker.nix
+    ../../modules/oci-containers.nix
     ../../modules/intel-gpu.nix
     ../../modules/zfs.nix
     ../../home-manager/home-manager.nix
