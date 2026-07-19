@@ -12,7 +12,7 @@
 
     sops-nix = {
       url = "github:Mic92/sops-nix";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     my-secrets = {
@@ -24,16 +24,18 @@
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Native NixOS module for authentik (server, worker, outposts).
+    # Upstream warns against overriding nixpkgs via follows because
+    # python deps in the lockfile are pinned together; let it use its
+    # own locked nixpkgs.
+    authentik-nix.url = "github:nix-community/authentik-nix";
   };
 
   outputs =
     {
       self,
       nixpkgs,
-      nixpkgs-unstable,
-      disko,
-      home-manager,
-      sops-nix,
       ...
     }@inputs:
     let
