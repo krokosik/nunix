@@ -162,6 +162,9 @@ in
           (lib.optionalAttrs svc.tzEnv {
             environment.TZ = config.time.timeZone;
           })
+          {
+            extraOptions = [ "--security-opt=no-new-privileges" ];
+          }
         ]
       ) config.myContainerServices;
     };

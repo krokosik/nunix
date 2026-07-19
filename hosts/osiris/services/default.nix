@@ -6,7 +6,6 @@
     ./ip2location.nix
     ./geoipupdate.nix
     ./postgresql.nix
-    ./shlink.nix
     ./splitpro.nix
     ./traefik.nix
   ];

@@ -12,31 +12,40 @@ in
 
   options.myTraefikServices = lib.mkOption {
     type = lib.types.attrsOf (
-      lib.types.submodule {
-        options = {
-          port = lib.mkOption {
-            type = lib.types.port;
-            default = null;
-            description = ''
-              Host port to bind the traefik service to.
-            '';
+      lib.types.submodule (
+        { name, ... }: {
+          options = {
+            port = lib.mkOption {
+              type = lib.types.port;
+              default = null;
+              description = ''
+                Host port to bind the traefik service to.
+              '';
+            };
+            subdomain = lib.mkOption {
+              type = lib.types.str;
+              default = name;
+              description = ''
+                Subdomain to bind the traefik service to. Defaults to the attribute name.
+              '';
+            };
+            public = lib.mkOption {
+              type = lib.types.bool;
+              default = false;
+              description = ''
+                Whether the traefik service is public-facing (routed via public domain) or internal-only (binds to private domain). Defaults to false (internal-only).
+              '';
+            };
+            chain = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [ "chain-authentik" ];
+              description = ''
+                Specify a list of middlewares to apply to the traefik router. Defaults to [ "chain-authentik" ].
+              '';
+            };
           };
-          public = lib.mkOption {
-            type = lib.types.bool;
-            default = false;
-            description = ''
-              Whether the traefik service is public-facing (routed via public domain) or internal-only (binds to private domain). Defaults to false (internal-only).
-            '';
-          };
-          chain = lib.mkOption {
-            type = lib.types.listOf lib.types.str;
-            default = [ "chain-authentik" ];
-            description = ''
-              Specify a list of middlewares to apply to the traefik router. Defaults to [ "chain-authentik" ].
-            '';
-          };
-        };
-      }
+        }
+      )
     );
     default = { };
     description = ''
@@ -171,7 +180,7 @@ in
 
           routers =
             (lib.mapAttrs (name: svc: {
-              rule = "Host(`${name}.${if svc.public then config.publicDomain else config.privateDomain}`)";
+              rule = "Host(`${svc.subdomain}.${if svc.public then config.publicDomain else config.privateDomain}`)";
               entryPoints = [ "websecure" ];
               service = "${name}-svc";
               middlewares = svc.chain;

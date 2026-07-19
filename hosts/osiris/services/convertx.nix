@@ -1,32 +1,25 @@
-{ config, ... }:
+let
+  port = 3024;
+in
 {
   # ConvertX - Self-hosted file converter
   # Reference: hosts/osiris/services/splitpro.nix for full pattern
-  virtualisation.oci-containers.backend = "docker";
+  myContainerServices.convertx = {
+    inherit port;
+    manageUser = false;
+    containerPort = 3000;
+  };
 
   virtualisation.oci-containers.containers.convertx = {
-    image = "ghcr.io/c4illin/convertx";
+    image = "ghcr.io/c4illin/convertx:v0.18.0";
     extraOptions = [
-      "--network=traefik_proxy"
-      "--security-opt=no-new-privileges"
       # Intel QuickSync GPU for FFmpeg hardware acceleration
       "--device=/dev/dri:/dev/dri"
-      # Traefik labels
-      "--label=traefik.enable=true"
-      "--label=traefik.http.routers.convertx-rtr.entrypoints=websecure"
-      "--label=traefik.http.routers.convertx-rtr.rule=Host(`convertx.${config.publicDomain}`)"
-      "--label=traefik.http.routers.convertx-rtr.middlewares=chain-authentik"
-      "--label=traefik.http.routers.convertx-rtr.service=convertx-svc"
-      "--label=traefik.http.services.convertx-svc.loadbalancer.server.port=3000"
-      "--label=traefik.docker.network=traefik_proxy"
     ];
     volumes = [
       "/var/lib/convertx:/app/data"
     ];
     environment = {
-      TZ = config.time.timeZone;
-      PUID = "1000";
-      PGID = "1000";
       ACCOUNT_REGISTRATION = "false";
       HTTP_ALLOWED = "false";
       ALLOW_UNAUTHENTICATED = "true";
@@ -35,7 +28,8 @@
     };
   };
 
-  systemd.tmpfiles.rules = [
-    "d /var/lib/convertx 0755 1000 1000 -"
-  ];
+  myTraefikServices.convertx = {
+    inherit port;
+    public = true;
+  };
 }

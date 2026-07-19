@@ -69,7 +69,6 @@ in
     image = "ossapps/splitpro:v2.1.4";
     extraOptions = [
       "--add-host=host.docker.internal:host-gateway"
-      "--security-opt=no-new-privileges"
     ];
     volumes = [
       "/var/lib/splitpro/uploads:/app/uploads"
