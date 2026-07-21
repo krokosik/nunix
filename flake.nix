@@ -1,6 +1,11 @@
 {
   description = "A simple NixOS flake with ZFS, Disko, and Home Manager";
 
+  nixConfig = {
+    extra-substituters = [ "https://nix-community.cachix.org" ];
+    extra-trusted-public-keys = [ "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" ];
+  };
+
   inputs = {
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/?shallow=1&ref=nixos-unstable";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
