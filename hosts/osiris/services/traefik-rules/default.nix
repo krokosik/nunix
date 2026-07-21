@@ -1,8 +1,8 @@
 {
   imports = [
     ./chains.nix
-    ./authentik.nix
     ./bouncer.nix
+    ./forward-auth.nix
     ./geoblock.nix
     ./lapi-allowlist.nix
     ./rate-limit.nix
