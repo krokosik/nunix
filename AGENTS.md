@@ -35,7 +35,7 @@ skill for the full migration runbook and postgres patterns.
   `~/Work/nunix-secrets` (`flake = false`, path input) — the flake does not
   build without it. Per-host `secrets.yaml` + `common/` + `server/`.
 - **`flake.lock` must be bumped when `my-secrets` changes.** Run
-  `nix flake lock --update-input my-secrets` after editing secrets, then
+  `nix flake update my-secrets` after editing secrets, then
   commit `flake.lock`. Otherwise the nix build uses a stale secrets hash
   and sops-install-secrets fails with "key not found".
 - **Hardware is via nixos-facter, not `hardware-configuration.nix`.** Each
