@@ -8,6 +8,6 @@
     autoLogin = {
       enable = true;
       user = config.username;
-    }
+    };
   };
 }
