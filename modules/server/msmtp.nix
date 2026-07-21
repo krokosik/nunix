@@ -53,7 +53,7 @@
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       Type = "simple";
-      ExecStart = "${lib.getExe pkgs.msmtp} --daemon --listen=127.0.0.1:2500";
+      ExecStart = "${pkgs.msmtp}/bin/msmtpd --daemon --listen=127.0.0.1:2500";
       Restart = "on-failure";
       LoadCredential = [ "smtp_token:${config.sops.secrets.smtp_token.path}" ];
     };
