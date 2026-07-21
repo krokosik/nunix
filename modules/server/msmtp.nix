@@ -45,7 +45,6 @@
 
   # Local SMTP listener for apps that speak SMTP (e.g. authentik). Forwards
   # to the protonmail relay configured above via the same `programs.msmtp`
-  # config + sops secret. Bind to 127.0.0.1 only — never expose.
   systemd.services.msmtpd = {
     description = "Local SMTP relay (msmtpd → protonmail)";
     after = [ "sops-install-secrets.service" ];
@@ -53,7 +52,7 @@
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       Type = "simple";
-      ExecStart = "${pkgs.msmtp}/bin/msmtpd --daemon --listen=127.0.0.1:2500";
+      ExecStart = "${pkgs.msmtp}/bin/msmtpd --port=2500";
       Restart = "on-failure";
       LoadCredential = [ "smtp_token:${config.sops.secrets.smtp_token.path}" ];
     };
