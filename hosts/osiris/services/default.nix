@@ -1,5 +1,6 @@
 {
   imports = [
+    ./authentik.nix
     ./bentopdf.nix
     ./convertx.nix
     ./crowdsec.nix
