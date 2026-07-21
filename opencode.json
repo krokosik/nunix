@@ -8,6 +8,10 @@
     "nunix-secrets": {
       "path": "../nunix-secrets",
       "description": "Per-host secrets for the nunix flake (secrets.yaml under anubis, common, osiris, server). Used by the NixOS configuration, likely via sops-nix or similar. Reference for resolving secret names and structure during service migrations."
+    },
+    "ian-flake": {
+      "path": "~/Work/ian-flake",
+      "description": "The ian-flake is a personal Nix flake that contains various configurations, packages, and utilities. It has some useful NixOS modules that are worth referencing, especially its handling of declarative Authentik deployment."
     }
   },
   "permission": {
