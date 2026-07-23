@@ -3,7 +3,6 @@ let
 in
 {
   # ConvertX - Self-hosted file converter
-  # Reference: hosts/osiris/services/splitpro.nix for full pattern
   myContainerServices.convertx = {
     inherit port;
     manageUser = false;
@@ -31,5 +30,15 @@ in
   myTraefikServices.convertx = {
     inherit port;
     public = true;
+    # chain-authentik is the option default; authentik gates the
+    # route via the embedded outpost's forward-auth flow.
+  };
+
+  # authentik provider + application + policy binding managed via
+  # the aggregator in `authentik.nix`. Icon slug matches
+  # dashboard-icons/png/<name>.png.
+  myAuthentik.forwardAuthApps.convertx = {
+    displayName = "ConvertX";
+    authentikGroup = "users";
   };
 }
