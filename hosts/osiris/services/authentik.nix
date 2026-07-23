@@ -47,6 +47,83 @@ let
 
   inherit (config.myAuthentik) oidcApps;
 
+  # Classification taxonomy — options below constrain `accessGroup` and
+  # `displayGroup` to one of these strings. Together the two let lists
+  # drive both the validation assertions and the rendered baseline group
+  # entries that always ship with the forward-auth blueprint.
+
+  # Access hierarchy (nested via `parents`): admins ⊃ family ⊃ friends ⊃ users.
+  # Each tier inherits every permission granted to any junior tier.
+  accessGroupNames = [
+    "users"
+    "friends"
+    "family"
+    "admins"
+  ];
+
+  # Display categories (flat, no nesting): used for the UI tile grouping
+  # on the authentik application library page. Purely cosmetic — no
+  # policy evaluation touches these groups.
+  displayGroupNames = [
+    "Infrastructure"
+    "Arr"
+    "Apps"
+  ];
+
+  # Baseline group entries prepended to every generated blueprint. Using
+  # `!KeyOf` anchors here means per-app entries in the same instance can
+  # reference `grp-<name>` deterministically — authentik builds a DAG and
+  # applies in dependency order, so the cross-instance race that bit us
+  # (forward-auth-apps applied before the groups existed) can't recur.
+  # `grp-` prefix keeps the anchor namespace clear of app `id:` anchors.
+  groupsBaselineContent = ''
+    version: 1
+    metadata:
+      name: groups-baseline
+    entries:
+      - model: authentik_core.group
+        id: grp-users
+        identifiers:
+          name: users
+        attrs:
+          is_superuser: false
+          parents: []
+
+      - model: authentik_core.group
+        id: grp-friends
+        identifiers:
+          name: friends
+        attrs:
+          is_superuser: false
+          parents:
+            - !KeyOf grp-users
+
+      - model: authentik_core.group
+        id: grp-family
+        identifiers:
+          name: family
+        attrs:
+          is_superuser: false
+          parents:
+            - !KeyOf grp-friends
+
+      - model: authentik_core.group
+        id: grp-admins
+        identifiers:
+          name: admins
+        attrs:
+          is_superuser: true
+          parents:
+            - !KeyOf grp-family'
+  '';
+
+  # Split out from `forward-auth-apps.yaml` because authentik's `!KeyOf`
+  # is instance-scoped (`BlueprintImporter.__pk_map` is per instance,
+  # not per blueprints_dir) — keeping groups in their own instance
+  # means adding/removing apps doesn't churn the groups hash, and
+  # groups exist before any app blueprint's `!Find` lookup fires.
+  groupsBaselineDir = pkgs.writeTextDir "groups-baseline.yaml" groupsBaselineContent;
+
   # One YAML entry block per forward-auth app: provider, application,
   # policy binding. `id:` anchors are used inside this same blueprint
   # by `!KeyOf` so the application can reference its own provider
@@ -70,7 +147,7 @@ let
       attrs:
         name: ${app.displayName}
         provider: !KeyOf prov-${name}
-        group: ${app.authentikGroup}
+        group: ${app.displayGroup}
         open_in_new_tab: true
         meta_launch_url: https://${app.host}
         meta_icon: ${app.iconUrl}
@@ -81,7 +158,7 @@ let
         target: !KeyOf app-${name}
         order: 0
       attrs:
-        group: !Find [authentik_core.group, [name, ${app.authentikGroup}]]
+        group: !Find [authentik_core.group, [name, ${app.accessGroup}]]
         enabled: true'';
 
   # The separator must match the column the first item lands at after
@@ -215,13 +292,17 @@ in
       description = ''
         Apps gated by authentik forward-auth via Traefik (chain-authentik
         middleware). Each entry generates an authentik proxy provider +
-        application + policy binding (default group: users),
-        plus the embedded outpost's `providers` list entry. One
-        blueprint owns the outpost's `providers` list, so every
-        forward-auth app on the host must register through this option
-        rather than emitting its own outpost block. The Traefik router
-        + middleware chain is configured in each app's own service
-        module via `myTraefikServices.<name>`.
+        application + policy binding, plus the embedded outpost's
+        `providers` list entry. One blueprint owns the outpost's
+        `providers` list, so every forward-auth app on the host must
+        register through this option rather than emitting its own
+        outpost block. The Traefik router + middleware chain is
+        configured in each app's own service module via
+        `myTraefikServices.<name>`.
+
+        Both `accessGroup` and `displayGroup` are validated against the
+        fixed taxonomy declared in this module (see `accessGroupNames`
+        / `displayGroupNames`) — typos fail the build via assertions.
       '';
       type = lib.types.attrsOf (
         lib.types.submodule (
@@ -242,12 +323,26 @@ in
                 default = "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/${name}.png";
                 description = "Icon URL used on the authentik application tile.";
               };
-              authentikGroup = lib.mkOption {
-                type = lib.types.str;
-                default = "users";
+              accessGroup = lib.mkOption {
+                type = lib.types.enum accessGroupNames;
+                default = "admins";
                 description = ''
-                  Authentik group whose members can access this app via
-                  the policy binding. Defaults to users;
+                  Access tier whose members can reach this app via its
+                  policy binding. One of: users, friends, family,
+                  admins. Defaults to admins (tightest); widen per app.
+                  Inheritance is nested — admins ⊃ family ⊃ friends ⊃
+                  users — so a senior tier's members automatically
+                  satisfy the policy for any junior tier.
+                '';
+              };
+              displayGroup = lib.mkOption {
+                type = lib.types.enum displayGroupNames;
+                default = "Infrastructure";
+                description = ''
+                  UI display category for the application library tile.
+                  One of: Infrastructure, Arr, Apps. Defaults to
+                  Infrastructure (admin/ops tools). Purely cosmetic —
+                  no policy evaluation touches display groups.
                 '';
               };
             };
@@ -366,6 +461,24 @@ in
                   to the attribute name.
                 '';
               };
+              accessGroup = lib.mkOption {
+                type = lib.types.enum accessGroupNames;
+                default = "admins";
+                description = ''
+                  Access tier whose members can reach this app via
+                  its policy binding (declared in the per-app
+                  blueprint YAML under `blueprintsDir`). Same taxonomy
+                  as `forwardAuthApps.<name>.accessGroup`.
+                '';
+              };
+              displayGroup = lib.mkOption {
+                type = lib.types.enum displayGroupNames;
+                default = "Infrastructure";
+                description = ''
+                  UI display category — same taxonomy as
+                  `forwardAuthApps.<name>.displayGroup`.
+                '';
+              };
             };
           }
         )
@@ -375,6 +488,45 @@ in
 
   config = lib.mkMerge [
     {
+      # Typo guard: validate every registered app's accessGroup and
+      # displayGroup against the fixed taxonomy declared above. The
+      # enum types on the options already reject free-form strings at
+      # eval time, so these assertions are belt-and-suspenders — they
+      # surface a single readable message naming the offending app
+      # rather than the more cryptic type-check error.
+      assertions =
+        let
+          allApps = fwApps // oidcApps;
+          invalid =
+            name: app:
+            lib.foldl'
+              (
+                acc:
+                { ok, msg }:
+                if ok then acc else acc ++ [ msg ]
+              )
+              [ ]
+              [
+                {
+                  ok = builtins.elem app.accessGroup accessGroupNames;
+                  msg = "myAuthentik: ${name}.accessGroup=\"${app.accessGroup}\" is not one of ${lib.concatStringsSep "," accessGroupNames}";
+                }
+                {
+                  ok = builtins.elem app.displayGroup displayGroupNames;
+                  msg = "myAuthentik: ${name}.displayGroup=\"${app.displayGroup}\" is not one of ${lib.concatStringsSep "," displayGroupNames}";
+                }
+              ];
+        in
+        lib.flatten (lib.mapAttrsToList invalid allApps)
+        ++ [
+          {
+            # Sanity check the taxonomy lists themselves — a typo here
+            # would silently break every assertion.
+            assertion = lib.length accessGroupNames == 4 && lib.length displayGroupNames == 3;
+            message = "myAuthentik: group taxonomy lists changed shape — revisit assertions";
+          }
+        ];
+
       sops.secrets = {
         authentik_secret_key.key = "authentik/secret_key";
         authentik_bootstrap_email.key = "authentik/bootstrap_email";
@@ -457,7 +609,19 @@ in
       };
     }
 
-    (lib.mkIf (fwApps != { }) {
+    # Baseline groups (access hierarchy + display categories) are always
+    # contributed so they exist before any app blueprint's `!Find` lookup
+    # fires. Race-resilient via worker auto-retry.
+    {
+      myAuthentik.extraBlueprints = [ groupsBaselineDir ];
+    }
+
+    # The merged forward-auth blueprint owns the baseline group entries
+    # (access hierarchy + display categories) used by both `forwardAuthApps`
+    # and `oidcApps` per-app blueprints. If we gate this on `fwApps != {}`
+    # alone, an OIDC-only deploy loses the groups and its per-app
+    # blueprint's `!Find` lookup races missing entries.
+    (lib.mkIf (fwApps != { } || oidcApps != { }) {
       myAuthentik.extraBlueprints = [ fwBlueprintDir ];
     })
 

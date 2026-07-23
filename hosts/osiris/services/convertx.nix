@@ -39,6 +39,7 @@ in
   # dashboard-icons/png/<name>.png.
   myAuthentik.forwardAuthApps.convertx = {
     displayName = "ConvertX";
-    authentikGroup = "users";
+    accessGroup = "friends";
+    displayGroup = "Apps";
   };
 }
