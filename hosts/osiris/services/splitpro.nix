@@ -5,7 +5,6 @@
 let
   name = "splitpro";
   port = 3000;
-  dbUser = name;
   containerUser = config.username; # UID/GID 1000 on osiris
   containerUnit = "${config.virtualisation.oci-containers.backend}-${name}.service";
 in
@@ -13,9 +12,9 @@ in
   myPostgresServices.splitpro = {
     extraCommands = [
       "CREATE EXTENSION IF NOT EXISTS pg_cron;"
-      "GRANT USAGE ON SCHEMA cron TO \"${dbUser}\";"
-      "GRANT ALL ON ALL TABLES IN SCHEMA cron TO \"${dbUser}\";"
-      "GRANT ALL ON ALL SEQUENCES IN SCHEMA cron TO \"${dbUser}\";"
+      "GRANT USAGE ON SCHEMA cron TO \"${name}\";"
+      "GRANT ALL ON ALL TABLES IN SCHEMA cron TO \"${name}\";"
+      "GRANT ALL ON ALL SEQUENCES IN SCHEMA cron TO \"${name}\";"
     ];
   };
 
@@ -24,7 +23,7 @@ in
     extensions = pp: [ pp.pg_cron ];
     settings = {
       shared_preload_libraries = [ "pg_cron" ];
-      "cron.database_name" = dbUser;
+      "cron.database_name" = name;
       "cron.timezone" = "UTC";
     };
   };
@@ -45,9 +44,9 @@ in
     templates."splitpro.env" = {
       content = ''
         NEXTAUTH_SECRET=${config.sops.placeholder.nextauth_secret}
-        DATABASE_URL=postgresql://${dbUser}:${
+        DATABASE_URL=postgresql://${name}:${
           config.sops.placeholder.${config.myPostgresServices.splitpro.secretName}
-        }@host.docker.internal:5432/${dbUser}
+        }@host.docker.internal:5432/${name}
         AUTHENTIK_ID=${config.sops.placeholder.authentik_id}
         AUTHENTIK_SECRET=${config.sops.placeholder.authentik_secret}
         WEB_PUSH_PUBLIC_KEY=${config.sops.placeholder.webpush_public_key}

@@ -19,6 +19,7 @@
     inputs.disko.nixosModules.disko
     inputs.home-manager.nixosModules.home-manager
     inputs.sops-nix.nixosModules.sops
+    inputs.nixflix.nixosModules.default
   ];
 
   hardware.facter.reportPath = ./facter.json;

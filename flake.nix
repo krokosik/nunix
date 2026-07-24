@@ -30,6 +30,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nixflix = {
+      url = "github:kiriwalawren/nixflix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Native NixOS module for authentik (server, worker, outposts).
     # Upstream warns against overriding nixpkgs via follows because
     # python deps in the lockfile are pinned together; let it use its

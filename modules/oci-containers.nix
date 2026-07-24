@@ -170,8 +170,8 @@ in
     };
 
     # docker isn't allowed to forward packets from docker0 to the actual NIC by default
-    boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
-    boot.kernel.sysctl."net.ipv6.conf.all.forwarding" = 1;
+    boot.kernel.sysctl."net.ipv4.ip_forward" = lib.mkForce 1;
+    boot.kernel.sysctl."net.ipv6.conf.all.forwarding" = lib.mkForce 1;
 
     # Parent directory for all containerized svc state. svcs create their
     # own subdirs (/var/lib/containers/<svc>) owned by the server user,

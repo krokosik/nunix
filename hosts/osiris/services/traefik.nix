@@ -22,6 +22,13 @@ in
                 Host port to bind the traefik service to.
               '';
             };
+            host = lib.mkOption {
+              type = lib.types.str;
+              default = "127.0.0.1";
+              description = ''
+                Host address to where the traefik service is bound.
+              '';
+            };
             subdomain = lib.mkOption {
               type = lib.types.str;
               default = name;
@@ -51,7 +58,7 @@ in
     description = ''
       Traefik service configuration. Each entry creates a traefik router/service pair. The domain
       is automatically derived from the attribute name and the public/private domain options and
-      always bound to websecure: https://<name>.<publicDomain|privateDomain> -> http://127.0.0.1:<port>
+      always bound to websecure: https://<name>.<publicDomain|privateDomain> -> http://<host>:<port>
     '';
   };
 
@@ -173,7 +180,7 @@ in
             name: svc:
             lib.nameValuePair "${name}-svc" {
               loadBalancer.servers = [
-                { url = "http://127.0.0.1:${toString svc.port}"; }
+                { url = "http://${svc.host}:${toString svc.port}"; }
               ];
             }
           ) config.myTraefikServices;

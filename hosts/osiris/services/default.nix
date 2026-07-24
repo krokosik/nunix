@@ -5,6 +5,7 @@
     ./convertx.nix
     ./crowdsec.nix
     ./ip2location.nix
+    ./nixflix.nix
     ./geoipupdate.nix
     ./postgresql.nix
     ./splitpro.nix
