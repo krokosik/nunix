@@ -11,6 +11,7 @@
     jellyfin_api_key.key = "jellyfin/api_key";
     seerr_api_key.key = "seerr/api_key";
     wireguard_conf.key = "wireguard_conf";
+    opensubtitles_password.key = "opensubtitles/password";
   };
 
   nixflix = {
@@ -67,22 +68,73 @@
       apiKey._secret = config.sops.secrets.jellyfin_api_key.path;
       users = {
         "${config.username}" = {
-          mutable = false;
+          mutable = true;
           policy.isAdministrator = true;
           password._secret = config.sops.secrets.jellyfin_admin_password.path;
         };
       };
       encoding = {
+        # https://jellyfin.org/docs/general/administration/hardware-acceleration/
         hardwareAccelerationType = "qsv";
+        allowHevcEncoding = true;
+        # https://jellyfin.org/docs/general/administration/hardware-acceleration/intel/#configure-and-verify-lp-mode-on-linux
+        enableIntelLowPowerH264HwEncoder = false;
+        enableIntelLowPowerHevcHwEncoder = false;
       };
       network = {
         enableIPv6 = true;
+      };
+      system = {
+        enableMetrics = false;
+        metadataCountryCode = "PL";
+      };
+      plugins = {
+        "Open Subtitles" = {
+          enable = true;
+          config = {
+            Username = "krokosik";
+            Password._secret = config.sops.secrets.opensubtitles_password.path;
+          };
+        };
+
+        "Subtitle Extract" = {        
+          enable = true;
+          config.ExtractionDuringLibraryScan = true;
+        };
+      };
+
+      libraries = 
+        let
+          subtitleSettings = {
+            subtitleDownloadLanguages = [
+              "eng"
+              "pol"
+            ];        
+            saveSubtitlesWithMedia = true;
+            allowEmbeddedSubtitles = "AllowAll";
+            requirePerfectSubtitleMatch = true;
+            skipSubtitlesIfAudioTrackMatches = false;
+            skipSubtitlesIfEmbeddedsubtitlesPresent = true;
+          };
+        in
+          {
+            Shows = subtitleSettings;
+            Movies = subtitleSettings;
+          };
       };
     };
 
     seerr = {
       enable = true;
       apiKey._secret = config.sops.secrets.seerr_api_key.path;
+      jellyfin.externalHostname = config.myTraefikServices.jellyfin.fullHostname;
+      radarr.Radarr.externalUrl = config.myTraefikServices.radarr.fullHostname;
+      radarr.Sonarr.externalUrl = config.myTraefikServices.sonarr.fullHostname;
+      settings.users = {
+        localLogin = false;
+        newPlexLogin = false;
+        defaultPermissions = 5;
+      }
     };
 
     vpn = {
@@ -111,6 +163,22 @@
     downloadarr = {
       enable = true;
       qbittorrent.enable = true;
+    };
+
+    # maintainerr = {
+    #   enable = true;
+    # };
+
+    recyclarr = {
+      enable = true;
+      settings = {
+        jellyfin = {
+          jellyfin_api_key = config.nixflix.jellyfin.apiKey;
+        };
+        seerr = {
+          api_key = config.nixflix.seerr.apiKey;
+        };
+      };
     };
   };
 
@@ -143,5 +211,8 @@
       chain = [ "chain-no-auth" ];
       subdomain = "qbit";
     };
+    # maintainerr = {
+    #   port = config.nixflix.maintainerr.port;
+    # };
   };
 }

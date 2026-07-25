@@ -50,6 +50,7 @@ in
                 Specify a list of middlewares to apply to the traefik router. Defaults to [ "chain-authentik" ].
               '';
             };
+            fullHostname = "https://${subdomain}.${if public then config.publicDomain else config.privateDomain}";
           };
         }
       )
