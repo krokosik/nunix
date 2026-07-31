@@ -97,19 +97,19 @@
           };
         };
 
-        "Subtitle Extract" = {        
+        "Subtitle Extract" = {
           enable = true;
           config.ExtractionDuringLibraryScan = true;
         };
       };
 
-      libraries = 
+      libraries =
         let
           subtitleSettings = {
             subtitleDownloadLanguages = [
               "eng"
               "pol"
-            ];        
+            ];
             saveSubtitlesWithMedia = true;
             allowEmbeddedSubtitles = "AllowAll";
             requirePerfectSubtitleMatch = true;
@@ -117,67 +117,66 @@
             skipSubtitlesIfEmbeddedsubtitlesPresent = true;
           };
         in
-          {
-            Shows = subtitleSettings;
-            Movies = subtitleSettings;
-          };
+        {
+          Shows = subtitleSettings;
+          Movies = subtitleSettings;
+        };
+    };
+  };
+
+  seerr = {
+    enable = true;
+    apiKey._secret = config.sops.secrets.seerr_api_key.path;
+    jellyfin.externalHostname = config.myTraefikServices.jellyfin.fullHostname;
+    radarr.Radarr.externalUrl = config.myTraefikServices.radarr.fullHostname;
+    radarr.Sonarr.externalUrl = config.myTraefikServices.sonarr.fullHostname;
+    settings.users = {
+      localLogin = false;
+      newPlexLogin = false;
+      defaultPermissions = 5;
+    };
+  };
+
+  vpn = {
+    enable = true;
+    wgConfFile = config.sops.secrets.wireguard_conf.path;
+    accessibleFrom = [
+      "192.168.0.0/24"
+      "127.0.0.0/8"
+      "10.0.0.0/8"
+    ];
+  };
+
+  torrentClients.qbittorrent = {
+    enable = true;
+    vpn.enable = true;
+    serverConfig = {
+      LegalNotice.Accepted = true;
+      Preferences.WebUI = {
+        Username = config.username;
+        # nix run git+https://codeberg.org/feathecutie/qbittorrent_password -- -p <password>
+        Password_PBKDF2 = "@ByteArray(X40XKnKuYSm50LTp9nE74A==:1R5R+rjx0PZ++yfIrvBqGMQPPzx96E9oi9SzrlWjVm5nSoaSVhL30uoCKrtwDRT8h1ZcWdkb2bLr71I9gbDjxg==)";
       };
     };
+  };
 
-    seerr = {
-      enable = true;
-      apiKey._secret = config.sops.secrets.seerr_api_key.path;
-      jellyfin.externalHostname = config.myTraefikServices.jellyfin.fullHostname;
-      radarr.Radarr.externalUrl = config.myTraefikServices.radarr.fullHostname;
-      radarr.Sonarr.externalUrl = config.myTraefikServices.sonarr.fullHostname;
-      settings.users = {
-        localLogin = false;
-        newPlexLogin = false;
-        defaultPermissions = 5;
-      }
-    };
+  downloadarr = {
+    enable = true;
+    qbittorrent.enable = true;
+  };
 
-    vpn = {
-      enable = true;
-      wgConfFile = config.sops.secrets.wireguard_conf.path;
-      accessibleFrom = [
-        "192.168.0.0/24"
-        "127.0.0.0/8"
-        "10.0.0.0/8"
-      ];
-    };
+  # maintainerr = {
+  #   enable = true;
+  # };
 
-    torrentClients.qbittorrent = {
-      enable = true;
-      vpn.enable = true;
-      serverConfig = {
-        LegalNotice.Accepted = true;
-        Preferences.WebUI = {
-          Username = config.username;
-          # nix run git+https://codeberg.org/feathecutie/qbittorrent_password -- -p <password>
-          Password_PBKDF2 = "@ByteArray(X40XKnKuYSm50LTp9nE74A==:1R5R+rjx0PZ++yfIrvBqGMQPPzx96E9oi9SzrlWjVm5nSoaSVhL30uoCKrtwDRT8h1ZcWdkb2bLr71I9gbDjxg==)";
-        };
+  recyclarr = {
+    enable = true;
+    settings = {
+      jellyfin = {
+        jellyfin_api_key = config.nixflix.jellyfin.apiKey;
       };
-    };
-
-    downloadarr = {
-      enable = true;
-      qbittorrent.enable = true;
-    };
-
-    # maintainerr = {
-    #   enable = true;
-    # };
-
-    recyclarr = {
-      enable = true;
-      settings = {
-        jellyfin = {
-          jellyfin_api_key = config.nixflix.jellyfin.apiKey;
-        };
-        seerr = {
-          api_key = config.nixflix.seerr.apiKey;
-        };
+      seerr = {
+        api_key = config.nixflix.seerr.apiKey;
       };
     };
   };
