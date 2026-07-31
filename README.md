@@ -92,7 +92,7 @@ Real files via `cp -L` are required.
 
 ### Adding an OIDC service to Authentik
 
-Services that speak OIDC natively register via the `myAuthentik.oidcApps`
+Services that speak OIDC natively register via the `mkAuthentik.oidcApps`
 aggregator from `hosts/osiris/services/authentik.nix`. The aggregator
 generates the sops secret pair, contributes the per-app blueprint
 dir, and stacks one merged worker-side env file onto authentik so
@@ -124,7 +124,7 @@ Reference: [model fields](https://docs.goauthentik.io/customize/blueprints/v1/mo
 
 For services that don't speak OIDC themselves, gate them via Authentik's embedded outpost +
 Traefik's `forward_auth`. Register the app via
-`myAuthentik.forwardAuthApps.<name>` — the aggregator emits the
+`mkAuthentik.forwardAuthApps.<name>` — the aggregator emits the
 proxy provider + application + policy binding into a single merged
 blueprint per host (so two forward-auth apps don't clobber the
 embedded outpost's global `providers` list) **and** wires a Traefik

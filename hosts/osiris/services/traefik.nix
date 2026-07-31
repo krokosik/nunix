@@ -10,7 +10,7 @@ in
   # Imports cannot be conditional.
   imports = [ ./traefik-rules ];
 
-  options.myTraefikServices = lib.mkOption {
+  options.mkTraefikServices = lib.mkOption {
     type = lib.types.attrsOf (
       lib.types.submodule (
         { name, ... }: {
@@ -50,7 +50,7 @@ in
                 Specify a list of middlewares to apply to the traefik router. Defaults to [ "chain-authentik" ].
               '';
             };
-            fullHostname = "https://${subdomain}.${if public then config.publicDomain else config.privateDomain}";
+            fullHostname = "https://${config.mkTraefikServices.${name}.subdomain}.${if config.mkTraefikServices.${name}.public then config.publicDomain else config.privateDomain}";
           };
         }
       )
@@ -184,7 +184,7 @@ in
                 { url = "http://${svc.host}:${toString svc.port}"; }
               ];
             }
-          ) config.myTraefikServices;
+          ) config.mkTraefikServices;
 
           routers =
             (lib.mapAttrs (name: svc: {
@@ -192,7 +192,7 @@ in
               entryPoints = [ "websecure" ];
               service = "${name}-svc";
               middlewares = svc.chain;
-            }) config.myTraefikServices)
+            }) config.mkTraefikServices)
             // {
               traefik-dashboard = {
                 rule = "Host(`traefik.${config.privateDomain}`)";

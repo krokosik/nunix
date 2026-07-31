@@ -17,7 +17,7 @@ in
     ];
   };
 
-  myTraefikServices.bentopdf = {
+  mkTraefikServices.bentopdf = {
     inherit port;
     public = true;
     subdomain = "pdf";

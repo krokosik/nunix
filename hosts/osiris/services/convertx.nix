@@ -27,7 +27,7 @@ in
     };
   };
 
-  myTraefikServices.convertx = {
+  mkTraefikServices.convertx = {
     inherit port;
     public = true;
     # chain-authentik is the option default; authentik gates the
@@ -37,7 +37,7 @@ in
   # authentik provider + application + policy binding managed via
   # the aggregator in `authentik.nix`. Icon slug matches
   # dashboard-icons/png/<name>.png.
-  myAuthentik.forwardAuthApps.convertx = {
+  mkAuthentik.forwardAuthApps.convertx = {
     displayName = "ConvertX";
     accessGroup = "friends";
     displayGroup = "Apps";

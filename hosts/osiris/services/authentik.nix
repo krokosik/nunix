@@ -1,5 +1,5 @@
 # Authentik — native systemd units via authentik-nix.
-# Owns the `myAuthentik` option namespace that app modules contribute to:
+# Owns the `mkAuthentik` option namespace that app modules contribute to:
 #   * extraBlueprints   — blueprint dirs merged into authentik's blueprints_dir
 #   * forwardAuthApps   — apps gated by the embedded outpost via Traefik
 #                         forward_auth (chain-authentik middleware)
@@ -15,7 +15,7 @@
 # renders one merged blueprint per host that owns every registered
 # forward-auth app's provider/application/policy-binding *and* the
 # outpost's providers list, then contributes the dir via
-# `myAuthentik.extraBlueprints`.
+# `mkAuthentik.extraBlueprints`.
 #
 # OIDC specifics: each registered OIDC app gets one sops secret pair
 # (oidc_client_id / oidc_client_secret unless `publicClient`).
@@ -42,10 +42,10 @@ let
     "authentik-migrate.service"
   ];
 
-  fwApps = config.myAuthentik.forwardAuthApps;
+  fwApps = config.mkAuthentik.forwardAuthApps;
   fwAppNames = lib.attrNames fwApps;
 
-  inherit (config.myAuthentik) oidcApps;
+  inherit (config.mkAuthentik) oidcApps;
 
   # Classification taxonomy — options below constrain `accessGroup` and
   # `displayGroup` to one of these strings. Together the two let lists
@@ -267,14 +267,14 @@ let
   mergedBlueprints = pkgs.runCommandLocal "authentik-blueprints-merged" { } ''
     mkdir -p $out
     cp -rL ${config.services.authentik.authentikComponents.staticWorkdirDeps}/blueprints/. $out/
-    ${lib.concatMapStringsSep "\n" (p: "cp -rL ${p}/. $out/") config.myAuthentik.extraBlueprints}
+    ${lib.concatMapStringsSep "\n" (p: "cp -rL ${p}/. $out/") config.mkAuthentik.extraBlueprints}
     chmod -R u+w $out
   '';
 in
 {
   imports = [ inputs.authentik-nix.nixosModules.default ];
 
-  options.myAuthentik = {
+  options.mkAuthentik = {
     extraBlueprints = lib.mkOption {
       type = lib.types.listOf lib.types.path;
       default = [ ];
@@ -298,7 +298,7 @@ in
         register through this option rather than emitting its own
         outpost block. The Traefik router + middleware chain is
         configured in each app's own service module via
-        `myTraefikServices.<name>`.
+        `mkTraefikServices.<name>`.
 
         Both `accessGroup` and `displayGroup` are validated against the
         fixed taxonomy declared in this module (see `accessGroupNames`
@@ -375,7 +375,7 @@ in
                 description = ''
                   Path to a directory of *.yaml blueprint files for
                   this app. The dir is contributed via
-                  `myAuthentik.extraBlueprints` and merged into
+                  `mkAuthentik.extraBlueprints` and merged into
                   authentik's blueprints_dir.
                 '';
               };
@@ -509,11 +509,11 @@ in
               [
                 {
                   ok = builtins.elem app.accessGroup accessGroupNames;
-                  msg = "myAuthentik: ${name}.accessGroup=\"${app.accessGroup}\" is not one of ${lib.concatStringsSep "," accessGroupNames}";
+                  msg = "mkAuthentik: ${name}.accessGroup=\"${app.accessGroup}\" is not one of ${lib.concatStringsSep "," accessGroupNames}";
                 }
                 {
                   ok = builtins.elem app.displayGroup displayGroupNames;
-                  msg = "myAuthentik: ${name}.displayGroup=\"${app.displayGroup}\" is not one of ${lib.concatStringsSep "," displayGroupNames}";
+                  msg = "mkAuthentik: ${name}.displayGroup=\"${app.displayGroup}\" is not one of ${lib.concatStringsSep "," displayGroupNames}";
                 }
               ];
         in
@@ -523,7 +523,7 @@ in
             # Sanity check the taxonomy lists themselves — a typo here
             # would silently break every assertion.
             assertion = lib.length accessGroupNames == 4 && lib.length displayGroupNames == 3;
-            message = "myAuthentik: group taxonomy lists changed shape — revisit assertions";
+            message = "mkAuthentik: group taxonomy lists changed shape — revisit assertions";
           }
         ];
 
@@ -560,7 +560,7 @@ in
         };
       };
 
-      myTraefikServices.authentik = {
+      mkTraefikServices.authentik = {
         port = authentikPort;
         public = true;
         chain = [ "chain-no-auth" ];
@@ -613,7 +613,7 @@ in
     # contributed so they exist before any app blueprint's `!Find` lookup
     # fires. Race-resilient via worker auto-retry.
     {
-      myAuthentik.extraBlueprints = [ groupsBaselineDir ];
+      mkAuthentik.extraBlueprints = [ groupsBaselineDir ];
     }
 
     # The merged forward-auth blueprint owns the baseline group entries
@@ -622,7 +622,7 @@ in
     # alone, an OIDC-only deploy loses the groups and its per-app
     # blueprint's `!Find` lookup races missing entries.
     (lib.mkIf (fwApps != { } || oidcApps != { }) {
-      myAuthentik.extraBlueprints = [ fwBlueprintDir ];
+      mkAuthentik.extraBlueprints = [ fwBlueprintDir ];
     })
 
     (lib.mkIf (oidcApps != { }) {
@@ -691,7 +691,7 @@ in
         ))
       ];
 
-      myAuthentik.extraBlueprints = lib.mapAttrsToList (
+      mkAuthentik.extraBlueprints = lib.mapAttrsToList (
         appName: app: renderedBlueprintDir appName app.blueprintsDir
       ) oidcApps;
     })

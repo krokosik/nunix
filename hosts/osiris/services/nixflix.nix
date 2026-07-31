@@ -127,9 +127,9 @@
   seerr = {
     enable = true;
     apiKey._secret = config.sops.secrets.seerr_api_key.path;
-    jellyfin.externalHostname = config.myTraefikServices.jellyfin.fullHostname;
-    radarr.Radarr.externalUrl = config.myTraefikServices.radarr.fullHostname;
-    radarr.Sonarr.externalUrl = config.myTraefikServices.sonarr.fullHostname;
+    jellyfin.externalHostname = config.mkTraefikServices.jellyfin.fullHostname;
+    radarr.Radarr.externalUrl = config.mkTraefikServices.radarr.fullHostname;
+    radarr.Sonarr.externalUrl = config.mkTraefikServices.sonarr.fullHostname;
     settings.users = {
       localLogin = false;
       newPlexLogin = false;
@@ -160,28 +160,28 @@
     };
   };
 
-  downloadarr = {
-    enable = true;
-    qbittorrent.enable = true;
-  };
+  # downloadarr = {
+  #   enable = true;
+  #   qbittorrent.enable = true;
+  # };
 
   # maintainerr = {
   #   enable = true;
   # };
 
-  recyclarr = {
-    enable = true;
-    settings = {
-      jellyfin = {
-        jellyfin_api_key = config.nixflix.jellyfin.apiKey;
-      };
-      seerr = {
-        api_key = config.nixflix.seerr.apiKey;
-      };
-    };
-  };
+  # recyclarr = {
+  #   enable = true;
+  #   settings = {
+  #     jellyfin = {
+  #       jellyfin_api_key = config.nixflix.jellyfin.apiKey;
+  #     };
+  #     seerr = {
+  #       api_key = config.nixflix.seerr.apiKey;
+  #     };
+  #   };
+  # };
 
-  myTraefikServices = {
+  mkTraefikServices = {
     sonarr = {
       port = config.nixflix.sonarr.settings.server.port;
       chain = [ "chain-no-auth" ];

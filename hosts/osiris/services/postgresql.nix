@@ -5,10 +5,10 @@
   ...
 }:
 let
-  svcs = config.myPostgresServices;
+  svcs = config.mkPostgresServices;
 in
 {
-  options.myPostgresServices = lib.mkOption {
+  options.mkPostgresServices = lib.mkOption {
     default = { };
     description = ''
       svcs that consume the shared native postgres instance with a

@@ -9,7 +9,7 @@ let
   containerUnit = "${config.virtualisation.oci-containers.backend}-${name}.service";
 in
 {
-  myPostgresServices.splitpro = {
+  mkPostgresServices.splitpro = {
     extraCommands = [
       "CREATE EXTENSION IF NOT EXISTS pg_cron;"
       "GRANT USAGE ON SCHEMA cron TO \"${name}\";"
@@ -45,7 +45,7 @@ in
       content = ''
         NEXTAUTH_SECRET=${config.sops.placeholder.nextauth_secret}
         DATABASE_URL=postgresql://${name}:${
-          config.sops.placeholder.${config.myPostgresServices.splitpro.secretName}
+          config.sops.placeholder.${config.mkPostgresServices.splitpro.secretName}
         }@host.docker.internal:5432/${name}
         AUTHENTIK_ID=${config.sops.placeholder.authentik_id}
         AUTHENTIK_SECRET=${config.sops.placeholder.authentik_secret}
@@ -58,7 +58,7 @@ in
     };
   };
 
-  myTraefikServices.splitpro = {
+  mkTraefikServices.splitpro = {
     inherit port;
     public = true;
     chain = [ "chain-no-auth" ];
