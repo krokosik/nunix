@@ -9,6 +9,7 @@
     prowlarr_password.key = "prowlarr/password";
     jellyfin_admin_password.key = "jellyfin/password";
     jellyfin_api_key.key = "jellyfin/api_key";
+    qbittorrent_password.key = "qbittorrent/password";
     seerr_api_key.key = "seerr/api_key";
     wireguard_conf.key = "wireguard_conf";
     opensubtitles_password.key = "opensubtitles/password";
@@ -40,10 +41,6 @@
         apiKey._secret = config.sops.secrets.radarr_api_key.path;
         hostConfig.password._secret = config.sops.secrets.radarr_password.path;
       };
-    };
-
-    recyclarr = {
-      enable = true;
     };
 
     prowlarr = {
@@ -114,7 +111,7 @@
             allowEmbeddedSubtitles = "AllowAll";
             requirePerfectSubtitleMatch = true;
             skipSubtitlesIfAudioTrackMatches = false;
-            skipSubtitlesIfEmbeddedsubtitlesPresent = true;
+            skipSubtitlesIfEmbeddedSubtitlesPresent = true;
           };
         in
         {
@@ -122,64 +119,52 @@
           Movies = subtitleSettings;
         };
     };
-  };
 
-  seerr = {
-    enable = true;
-    apiKey._secret = config.sops.secrets.seerr_api_key.path;
-    jellyfin.externalHostname = config.mkTraefikServices.jellyfin.fullHostname;
-    radarr.Radarr.externalUrl = config.mkTraefikServices.radarr.fullHostname;
-    radarr.Sonarr.externalUrl = config.mkTraefikServices.sonarr.fullHostname;
-    settings.users = {
-      localLogin = false;
-      newPlexLogin = false;
-      defaultPermissions = 5;
-    };
-  };
-
-  vpn = {
-    enable = true;
-    wgConfFile = config.sops.secrets.wireguard_conf.path;
-    accessibleFrom = [
-      "192.168.0.0/24"
-      "127.0.0.0/8"
-      "10.0.0.0/8"
-    ];
-  };
-
-  torrentClients.qbittorrent = {
-    enable = true;
-    vpn.enable = true;
-    serverConfig = {
-      LegalNotice.Accepted = true;
-      Preferences.WebUI = {
-        Username = config.username;
-        # nix run git+https://codeberg.org/feathecutie/qbittorrent_password -- -p <password>
-        Password_PBKDF2 = "@ByteArray(X40XKnKuYSm50LTp9nE74A==:1R5R+rjx0PZ++yfIrvBqGMQPPzx96E9oi9SzrlWjVm5nSoaSVhL30uoCKrtwDRT8h1ZcWdkb2bLr71I9gbDjxg==)";
+    seerr = {
+      enable = true;
+      apiKey._secret = config.sops.secrets.seerr_api_key.path;
+      jellyfin.externalHostname = config.mkTraefikServices.jellyfin.fullHostname;
+      # radarr.Radarr.externalUrl = config.mkTraefikServices.radarr.fullHostname;
+      # radarr.Sonarr.externalUrl = config.mkTraefikServices.sonarr.fullHostname;
+      settings.users = {
+        localLogin = false;
+        newPlexLogin = false;
+        defaultPermissions = 5;
       };
     };
+
+    vpn = {
+      enable = true;
+      wgConfFile = config.sops.secrets.wireguard_conf.path;
+      accessibleFrom = [
+        "192.168.0.0/24"
+        "127.0.0.0/8"
+        "10.0.0.0/8"
+      ];
+    };
+
+    torrentClients.qbittorrent = {
+      enable = true;
+      vpn.enable = true;
+      password._secret = config.sops.secrets.qbittorrent_password.path;
+      serverConfig = {
+        LegalNotice.Accepted = true;
+        Preferences.WebUI = {
+          Username = config.username;
+          # nix run git+https://codeberg.org/feathecutie/qbittorrent_password -- -p <password>
+          Password_PBKDF2 = "@ByteArray(zSiUF/IfzUjMGRs9AoMx7w==:Gmn3y62e6Md7R/Cjn9P5CDiVKBB4YrCXtGa+lHpV8rytNcOn097rUbpMJ32z/LVOdJVBPc233/QztLzY871zfQ==)";
+        };
+      };
+    };
+
+    maintainerr = {
+      enable = true;
+    };
+
+    recyclarr = {
+      enable = true;
+    };
   };
-
-  # downloadarr = {
-  #   enable = true;
-  #   qbittorrent.enable = true;
-  # };
-
-  # maintainerr = {
-  #   enable = true;
-  # };
-
-  # recyclarr = {
-  #   enable = true;
-  #   settings = {
-  #     jellyfin = {
-  #       jellyfin_api_key = config.nixflix.jellyfin.apiKey;
-  #     };
-  #     seerr = {
-  #       api_key = config.nixflix.seerr.apiKey;
-  #     };
-  #   };
-  # };
 
   mkTraefikServices = {
     sonarr = {
@@ -210,8 +195,70 @@
       chain = [ "chain-no-auth" ];
       subdomain = "qbit";
     };
-    # maintainerr = {
-    #   port = config.nixflix.maintainerr.port;
-    # };
+    maintainerr = {
+      port = config.nixflix.maintainerr.port;
+    };
+  };
+
+  # Ensure the NAT-PMP tool is available on the system
+  environment.systemPackages = [ pkgs.libnatpmp ];
+
+  systemd.services.proton-port-forward = {
+    description = "ProtonVPN Port Forwarding to qBittorrent";
+    after = [
+      "wg.service"
+      "qbittorrent.service"
+    ];
+    wants = [ "wg.service" ];
+
+    serviceConfig = {
+      Type = "oneshot";
+    };
+
+    script = ''
+      GATEWAY="10.2.0.1"
+      NETNS="wg"
+      QBIT_URL="http://${config.nixflix.torrentClients.qbittorrent.connectionAddress}:${toString config.nixflix.torrentClients.qbittorrent.webuiPort}"
+
+      # 1. Inject the specific route for ProtonVPN's NAT-PMP gateway
+      # We use 'replace' so it doesn't fail if the route already exists from a previous run
+      ${pkgs.iproute2}/bin/ip netns exec $NETNS ${pkgs.iproute2}/bin/ip route replace $GATEWAY/32 dev wg0
+
+      # 2. Authenticate securely: curl reads the password directly from the SOPS file
+      ${pkgs.curl}/bin/curl -s -c /tmp/qbit_cookie.txt \
+        --data-urlencode "username=${config.username}" \
+        --data-urlencode "password@${config.sops.secrets.qbittorrent_password.path}" \
+        "$QBIT_URL/api/v2/auth/login"
+
+      # 3. Request UDP and TCP port mappings from ProtonVPN
+      TCP_OUT=$(${pkgs.iproute2}/bin/ip netns exec $NETNS ${pkgs.libnatpmp}/bin/natpmpc -a 1 0 tcp 60 -g $GATEWAY)
+
+      # 4. Extract the mapped public port
+      PORT=$(echo "$TCP_OUT" | ${pkgs.gnugrep}/bin/grep -oP 'Mapped public port \K\d+')
+
+      if [ -n "$PORT" ]; then
+        echo "Successfully mapped ProtonVPN port: $PORT"
+        
+        # 5. Push the new port to qBittorrent using the session cookie
+        ${pkgs.curl}/bin/curl -s -b /tmp/qbit_cookie.txt -X POST "$QBIT_URL/api/v2/app/setPreferences" \
+          -d "json={\"listen_port\": $PORT}"
+      else
+        echo "Failed to acquire port from ProtonVPN."
+        exit 1
+      fi
+
+      # Clean up the cookie
+      rm -f /tmp/qbit_cookie.txt
+    '';
+  };
+
+  # Timer to fire the script every 45 seconds to keep the 60-second lease alive
+  systemd.timers.proton-port-forward = {
+    description = "Timer for ProtonVPN Port Forwarding";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "1min";
+      OnUnitActiveSec = "45s";
+    };
   };
 }

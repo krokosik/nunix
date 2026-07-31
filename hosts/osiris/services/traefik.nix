@@ -12,8 +12,12 @@ in
 
   options.mkTraefikServices = lib.mkOption {
     type = lib.types.attrsOf (
+      let
+        outerConfig = config;
+      in
       lib.types.submodule (
-        { name, ... }: {
+        { name, config, ... }:
+        {
           options = {
             port = lib.mkOption {
               type = lib.types.port;
@@ -50,7 +54,19 @@ in
                 Specify a list of middlewares to apply to the traefik router. Defaults to [ "chain-authentik" ].
               '';
             };
-            fullHostname = "https://${config.mkTraefikServices.${name}.subdomain}.${if config.mkTraefikServices.${name}.public then config.publicDomain else config.privateDomain}";
+            fullHostname = lib.mkOption {
+              type = lib.types.str;
+              readOnly = true;
+              description = ''
+                Full hostname of the traefik service. Automatically derived from the subdomain and public/private domain options.
+              '';
+            };
+          };
+
+          config = {
+            fullHostname = "https://${config.subdomain}.${
+              if config.public then outerConfig.publicDomain else outerConfig.privateDomain
+            }";
           };
         }
       )
@@ -188,7 +204,9 @@ in
 
           routers =
             (lib.mapAttrs (name: svc: {
-              rule = "Host(`${svc.subdomain}.${if svc.public then config.publicDomain else config.privateDomain}`)";
+              rule = "Host(`${svc.subdomain}.${
+                if svc.public then config.publicDomain else config.privateDomain
+              }`)";
               entryPoints = [ "websecure" ];
               service = "${name}-svc";
               middlewares = svc.chain;
