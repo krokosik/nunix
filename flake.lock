@@ -158,8 +158,8 @@
     "my-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1785522852,
-        "narHash": "sha256-8TPI7JqZt8gWWCPFCOAXqxNxUW2Iwp9KdLHn7CKFdb4=",
+        "lastModified": 1785589006,
+        "narHash": "sha256-xZKEJB7Z1jCGUQKseKg8oYIqLDR5JPNHZF7oui5Egqs=",
         "path": "/home/krokosik/Work/nunix-secrets",
         "type": "path"
       },
@@ -224,11 +224,11 @@
     },
     "nixpkgs-unstable": {
       "locked": {
-        "lastModified": 1784356753,
-        "narHash": "sha256-12KrbMiWLcf8m7pCvAtZh1ZrgF85ZXDXvfR/fWTKy84=",
+        "lastModified": 1785828668,
+        "narHash": "sha256-8fsyqeO+mJqvIzeO4xIpgJe/f7MTbbVTEC6RT6WSXNs=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "61b7c44c4073f0b827768aff0049561b5110ea5a",
+        "rev": "e72e4f299401a3689d4b3d5fc6496b11db7064eb",
         "type": "github"
       },
       "original": {

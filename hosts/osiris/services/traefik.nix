@@ -28,7 +28,7 @@ in
             };
             host = lib.mkOption {
               type = lib.types.str;
-              default = "127.0.0.1";
+              default = "localhost";
               description = ''
                 Host address to where the traefik service is bound.
               '';

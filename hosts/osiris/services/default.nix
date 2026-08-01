@@ -4,6 +4,7 @@
     ./bentopdf.nix
     ./convertx.nix
     ./crowdsec.nix
+    ./immich.nix
     ./ip2location.nix
     ./nixflix.nix
     ./geoipupdate.nix
