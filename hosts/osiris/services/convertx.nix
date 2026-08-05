@@ -3,7 +3,7 @@ let
 in
 {
   # ConvertX - Self-hosted file converter
-  myContainerServices.convertx = {
+  mkContainerServices.convertx = {
     inherit port;
     manageUser = false;
     containerPort = 3000;

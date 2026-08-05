@@ -22,7 +22,7 @@ let
   serverGid = 1234;
 in
 {
-  options.myContainerServices = lib.mkOption {
+  options.mkContainerServices = lib.mkOption {
     type = lib.types.attrsOf (
       lib.types.submodule (
         { name, config, ... }:
@@ -113,8 +113,8 @@ in
     # the two.
     assertions = lib.mapAttrsToList (name: svc: {
       assertion = svc.port == null || svc.containerPort != null;
-      message = "myContainerServices.${name}: containerPort must not be null when port is set";
-    }) config.myContainerServices;
+      message = "mkContainerServices.${name}: containerPort must not be null when port is set";
+    }) config.mkContainerServices;
 
     # Backend specific configuration for the container runtime.
     users.users.${config.username}.extraGroups = [ "docker" ];
@@ -141,7 +141,7 @@ in
       };
       oci-containers.backend = "docker";
 
-      # Per-svc container fragments contributed via `myContainerServices.<name>`.
+      # Per-svc container fragments contributed via `mkContainerServices.<name>`.
       # Each entry merges with the svc module's own container definition
       # (image, volumes, extra env), which stays in the svc module.
       oci-containers.containers = lib.mapAttrs (
@@ -166,7 +166,7 @@ in
             extraOptions = [ "--security-opt=no-new-privileges" ];
           }
         ]
-      ) config.myContainerServices;
+      ) config.mkContainerServices;
     };
 
     # docker isn't allowed to forward packets from docker0 to the actual NIC by default
@@ -176,14 +176,14 @@ in
     # Parent directory for all containerized svc state. svcs create their
     # own subdirs (/var/lib/containers/<svc>) owned by the server user,
     # which lets a single backup path cover every svc automatically.
-    # Per-svc subdirs come from `myContainerServices.<name>.stateDirs`.
+    # Per-svc subdirs come from `mkContainerServices.<name>.stateDirs`.
     systemd.tmpfiles.rules = [
       "d /var/lib/containers 0755 root root -"
     ]
     ++ lib.concatLists (
       lib.mapAttrsToList (
         _: svc: map (dir: "d ${dir} 0750 ${svc.stateDirOwner} ${svc.stateDirGroup} -") svc.stateDirs
-      ) config.myContainerServices
+      ) config.mkContainerServices
     );
   };
 }

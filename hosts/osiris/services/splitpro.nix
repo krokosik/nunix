@@ -28,7 +28,7 @@ in
     };
   };
 
-  myContainerServices.splitpro = {
+  mkContainerServices.splitpro = {
     inherit port;
     stateDirs = [ "/var/lib/splitpro/uploads" ];
   };

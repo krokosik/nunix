@@ -4,7 +4,7 @@ in
 {
   # BentoPDF - Privacy-first PDF toolkit
   # Container runs as UID 101 (image default)
-  myContainerServices.bentopdf = {
+  mkContainerServices.bentopdf = {
     inherit port;
     manageUser = false;
     containerPort = 8080;
