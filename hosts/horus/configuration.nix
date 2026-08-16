@@ -14,7 +14,7 @@
     ../../modules/nvidia-gpu.nix
     ../../modules/desktop/theme.nix
     ../../modules/hibernation.nix
-    ../../modules/power.nix
+    # ../../modules/power.nix
     ../../home-manager/home-manager.nix
     inputs.disko.nixosModules.disko
     inputs.home-manager.nixosModules.home-manager
