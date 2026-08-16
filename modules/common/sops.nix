@@ -3,20 +3,17 @@
   inputs,
   ...
 }:
-let
-  secretspath = toString inputs.my-secrets;
-in
 {
   # Sops-nix
   sops = {
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
     age.keyFile = "/nix/persist/var/lib/sops-nix/key.txt";
     age.generateKey = true;
-    defaultSopsFile = "${secretspath}/${config.networking.hostName}/secrets.yaml";
+    defaultSopsFile = "${inputs.my-secrets}/${config.networking.hostName}/secrets.yaml";
   };
   # Set github access token for nixpkgs
   sops.secrets.nix_access_token = {
-    sopsFile = "${secretspath}/common/secrets.yaml";
+    sopsFile = "${inputs.my-secrets}/common/secrets.yaml";
     owner = config.username;
   };
   nix.extraOptions = ''

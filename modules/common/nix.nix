@@ -1,10 +1,13 @@
 {
   config,
   inputs,
+  lib,
   pkgs,
   ...
 }:
 let
+  inherit (lib.lists) elem;
+  inherit (lib) getName;
   user = config.username;
   flakePath = "/home/${user}/Work/nunix";
 in
@@ -53,7 +56,16 @@ in
 
   # Allow unfree packages and pulling some packages from stable
   nixpkgs.config = {
-    allowUnfree = true;
+    allowUnfreePredicate =
+      pkg:
+      elem (getName pkg) [
+        "beeper"
+        "nvidia-x11"
+        "nvidia-settings"
+        "nvidia-kernel-modules"
+        "obsidian"
+        "vscode"
+      ];
     packageOverrides = pkgs: {
       stable = import inputs.nixpkgs {
         config = config.nixpkgs.config;

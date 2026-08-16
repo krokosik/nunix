@@ -4,9 +4,6 @@
   inputs,
   ...
 }:
-let
-  secretspath = builtins.toString inputs.my-secrets;
-in
 {
   imports = [
     ./common
@@ -19,7 +16,7 @@ in
 
   sops = {
     age.keyFile = "${config.xdg.configHome}/sops/age/keys.txt";
-    defaultSopsFile = "${secretspath}/${osConfig.networking.hostName}/secrets.yaml";
+    defaultSopsFile = "${inputs.my-secrets}/${osConfig.networking.hostName}/secrets.yaml";
   };
 
   # This value determines the Home Manager release that your

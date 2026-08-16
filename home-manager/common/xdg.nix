@@ -14,8 +14,8 @@
   ];
   xdg.mime.enable = true;
 
-  xdg.terminalExec.enable = true;
-  xdg.terminalExec.settings.default = [
+  xdg."terminal-exec".enable = true;
+  xdg."terminal-exec".settings.default = [
     "ghostty.desktop"
     "alacritty.desktop"
     "kitty.desktop"

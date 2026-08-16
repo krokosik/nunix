@@ -6,5 +6,6 @@
     ./mcp.nix
     ./opencode.nix
     ./starship.nix
+    ./xdg.nix
   ];
 }
