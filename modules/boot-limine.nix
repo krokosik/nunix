@@ -35,6 +35,8 @@
         enrollConfig = true;
         secureBoot = {
           enable = true;
+          autoGenerateKeys = true;
+          autoEnrollKeys.enable = true;
         };
       };
       efi = {
