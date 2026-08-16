@@ -98,18 +98,6 @@
           system = "aarch64-linux";
         };
         horus = mkSystem { host = "horus"; };
-        horus-vm = nixpkgs.lib.nixosSystem {
-          modules = [
-            {
-              nixpkgs.hostPlatform = "x86_64-linux";
-              networking.hostName = "horus-vm";
-            }
-            ./hosts/horus/vm.nix
-          ];
-          specialArgs = {
-            inherit inputs outputs;
-          };
-        };
       };
 
       formatter.x86_64-linux = pkgs.nixfmt-tree;
