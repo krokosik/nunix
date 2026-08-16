@@ -26,7 +26,8 @@
 
     powerManagement = {
       enable = true;
-      kernelSuspendNotifier = true;
+      # Requires open kernel modules
+      kernelSuspendNotifier = false;
     };
   };
 }
