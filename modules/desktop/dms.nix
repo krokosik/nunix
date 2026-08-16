@@ -17,4 +17,14 @@
     compositor.name = "hyprland";
     configHome = "/home/${config.username}";
   };
+
+  services.displayManager = {
+    autoLogin = {
+      enable = true;
+      user = config.username;
+    };
+
+    # Required for auto-login: identifies which session to launch.
+    defaultSession = "hyprland";
+  };
 }
