@@ -1,12 +1,12 @@
 {
   config,
   inputs,
-  pkgs,
   ...
 }:
 {
   imports = [
     ./disko-config.nix
+    ./windows.nix
     ../../modules/avahi.nix
     ../../modules/boot-limine.nix
     ../../modules/common

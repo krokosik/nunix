@@ -32,13 +32,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    dms = {
-      url = "github:AvengeMedia/DankMaterialShell/stable";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    hyprland.url = "github:hyprwm/Hyprland";
-
     stylix = {
       url = "github:nix-community/stylix/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -105,6 +98,18 @@
           system = "aarch64-linux";
         };
         horus = mkSystem { host = "horus"; };
+        horus-vm = nixpkgs.lib.nixosSystem {
+          modules = [
+            {
+              nixpkgs.hostPlatform = "x86_64-linux";
+              networking.hostName = "horus-vm";
+            }
+            ./hosts/horus/vm.nix
+          ];
+          specialArgs = {
+            inherit inputs outputs;
+          };
+        };
       };
 
       formatter.x86_64-linux = pkgs.nixfmt-tree;

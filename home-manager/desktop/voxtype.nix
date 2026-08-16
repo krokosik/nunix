@@ -6,7 +6,7 @@
 }:
 let
   useVulkan = osConfig.hardware.nvidia.enabled;
-  voxtypePackages = inputs.voxtype.packages.${pkgs.stdenv.hostPlatform.system};
+  voxtypePackages = pkgs.unstable;
 in
 {
   imports = [ inputs.voxtype.homeManagerModules.default ];
@@ -14,7 +14,7 @@ in
   config.programs.voxtype = {
     enable = true;
     engine = "whisper";
-    package = if useVulkan then voxtypePackages.vulkan else voxtypePackages.onnx;
+    package = if useVulkan then voxtypePackages.voxtype-vulkan else voxtypePackages.voxtype-onnx;
     service.enable = true;
 
     settings = {

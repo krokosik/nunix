@@ -20,7 +20,6 @@ in
       extensions.packages = with firefox-addons; [
         consent-o-matic
         dont-track-me-google1
-        enhancer-for-youtube
         facebook-container
         github-file-icons
         hover-zoom-plus

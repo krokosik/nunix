@@ -22,14 +22,11 @@ let
   baseSettings = {
     "update.mode" = "none";
     "workbench.iconTheme" = "vscode-icons";
-    "workbench.colorTheme" = "Tokyo Night";
-
     "git.enableSmartCommit" = true;
     "git.confirmSync" = false;
     "git.autofetch" = true;
     "git.mergeEditor" = true;
 
-    "editor.fontFamily" = "'Fira Code', Consolas, 'Courier New', monospace";
     "editor.fontLigatures" = true;
     "editor.suggestSelection" = "first";
     "editor.bracketPairColorization.enabled" = true;
@@ -104,7 +101,7 @@ let
   ];
 in
 {
-  programs.vscode = {
+  programs.vscodium = {
     enable = true;
     package = pkgs.vscodium;
 

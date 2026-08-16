@@ -15,7 +15,10 @@ in
 {
   xdg = {
     enable = true;
-    portal.enable = true;
+    portal = {
+      enable = true;
+      extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    };
   };
 
   home.packages = [

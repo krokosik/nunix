@@ -65,6 +65,11 @@ in
         "nvidia-kernel-modules"
         "obsidian"
         "vscode"
+        "vscode-extension-ms-vscode-remote-remote-containers"
+        "vscode-extension-ms-vscode-remote-remote-ssh"
+        "vscode-extension-ms-vscode-remote-explorer"
+        "vscode-extension-MS-python-vscode-pylance"
+        "vscode-extension-ms-vscode-cpptools"
       ];
     packageOverrides = pkgs: {
       stable = import inputs.nixpkgs {

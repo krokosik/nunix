@@ -1,12 +1,16 @@
+{ config, ... }:
 {
-  config,
-  inputs,
-  ...
-}:
-{
-  imports = [ inputs.dms.nixosModules.dank-material-shell ];
-
-  programs.dank-material-shell.enable = true;
+  programs.dms-shell = {
+    enable = true;
+    enableAudioWavelength = true;
+    enableCalendarEvents = false;
+    enableSystemMonitoring = true;
+    enableVPN = true;
+    systemd = {
+      enable = true;
+      restartIfChanged = true;
+    };
+  };
 
   services.displayManager.dms-greeter = {
     enable = true;
