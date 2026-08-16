@@ -19,12 +19,4 @@
     mode = "0400";
   };
 
-  networking.firewall.extraInputRules = /* nftables */ ''
-    ip saddr 172.16.0.0/12 udp dport 53 accept
-    ip saddr 172.16.0.0/12 tcp dport 53 accept
-    ip saddr 192.168.90.0/24 udp dport 53 accept
-    ip saddr 192.168.90.0/24 tcp dport 53 accept
-    ip saddr 192.168.91.0/24 udp dport 53 accept
-    ip saddr 192.168.91.0/24 tcp dport 53 accept
-  '';
 }

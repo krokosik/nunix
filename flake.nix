@@ -3,11 +3,13 @@
 
   nixConfig = {
     extra-substituters = [ "https://nix-community.cachix.org" ];
-    extra-trusted-public-keys = [ "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" ];
+    extra-trusted-public-keys = [
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+    ];
   };
 
   inputs = {
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/?shallow=1&ref=nixos-unstable";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
     disko = {
@@ -27,6 +29,31 @@
 
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    dms = {
+      url = "github:AvengeMedia/DankMaterialShell/stable";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    hyprland.url = "github:hyprwm/Hyprland";
+
+    stylix = {
+      url = "github:nix-community/stylix/release-26.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    voxtype.url = "github:peteonrails/voxtype/v0.7.1";
+
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.home-manager.follows = "home-manager";
+    };
+
+    firefox-addons = {
+      url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -77,6 +104,7 @@
           host = "anubis";
           system = "aarch64-linux";
         };
+        horus = mkSystem { host = "horus"; };
       };
 
       formatter.x86_64-linux = pkgs.nixfmt-tree;

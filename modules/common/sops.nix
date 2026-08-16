@@ -7,7 +7,7 @@
   # Sops-nix
   sops = {
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-    age.keyFile = "/nix/persist/var/lib/sops-nix/key.txt";
+    age.keyFile = "/var/lib/sops-nix/key.txt";
     age.generateKey = true;
     defaultSopsFile = "${inputs.my-secrets}/${config.networking.hostName}/secrets.yaml";
   };
