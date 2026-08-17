@@ -20,7 +20,7 @@
     jq
     lazydocker
     lazygit
-    ncurses
+    libsecret
     nix-tree
     pciutils
     python3
