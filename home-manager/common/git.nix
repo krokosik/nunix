@@ -23,7 +23,7 @@
           ]
         else
           [
-            "libsecret"
+            "/run/current-system/sw/bin/git-credential-libsecret"
             "oauth"
           ];
       filter.lfs = {

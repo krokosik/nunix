@@ -12,7 +12,7 @@
     fastfetch
     fd
     fzf
-    git
+    gitFull
     git-credential-oauth
     git-lfs
     ghostty.terminfo
