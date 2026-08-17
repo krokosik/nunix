@@ -336,13 +336,13 @@
     "my-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1786890704,
-        "narHash": "sha256-NQPcPtt+o5TmkJbaoWW50JpqY/aBP9R7UfhdLmnYWto=",
-        "path": "/home/krokosik/Work/nunix-secrets",
+        "lastModified": 1786906248,
+        "narHash": "sha256-0YRh2cKEtDKGJY+8UtPKJaQwFgsTu+dkHnaBKXKay0s=",
+        "path": "/home/krokosik/work/nunix-secrets",
         "type": "path"
       },
       "original": {
-        "path": "/home/krokosik/Work/nunix-secrets",
+        "path": "/home/krokosik/work/nunix-secrets",
         "type": "path"
       }
     },

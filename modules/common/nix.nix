@@ -9,7 +9,7 @@ let
   inherit (lib.lists) elem;
   inherit (lib) getName;
   user = config.username;
-  flakePath = "/home/${user}/Work/nunix";
+  flakePath = "/home/${user}/work/nunix";
 in
 {
   nix.settings = {
@@ -39,7 +39,7 @@ in
   programs.git = {
     enable = true;
     config = {
-      safe."directory" = "/home/${user}/Work/nunix";
+      safe."directory" = flakePath;
     };
   };
 
@@ -95,7 +95,7 @@ in
     # Rebuild system
     nrb = "sudo nixos-rebuild switch --flake ${flakePath}#${config.networking.hostName}";
     # Pull nunix and nunix-secrets repos
-    nl = "git -C /home/${user}/Work/nunix pull && git -C /home/${user}/Work/nunix-secrets pull";
+    nl = "git -C ${flakePath} pull && git -C /home/${user}/work/nunix-secrets pull";
   };
 
   # System maintenance

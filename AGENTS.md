@@ -32,7 +32,7 @@ skill for the full migration runbook and postgres patterns.
 ## Critical gotchas
 
 - **Secrets are a separate local repo.** `my-secrets` flake input points at
-  `~/Work/nunix-secrets` (`flake = false`, path input) — the flake does not
+  `~/work/nunix-secrets` (`flake = false`, path input) — the flake does not
   build without it. Per-host `secrets.yaml` + `common/` + `server/`.
 - **`flake.lock` must be bumped when `my-secrets` changes.** Run
   `nix flake update my-secrets` after editing secrets, then
