@@ -1,9 +1,7 @@
-{ config, pkgs, ... }:
+{ config, ... }:
 {
   programs.dms-shell = {
     enable = true;
-    package = pkgs.unstable.dms-shell;
-    quickshell.package = pkgs.unstable.quickshell;
     enableAudioWavelength = true;
     enableCalendarEvents = false;
     enableSystemMonitoring = true;
@@ -16,8 +14,6 @@
 
   services.displayManager.dms-greeter = {
     enable = true;
-    package = config.programs.dms-shell.package;
-    quickshell.package = config.programs.dms-shell.quickshell.package;
     compositor.name = "hyprland";
     configHome = "/home/${config.username}";
   };
