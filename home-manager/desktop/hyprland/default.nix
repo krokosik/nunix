@@ -18,39 +18,6 @@
       # MONITOR CONFIG
       monitor = , preferred, auto, auto
 
-      # STARTUP APPS
-      exec-once = dbus-update-activation-environment --systemd --all
-      exec-once = systemctl --user start hyprland-session.target
-
-      # INPUT CONFIG
-      input {
-        kb_layout = us
-        numlock_by_default = true
-      }
-
-      # GENERAL LAYOUT
-      general {
-        gaps_in = 5
-        gaps_out = 5
-        border_size = 2
-        layout = dwindle
-      }
-
-      # DECORATION
-      decoration {
-        rounding = 12
-        active_opacity = 1.0
-        inactive_opacity = 1.0
-
-        shadow {
-          enabled = true
-          range = 30
-          render_power = 5
-          offset = 0 5
-          color = rgba(00000070)
-        }
-      }
-
       # ANIMATIONS
       animations {
         enabled = true
@@ -62,19 +29,8 @@
         animation = border, 1, 3, default
       }
 
-      # LAYOUTS
-      dwindle {
-        preserve_split = true
-      }
-
       master {
         mfact = 0.5
-      }
-
-      # MISC
-      misc {
-        disable_hyprland_logo = true
-        disable_splash_rendering = true
       }
 
       # WINDOW RULES

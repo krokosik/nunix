@@ -1,5 +1,6 @@
 {
   config,
+  pkgs,
   inputs,
   ...
 }:
@@ -19,4 +20,6 @@
   nix.extraOptions = ''
     !include ${config.sops.secrets.nix_access_token.path}
   '';
+
+  environment.systemPackages = [ pkgs.sops ];
 }

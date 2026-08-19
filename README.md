@@ -21,6 +21,7 @@ To add a host:
     b. latestZFSKernel (bool) - set to use latest available ZFS compatible kernel. Default false.
     c. username (string) - set to override default username. Default krokosik.
     d. role (desktop|server|shared) - set host role. Shared stands for a workstation also used by others. Default server.
+4. For hosts with automatic secure boot setup (limine), disable secure boot before hand and make sure it is in setup mode if available in UEFI.
 
 ### Installing using [nixos-anywhere](https://github.com/nix-community/nixos-anywhere/blob/main/docs/quickstart.md)
 
@@ -142,6 +143,32 @@ input and managed with [sops-nix](https://github.com/Mic92/sops-nix).
   `<hostname>/secrets.yaml`, `server/secrets.yaml`, etc.)
 - Age encryption keys are bootstrapped from host SSH keys
   (`/etc/ssh/ssh_host_ed25519_key`)
+
+### Editing secrets locally
+
+To configure SOPS to use an SSH private key that corresponds to an age recipient:
+
+```bash
+mkdir -p ~/.config/sops/age
+read -rsp "Paste the SSH private key, then press Enter: " SSH_KEY
+printf '\n' >&2
+printf '%s\n' "$SSH_KEY" | ssh-to-age -private-key > ~/.config/sops/age/keys.txt
+unset SSH_KEY
+chmod 600 ~/.config/sops/age/keys.txt
+```
+
+The converted private age identity is used automatically by `sops edit`.
+
+### Syncthing node identity
+
+Generate a stable node identity for a host:
+
+```bash
+nix shell nixpkgs#syncthing --command syncthing generate --home /tmp/syncthing-config
+```
+
+Encrypt the generated `key.pem` and `cert.pem` into that host's secrets file as
+`syncthing_key` and `syncthing_cert`.
 
 ## Guidance and Resources
 

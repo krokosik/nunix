@@ -8,6 +8,7 @@
     mpv
     inkscape
     libreoffice
+    localsend
     mattermost-desktop
     moonlight-qt
     obsidian

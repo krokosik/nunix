@@ -7,7 +7,6 @@
   wayland.windowManager.hyprland.settings = {
     bindd = [
       # APPLICATION LAUNCHERS
-      "SUPER, RETURN, Terminal, exec, uwsm-app -- xdg-terminal-exec"
       "SUPER SHIFT, F, File manager, exec, uwsm-app -- nautilus --new-window"
       "SUPER SHIFT, B, Browser, exec, $BROWSER"
       "SUPER SHIFT ALT, B, Browser (private), exec, $BROWSER --private"
