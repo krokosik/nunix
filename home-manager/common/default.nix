@@ -4,7 +4,7 @@
     ./fish.nix
     ./git.nix
     ./mcp.nix
-    ./opencode.nix
+    ./slop.nix
     ./starship.nix
     ./xdg.nix
   ];

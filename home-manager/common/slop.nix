@@ -9,6 +9,13 @@
     opencode_go_api_key.sopsFile = "${inputs.my-secrets}/common/secrets.yaml";
   };
 
+  programs.codex = {
+    enable = true;
+    package = pkgs.unstable.codex;
+    skills = "${../../ai/skills}";
+    enableMcpIntegration = config.programs.mcp.enable;
+  };
+
   programs.opencode = {
     enable = true;
     package = pkgs.unstable.opencode;
