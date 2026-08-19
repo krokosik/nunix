@@ -10,9 +10,7 @@ let
     jnoortheen.nix-ide
     mkhl.direnv
     ms-azuretools.vscode-docker
-    ms-vscode-remote.remote-containers
-    ms-vscode-remote.remote-ssh
-    ms-vscode.remote-explorer
+    ms-vscode-remote.vscode-remote-extensionpack
     redhat.vscode-yaml
     tamasfe.even-better-toml
     vscode-icons-team.vscode-icons
@@ -50,6 +48,17 @@ let
     "workbench.layoutControl.enabled" = false;
     "workbench.secondarySideBar.defaultVisibility" = "hidden";
 
+    "workbench.keybindings" = [
+      {
+        key = "alt+left";
+        command = "workbench.action.navigatePreviousInEditLocations";
+      }
+      {
+        key = "alt+right";
+        command = "workbench.action.navigateForwardInEditLocations";
+      }
+    ];
+
     "remote.SSH.connectTimeout" = 1800;
     "remote.SSH.enableX11Forwarding" = false;
     "remote.SSH.useExecServer" = false;
@@ -86,7 +95,7 @@ let
   pythonExtensions = with vscode-extensions; [
     charliermarsh.ruff
     ms-python.python
-    ms-python.vscode-pylance
+    detachhead.basedpyright
     ms-toolsai.jupyter
   ];
 
@@ -112,7 +121,7 @@ in
       };
 
       Arduino = {
-        extensions = commonExtensions ++ [ vscode-extensions.ms-vscode.cpptools ];
+        extensions = commonExtensions;
         userSettings = baseSettings // {
           "arduino.additionalUrls" = [
             "https://arduino.esp8266.com/stable/package_esp8266com_index.json"
@@ -126,7 +135,6 @@ in
         extensions = commonExtensions ++ [
           vscode-extensions.llvm-vs-code-extensions.vscode-clangd
           vscode-extensions.ms-vscode.cmake-tools
-          vscode-extensions.ms-vscode.cpptools
         ];
         userSettings = baseSettings // {
           "C_Cpp.intelliSenseEngine" = "disabled";
@@ -191,11 +199,6 @@ in
           "typescript.updateImportsOnFileMove.enabled" = "always";
           "javascript.updateImportsOnFileMove.enabled" = "always";
         };
-      };
-
-      Tizen = {
-        extensions = commonExtensions;
-        userSettings = baseSettings;
       };
 
       Latex = {

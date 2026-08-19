@@ -8,6 +8,7 @@
     btop
     curl
     dust
+    direnv
     eza
     fastfetch
     fd
