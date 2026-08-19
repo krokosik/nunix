@@ -1,16 +1,15 @@
-{
-  lib,
-  pkgs,
-  ...
-}:
+let
+  browser = "zen-twilight";
+  editor = "codium";
+in
 {
   wayland.windowManager.hyprland.settings = {
     bindd = [
       # APPLICATION LAUNCHERS
       "SUPER SHIFT, F, File manager, exec, uwsm-app -- nautilus --new-window"
-      "SUPER SHIFT, B, Browser, exec, $BROWSER"
-      "SUPER SHIFT ALT, B, Browser (private), exec, $BROWSER --private"
-      "SUPER SHIFT, N, Editor, exec, $EDITOR"
+      "SUPER SHIFT, B, Browser, exec, uwsm-app -- ${browser}"
+      "SUPER SHIFT ALT, B, Browser (private), exec, setsid uwsm-app -- ${browser} --private-window"
+      "SUPER SHIFT, N, Editor, exec, uwsm-app -- ${editor}"
       "SUPER SHIFT, T, Activity, exec, dms ipc call widget toggle cpuUsage"
       "SUPER SHIFT, G, Beeper, exec, launch-or-focus Beeper -- uwsm-app -- beeper"
       "SUPER SHIFT, O, Obsidian, exec, launch-or-focus '^obsidian$' -- uwsm-app -- obsidian"
