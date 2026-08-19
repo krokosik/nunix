@@ -31,6 +31,13 @@
       size = 24;
     };
 
+    icons = {
+      enable = true;
+      package = pkgs.yaru-theme;
+      light = "Yaru-magenta";
+      dark = "Yaru-magenta-dark";
+    };
+
     fonts = {
       monospace = {
         package = pkgs.nerd-fonts.jetbrains-mono;
