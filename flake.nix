@@ -57,6 +57,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    lazyvim.url = "github:pfassina/lazyvim-nix";
+
     # Native NixOS module for authentik (server, worker, outposts).
     # Upstream warns against overriding nixpkgs via follows because
     # python deps in the lockfile are pinned together; let it use its
