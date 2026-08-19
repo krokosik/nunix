@@ -2,7 +2,6 @@
 {
   home.packages = with pkgs; [
     beeper
-    codex
     freecad
     imv
     mpv
