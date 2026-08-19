@@ -23,6 +23,8 @@
     base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
     polarity = "dark";
 
+    image = ../../wallpapers/fear.png;
+
     cursor = {
       package = pkgs.bibata-cursors;
       name = "Bibata-Modern-Classic";
