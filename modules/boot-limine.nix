@@ -4,10 +4,13 @@
   lib,
   ...
 }:
+let
+  isDesktop = (config.role == "desktop");
+in
 {
-  environment.systemPackages = with pkgs; [
-    sbctl
-    plymouth
+  environment.systemPackages = lib.mkIf isDesktop [
+    pkgs.sbctl
+    pkgs.plymouth
   ];
 
   # Limine Configuration with plymouth
@@ -44,8 +47,14 @@
         canTouchEfiVariables = true;
       };
     };
-    plymouth = lib.mkIf (config.role == "desktop") {
+    plymouth = lib.mkIf isDesktop {
       enable = true;
     };
+  };
+
+  # hold on the plymouth splash screen for longer
+  systemd.services = lib.mkIf isDesktop {
+    plymouth-quit.after = [ "multi-user.target" ];
+    plymouth-quit-wait.enable = false;
   };
 }
