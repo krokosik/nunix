@@ -2,9 +2,20 @@
   pkgs,
   config,
   inputs,
+  lib,
   ...
 }:
+let
+  rtk = pkgs.unstable.rtk;
+in
 {
+  home.packages = [ rtk ];
+
+  home.activation.rtkInit = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    ${lib.getExe rtk} init -g --opencode
+    ${lib.getExe rtk} init -g --codex
+  '';
+
   sops.secrets = {
     opencode_go_api_key.sopsFile = "${inputs.my-secrets}/common/secrets.yaml";
     openai_api_key.sopsFile = "${inputs.my-secrets}/common/secrets.yaml";
