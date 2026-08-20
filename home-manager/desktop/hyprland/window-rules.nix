@@ -67,6 +67,8 @@ in
       "size 1100 700, match:class steam, match:title Steam"
       "size 460 800, match:class steam, match:title Friends List"
       "idle_inhibit fullscreen, match:class steam"
+      "no_initial_focus on, match:class ^(steam)$, match:title ^(notificationtoasts)"
+      "pin on, match:class ^(steam)$, match:title ^(notificationtoasts)"
 
       # Generic floating dialogs and media-window opacity
       "float on, match:tag floating-window"
@@ -86,6 +88,7 @@ in
       "no_initial_focus on, match:class python3"
       "rounding 8, match:tag pop"
       "idle_inhibit always, match:tag noidle"
+      "float on, match:class ^(xdg-desktop-portal)$"
 
       # Terminal tagging and opacity
       "tag +terminal, match:class (Alacritty|kitty|com.mitchellh.ghostty)"

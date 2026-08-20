@@ -33,23 +33,6 @@
         mfact = 0.5
       }
 
-      # WINDOW RULES
-      windowrule = tile on, match:class ^(org\\.wezfurlong\\.wezterm)$
-      windowrule = rounding 12, match:class ^(org\\.gnome\\.)
-      windowrule = tile on, match:class ^(gnome-control-center)$
-      windowrule = tile on, match:class ^(pavucontrol)$
-      windowrule = tile on, match:class ^(nm-connection-editor)$
-      windowrule = float on, match:class ^(org\\.gnome\\.Calculator)$
-      windowrule = float on, match:class ^(gnome-calculator)$
-      windowrule = float on, match:class ^(galculator)$
-      windowrule = float on, match:class ^(blueman-manager)$
-      windowrule = float on, match:class ^(org\\.gnome\\.Nautilus)$
-      windowrule = float on, match:class ^(xdg-desktop-portal)$
-      windowrule = no_initial_focus on, match:class ^(steam)$, match:title ^(notificationtoasts)
-      windowrule = pin on, match:class ^(steam)$, match:title ^(notificationtoasts)
-      windowrule = float on, match:class ^(firefox)$, match:title ^(Picture-in-Picture)$
-      windowrule = float on, match:class ^(zoom)$
-
       layerrule = no_anim on, match:namespace ^(quickshell)$
       layerrule = no_anim on, match:namespace ^dms:.*
 
@@ -60,6 +43,11 @@
       source = ${config.xdg.configHome}/hypr/dms/cursor.conf
       source = ${config.xdg.configHome}/hypr/dms/binds.conf
       source = ${config.xdg.configHome}/hypr/dms/windowrules.conf
+
+      # assign workspaces to monitors
+      workspace=name:1, monitor:desc:Dell Inc. DELL S2725QS 3H8D364
+      workspace=name:2, monitor:desc:BOE 0x0A1C
+      exec-once = hyprctl dispatch workspace 1
     '';
   };
 }
