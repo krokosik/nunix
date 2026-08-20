@@ -54,7 +54,10 @@ in
 
   # hold on the plymouth splash screen for longer
   systemd.services = lib.mkIf isDesktop {
-    plymouth-quit.after = [ "multi-user.target" ];
+    plymouth-quit = {
+      wantedBy = lib.mkForce [ "graphical.target" ];
+      after = [ "multi-user.target" ];
+    };
     plymouth-quit-wait.enable = false;
   };
 }
