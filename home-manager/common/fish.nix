@@ -25,6 +25,12 @@ in
         src = pkgs.fishPlugins.bass.src;
       }
     ];
+    shellAbbrs = {
+      sc = "systemctl";
+      scu = "systemctl --user";
+      jr = "journalctl";
+      jru = "journalctl --user";
+    };
     shellAliases = {
       ls = "eza -al --color=always --group-directories-first --icons";
       la = "eza -a --color=always --group-directories-first --icons";
@@ -51,15 +57,6 @@ in
       ff = "fzf --preview 'bat --style=numbers --color=always {}'";
       c = "opencode";
       gti = "ghostty_terminfo_push";
-    }
-    // lib.optionalAttrs (osConfig.networking.hostName == "osiris") {
-      # to be removed after migrating services
-      dps = "docker ps -a";
-      dcup = "docker compose --profile all -f $DOCKER_PATH/docker-compose-(hostname).yml up -d";
-      dcdown = "docker compose --profile all -f $DOCKER_PATH/docker-compose-(hostname).yml down";
-      dclogs = "docker compose --profile all -f $DOCKER_PATH/docker-compose-(hostname).yml logs -f --tail=50";
-      dcrec = "docker compose --profile all -f $DOCKER_PATH/docker-compose-(hostname).yml up -d --force-recreate";
-      dcpull = "docker compose --profile all -f $DOCKER_PATH/docker-compose-(hostname).yml pull";
     };
     functions = {
       fish_greeting = "";
@@ -140,7 +137,31 @@ in
           end
         '';
       };
+      systemctl = {
+        body = ''
+          set -l user_commands \
+            list-units list-unit-files list-jobs list-timers \
+            list-sockets list-dependencies list-machines \
+            is-active is-enabled is-failed \
+            status show help get-default show-environment cat
 
+          set -l root_commands start stop reload restart try-restart \
+              reload-or-restart try-reload-or-restart isolate kill clean \
+              set-property reset-failed enable disable reenable preset \
+              preset-all mask unmask link revert add-wants add-requires \
+              edit set-default cancel set-environment unset-environment import-environment \
+              daemon-reload daemon-reexec default rescue emergency halt poweroff reboot \
+              kexec exit switch-root suspend hibernate hybrid-sleep suspend-then-hibernate
+
+          if contains -- --user $argv; or not contains -- $argv[1] $root_commands
+              command systemctl $argv
+          else
+              command sudo systemctl $argv
+          end
+        '';
+        description = "wraps privileged and user systemctl commands to use sudo when necessary";
+        wraps = "systemctl";
+      };
     };
     interactiveShellInit = ''
       set -gx MANROFFOPT -c
