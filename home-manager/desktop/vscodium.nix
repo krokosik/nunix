@@ -1,4 +1,9 @@
-{ pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   inherit (pkgs) vscode-extensions;
 
@@ -6,7 +11,6 @@ let
     aaron-bond.better-comments
     christian-kohler.path-intellisense
     eamodio.gitlens
-    enkia.tokyo-night
     jnoortheen.nix-ide
     mkhl.direnv
     ms-azuretools.vscode-docker
@@ -14,7 +18,6 @@ let
     redhat.vscode-yaml
     tamasfe.even-better-toml
     vscode-icons-team.vscode-icons
-    vscodevim.vim
   ];
 
   baseSettings = {
@@ -108,114 +111,117 @@ let
     james-yu.latex-workshop
     tecosaur.latex-utilities
   ];
+
+  profiles = {
+    default = {
+      extensions = commonExtensions;
+      userSettings = baseSettings;
+    };
+
+    Arduino = {
+      extensions = commonExtensions;
+      userSettings = baseSettings // {
+        "arduino.additionalUrls" = [
+          "https://arduino.esp8266.com/stable/package_esp8266com_index.json"
+        ];
+        "arduino.useArduinoCli" = true;
+        "cmake.configureOnOpen" = true;
+      };
+    };
+
+    "C++" = {
+      extensions = commonExtensions ++ [
+        vscode-extensions.llvm-vs-code-extensions.vscode-clangd
+        vscode-extensions.ms-vscode.cmake-tools
+      ];
+      userSettings = baseSettings // {
+        "C_Cpp.intelliSenseEngine" = "disabled";
+        "cmake.pinnedCommands" = [
+          "workbench.action.tasks.configureTaskRunner"
+          "workbench.action.tasks.runTask"
+        ];
+      };
+    };
+
+    Python = {
+      extensions = commonExtensions ++ pythonExtensions;
+      userSettings = baseSettings // {
+        "jupyter.runStartupCommands" = [
+          "%load_ext autoreload"
+          "%autoreload 2"
+        ];
+        "python.analysis.supportRestructuredText" = true;
+      };
+    };
+
+    Rust = {
+      extensions = commonExtensions ++ rustExtensions;
+      userSettings = baseSettings;
+    };
+
+    "Rust Embedded" = {
+      extensions = commonExtensions ++ rustExtensions;
+      userSettings = baseSettings;
+    };
+
+    Web = {
+      extensions = commonExtensions ++ [ vscode-extensions.esbenp.prettier-vscode ];
+      userSettings = baseSettings // {
+        "[css]" = {
+          "editor.defaultFormatter" = "esbenp.prettier-vscode";
+        };
+        "[html]" = {
+          "editor.defaultFormatter" = "esbenp.prettier-vscode";
+        };
+        "[javascript]" = {
+          "editor.defaultFormatter" = "esbenp.prettier-vscode";
+          "editor.formatOnSave" = true;
+        };
+        "[json]" = {
+          "editor.defaultFormatter" = "esbenp.prettier-vscode";
+        };
+        "[jsonc]" = {
+          "editor.defaultFormatter" = "esbenp.prettier-vscode";
+        };
+        "[markdown]" = {
+          "editor.defaultFormatter" = "esbenp.prettier-vscode";
+        };
+        "[typescript]" = {
+          "editor.defaultFormatter" = "esbenp.prettier-vscode";
+          "editor.formatOnSave" = true;
+        };
+        "[typescriptreact]" = {
+          "editor.defaultFormatter" = "esbenp.prettier-vscode";
+          "editor.formatOnSave" = true;
+        };
+        "typescript.updateImportsOnFileMove.enabled" = "always";
+        "javascript.updateImportsOnFileMove.enabled" = "always";
+      };
+    };
+
+    Latex = {
+      extensions = commonExtensions ++ latexExtensions;
+      userSettings = baseSettings // {
+        "texpresso.syncTeXForwardOnSelection" = true;
+        "todo-tree.general.tags" = [
+          "BUG"
+          "HACK"
+          "FIXME"
+          "TODO"
+          "XXX"
+          "[ ]"
+          "[x]"
+        ];
+      };
+    };
+  };
 in
 {
   programs.vscodium = {
     enable = true;
     package = pkgs.vscodium;
-
-    profiles = {
-      default = {
-        extensions = commonExtensions;
-        userSettings = baseSettings;
-      };
-
-      Arduino = {
-        extensions = commonExtensions;
-        userSettings = baseSettings // {
-          "arduino.additionalUrls" = [
-            "https://arduino.esp8266.com/stable/package_esp8266com_index.json"
-          ];
-          "arduino.useArduinoCli" = true;
-          "cmake.configureOnOpen" = true;
-        };
-      };
-
-      "C++" = {
-        extensions = commonExtensions ++ [
-          vscode-extensions.llvm-vs-code-extensions.vscode-clangd
-          vscode-extensions.ms-vscode.cmake-tools
-        ];
-        userSettings = baseSettings // {
-          "C_Cpp.intelliSenseEngine" = "disabled";
-          "cmake.pinnedCommands" = [
-            "workbench.action.tasks.configureTaskRunner"
-            "workbench.action.tasks.runTask"
-          ];
-        };
-      };
-
-      Python = {
-        extensions = commonExtensions ++ pythonExtensions;
-        userSettings = baseSettings // {
-          "jupyter.runStartupCommands" = [
-            "%load_ext autoreload"
-            "%autoreload 2"
-          ];
-          "python.analysis.supportRestructuredText" = true;
-        };
-      };
-
-      Rust = {
-        extensions = commonExtensions ++ rustExtensions;
-        userSettings = baseSettings;
-      };
-
-      "Rust Embedded" = {
-        extensions = commonExtensions ++ rustExtensions;
-        userSettings = baseSettings;
-      };
-
-      Web = {
-        extensions = commonExtensions ++ [ vscode-extensions.esbenp.prettier-vscode ];
-        userSettings = baseSettings // {
-          "[css]" = {
-            "editor.defaultFormatter" = "esbenp.prettier-vscode";
-          };
-          "[html]" = {
-            "editor.defaultFormatter" = "esbenp.prettier-vscode";
-          };
-          "[javascript]" = {
-            "editor.defaultFormatter" = "esbenp.prettier-vscode";
-            "editor.formatOnSave" = true;
-          };
-          "[json]" = {
-            "editor.defaultFormatter" = "esbenp.prettier-vscode";
-          };
-          "[jsonc]" = {
-            "editor.defaultFormatter" = "esbenp.prettier-vscode";
-          };
-          "[markdown]" = {
-            "editor.defaultFormatter" = "esbenp.prettier-vscode";
-          };
-          "[typescript]" = {
-            "editor.defaultFormatter" = "esbenp.prettier-vscode";
-            "editor.formatOnSave" = true;
-          };
-          "[typescriptreact]" = {
-            "editor.defaultFormatter" = "esbenp.prettier-vscode";
-            "editor.formatOnSave" = true;
-          };
-          "typescript.updateImportsOnFileMove.enabled" = "always";
-          "javascript.updateImportsOnFileMove.enabled" = "always";
-        };
-      };
-
-      Latex = {
-        extensions = commonExtensions ++ latexExtensions;
-        userSettings = baseSettings // {
-          "texpresso.syncTeXForwardOnSelection" = true;
-          "todo-tree.general.tags" = [
-            "BUG"
-            "HACK"
-            "FIXME"
-            "TODO"
-            "XXX"
-            "[ ]"
-            "[x]"
-          ];
-        };
-      };
-    };
+    profiles = profiles;
   };
+
+  stylix.targets.vscodium.profileNames = lib.attrNames profiles;
 }
