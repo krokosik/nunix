@@ -1,6 +1,7 @@
 {
   imports = [
     ./env.nix
+    ./dev.nix
     ./fwupd.nix
     ./firewall.nix
     ./nix.nix
