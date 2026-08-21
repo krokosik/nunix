@@ -93,6 +93,10 @@
             inherit inputs outputs;
           };
         };
+      rescueIso = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [ ./iso/rescue.nix ];
+      };
     in
     {
       nixosConfigurations = {
@@ -105,6 +109,8 @@
       };
 
       formatter.x86_64-linux = pkgs.nixfmt-tree;
+
+      packages.x86_64-linux.rescue-iso = rescueIso.config.system.build.isoImage;
 
       devShells.x86_64-linux.default = pkgs.mkShell {
         packages = with pkgs; [
