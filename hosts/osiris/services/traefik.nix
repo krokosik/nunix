@@ -229,7 +229,11 @@ in
 
       systemd.services.traefik = {
         requires = [ "docker.service" ];
-        after = [ "docker.service" ];
+        wants = [ "network-online.target" ];
+        after = [
+          "docker.service"
+          "network-online.target"
+        ];
         serviceConfig = {
           EnvironmentFile = config.sops.templates."traefik_cloudflare.env".path;
         };
