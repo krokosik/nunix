@@ -373,8 +373,8 @@
     "my-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1787141923,
-        "narHash": "sha256-D784ov4VmFegejDGYB/NQhdXP6UI6y/56G4gA5Hx39U=",
+        "lastModified": 1787344233,
+        "narHash": "sha256-opsSrJFbiGmCPwGE89kXCL33eHWzHBABc9S4RuItjME=",
         "path": "/home/krokosik/work/nunix-secrets",
         "type": "path"
       },
