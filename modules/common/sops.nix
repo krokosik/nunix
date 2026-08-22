@@ -12,16 +12,19 @@
     age.generateKey = true;
     defaultSopsFile = "${inputs.my-secrets}/${config.networking.hostName}/secrets.yaml";
   };
+
+  # Wire an age key for home manager
+  sops.secrets.home_manager_age_key = {
+    sopsFile = "${inputs.my-secrets}/${config.networking.hostName}/secrets.yaml";
+    owner = config.username;
+    mode = "0400";
+  };
+  
   # Set github access token for nixpkgs
   sops.secrets.nix_access_token = {
     sopsFile = "${inputs.my-secrets}/common/secrets.yaml";
   };
 
-  sops.secrets.home_manager_age_key = {
-    sopsFile = "${inputs.my-secrets}/common/secrets.yaml";
-    owner = config.username;
-    mode = "0400";
-  };
 
   nix.extraOptions = ''
     !include ${config.sops.secrets.nix_access_token.path}

@@ -1,8 +1,13 @@
-{ config, inputs, ... }:
+{
+  config,
+  inputs,
+  osConfig,
+  ...
+}:
 {
   sops.secrets = {
-    syncthing_key = { };
-    syncthing_cert = { };
+    syncthing_key.sopsFile = "${inputs.my-secrets}/${osConfig.networking.hostName}/home.yaml";
+    syncthing_cert.sopsFile = "${inputs.my-secrets}/${osConfig.networking.hostName}/home.yaml";
     syncthing_password.sopsFile = "${inputs.my-secrets}/common/home.yaml";
   };
 

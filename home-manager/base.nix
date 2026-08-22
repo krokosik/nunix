@@ -15,7 +15,7 @@
 
   sops = {
     age.keyFile = osConfig.sops.secrets.home_manager_age_key.path;
-    defaultSopsFile = "${inputs.my-secrets}/common/home.yaml";
+    defaultSopsFile = "${inputs.my-secrets}/${osConfig.networking.hostName}/home.yaml";
   };
 
   # This value determines the Home Manager release that your
