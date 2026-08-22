@@ -15,8 +15,14 @@
   # Set github access token for nixpkgs
   sops.secrets.nix_access_token = {
     sopsFile = "${inputs.my-secrets}/common/secrets.yaml";
-    owner = config.username;
   };
+
+  sops.secrets.home_manager_age_key = {
+    sopsFile = "${inputs.my-secrets}/common/secrets.yaml";
+    owner = config.username;
+    mode = "0400";
+  };
+
   nix.extraOptions = ''
     !include ${config.sops.secrets.nix_access_token.path}
   '';

@@ -17,8 +17,8 @@ in
   '';
 
   sops.secrets = {
-    opencode_go_api_key.sopsFile = "${inputs.my-secrets}/common/secrets.yaml";
-    openai_api_key.sopsFile = "${inputs.my-secrets}/common/secrets.yaml";
+    opencode_go_api_key.sopsFile = "${inputs.my-secrets}/common/home.yaml";
+    openai_api_key.sopsFile = "${inputs.my-secrets}/common/home.yaml";
   };
 
   programs.codex = {

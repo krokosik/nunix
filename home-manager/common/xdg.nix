@@ -13,13 +13,7 @@ let
   videoPlayer = "mpv.desktop";
 in
 {
-  xdg = {
-    enable = true;
-    portal = {
-      enable = true;
-      extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-    };
-  };
+  xdg.enable = true;
 
   home.packages = [
     pkgs.xdg-utils

@@ -1,5 +1,4 @@
 {
-  config,
   osConfig,
   inputs,
   ...
@@ -15,8 +14,8 @@
   programs.home-manager.enable = true;
 
   sops = {
-    age.keyFile = "${config.xdg.configHome}/sops/age/keys.txt";
-    defaultSopsFile = "${inputs.my-secrets}/${osConfig.networking.hostName}/secrets.yaml";
+    age.keyFile = osConfig.sops.secrets.home_manager_age_key.path;
+    defaultSopsFile = "${inputs.my-secrets}/${osConfig.networking.hostName}/home.yaml";
   };
 
   # This value determines the Home Manager release that your
