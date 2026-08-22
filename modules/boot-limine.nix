@@ -59,5 +59,9 @@ in
       after = [ "multi-user.target" ];
     };
     plymouth-quit-wait.enable = false;
+
+    plymouth-poweroff.wantedBy = [ "poweroff.target" ];
+    plymouth-halt.wantedBy = [ "halt.target" ];
+    plymouth-reboot.wantedBy = [ "reboot.target" ];
   };
 }
