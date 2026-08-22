@@ -3,7 +3,7 @@
   programs.hyprland = {
     enable = true;
     package = pkgs.hyprland;
-    portalPackage = pkgs.unstable.xdg-desktop-portal-hyprland;
+    portalPackage = pkgs.xdg-desktop-portal-hyprland;
     withUWSM = true;
   };
 }
