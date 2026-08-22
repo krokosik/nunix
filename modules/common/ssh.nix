@@ -13,6 +13,7 @@ in
   programs.ssh = {
     knownHosts = sshKeys.knownHosts;
     extraConfig = /* sshconfig */ ''
+      # Keep the secrets repository separate from ordinary GitHub SSH traffic.
       Host github-secrets
         HostName github.com
         HostKeyAlias github.com
@@ -22,6 +23,8 @@ in
     '';
   };
 
+  # Flake fetching runs as the configured user, so every host needs its own
+  # unencrypted user key. Existing identities are never rotated.
   systemd.services.generate-user-ssh-key = {
     description = "Generate SSH key for ${config.username}";
     wantedBy = [ "multi-user.target" ];

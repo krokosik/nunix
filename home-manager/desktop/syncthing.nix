@@ -1,13 +1,13 @@
 {
   config,
   inputs,
-  osConfig,
   ...
 }:
 {
   sops.secrets = {
-    syncthing_key.sopsFile = "${inputs.my-secrets}/${osConfig.networking.hostName}/home.yaml";
-    syncthing_cert.sopsFile = "${inputs.my-secrets}/${osConfig.networking.hostName}/home.yaml";
+    # Device identity is host-specific; the GUI password is intentionally shared.
+    syncthing_key = { };
+    syncthing_cert = { };
     syncthing_password.sopsFile = "${inputs.my-secrets}/common/home.yaml";
   };
 
