@@ -3,7 +3,7 @@
   sops.secrets = {
     syncthing_key = { };
     syncthing_cert = { };
-    syncthing_password.sopsFile = "${inputs.my-secrets}/common/secrets.yaml";
+    syncthing_password.sopsFile = "${inputs.my-secrets}/common/home.yaml";
   };
 
   services.syncthing = {
@@ -23,11 +23,17 @@
         khonsu = {
           id = "YLQZWQ7-DUKD2EP-CMXTWES-ZPFSP75-CYV7J3L-5OCMT6Q-ATCSN3Y-OJAUOAB";
         };
+        lindbladian = {
+          id = "K5Y6JJO-IQD2LPY-IT3WGH5-HMEXXPB-MQHMEJK-YECAIZS-CCWLWA2-7X5U6A4";
+        };
       };
       folders = {
         vault = {
           path = "${config.xdg.userDirs.documents}/vault";
-          devices = [ "khonsu" ];
+          devices = [
+            "lindbladian"
+            "khonsu"
+          ];
           id = "7nqdz-vurey";
         };
       };
