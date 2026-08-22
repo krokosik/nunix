@@ -87,10 +87,8 @@ in
     '';
     # Show installed packages
     ni = "nix-store --query --requisites /run/current-system/sw | cut -d- -f2- | sort | less";
-    # Rebuild system
-    nrb = "sudo nixos-rebuild switch --flake ${flakePath}#${config.networking.hostName}";
     # Pull nunix and nunix-secrets repos
-    nl = "git -C ${flakePath} pull && git -C /home/${user}/work/nunix-secrets pull";
+    nl = "git -C ${flakePath} pull";
   };
 
   # System maintenance
