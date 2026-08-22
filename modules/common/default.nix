@@ -9,6 +9,7 @@
     ./packages.nix
     ./resolved.nix
     ./smartmon.nix
+    ./ssh.nix
     ./sops.nix
     ./timesyncd.nix
     ./tz_locale.nix

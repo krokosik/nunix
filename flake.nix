@@ -25,7 +25,7 @@
     };
 
     my-secrets = {
-      url = "/home/krokosik/work/nunix-secrets";
+      url = "git+ssh://git@github-secrets/krokosik/nunix-secrets.git";
       flake = false;
     };
 
