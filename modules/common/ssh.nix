@@ -1,5 +1,12 @@
-{ ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
+  inherit (lib) getExe';
+
   sshKeys = import ./ssh-keys.nix;
 in
 {
@@ -10,8 +17,33 @@ in
         HostName github.com
         HostKeyAlias github.com
         User git
-        IdentityFile /etc/ssh/ssh_host_ed25519_key
+        IdentityFile /home/${config.username}/.ssh/id_ed25519
         IdentitiesOnly yes
+    '';
+  };
+
+  systemd.services.generate-user-ssh-key = {
+    description = "Generate SSH key for ${config.username}";
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      User = config.username;
+      Group = config.username;
+      UMask = "0077";
+    };
+    script = /* bash */ ''
+      keyFile="/home/${config.username}/.ssh/id_ed25519"
+
+      ${getExe' pkgs.coreutils "install"} --directory --mode=700 "$(dirname "$keyFile")"
+
+      if [ ! -f "$keyFile" ]; then
+        ${getExe' pkgs.openssh "ssh-keygen"} -q -t ed25519 -N "" -f "$keyFile"
+      fi
+
+      if [ ! -f "$keyFile.pub" ]; then
+        ${getExe' pkgs.openssh "ssh-keygen"} -y -f "$keyFile" > "$keyFile.pub"
+        ${getExe' pkgs.coreutils "chmod"} 644 "$keyFile.pub"
+      fi
     '';
   };
 }

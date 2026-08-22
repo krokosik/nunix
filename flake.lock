@@ -374,13 +374,16 @@
       "flake": false,
       "locked": {
         "lastModified": 1787405532,
-        "narHash": "sha256-G8tve8JJtDmz+1bW+On+qeLV9f5AUSErGR87Yc2i+RQ=",
-        "path": "/home/krokosik/work/nunix-secrets",
-        "type": "path"
+        "narHash": "sha256-TwRZtZOE7sRFldoaufRMl9JFZBm86lTW3juQhRDFtbw=",
+        "ref": "refs/heads/main",
+        "rev": "4d49587bbe1637a09adecec5162cd1edf66a756f",
+        "revCount": 35,
+        "type": "git",
+        "url": "ssh://git@github-secrets/krokosik/nunix-secrets.git"
       },
       "original": {
-        "path": "/home/krokosik/work/nunix-secrets",
-        "type": "path"
+        "type": "git",
+        "url": "ssh://git@github-secrets/krokosik/nunix-secrets.git"
       }
     },
     "nixflix": {

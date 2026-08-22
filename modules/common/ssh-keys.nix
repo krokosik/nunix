@@ -1,8 +1,8 @@
 {
   deployKeys = {
-    anubis = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGV4rBomKDF6oD/H0gTHK7kcw2Id36RLQ5SLMy03qUer krokosik@legion";
-    horus = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGvaPAP0/qNC9NpC3qz7RSHpgT9+OcvAEWz9Y8q4QmCJ krokosik@osiris";
-    osiris = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICe/ngBcMq4U617INsnKl/8aNqp+zqRe/QmE+cVrfuyL root@osiris";
+    anubis = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGUTKDQm7saPW6jNaNQUgrABtzK3M8vQssCCCXLRryrG krokosik@anubis";
+    horus = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKw9/vuQetryM92flnnOazWpHJSfvK9am/JVmUiZLHsu krokosik@horus";
+    osiris = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID7sOgLyyDNodmu4kHYGbFWfKhYIQYRIxBRCBaPTD2vU krokosik@osiris";
   };
 
   knownHosts.github = {

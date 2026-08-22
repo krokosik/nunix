@@ -41,6 +41,7 @@ cat /tmp/nixos-anywhere-extra/etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age
 7. `just deploy-new <host>` to install NixOS and the configuration for the new host.
 8. If problems arise, add `--no-reboot` to the above command so you can
    troubleshoot the new install.
+9. Once the host boots, get its `~/.ssh/id_ed25519.pub` file and it to the `nunix-secrets` deploy keys as well as `ssh-keys.nix`
         
 ### PostgreSQL major-version upgrades
 
