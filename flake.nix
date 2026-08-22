@@ -117,9 +117,6 @@
           nixfmt-tree
           nixd
           nh
-          sops
-          age
-          ssh-to-age
           nix-prefetch
           just
           git
