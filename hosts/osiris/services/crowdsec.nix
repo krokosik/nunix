@@ -14,6 +14,12 @@ in
     (pkgs.formats.yaml { }).generate "crowdsec.yaml"
       config.services.crowdsec.settings.general;
 
+  environment.etc."crowdsec/capi-whitelists.yaml".text = /* yaml */ ''
+    cidrs:
+      - 100.64.0.0/10
+      - fd7a:115c:a1e0::/48
+  '';
+
   services.crowdsec = {
     enable = true;
     autoUpdateService = true;
@@ -65,6 +71,7 @@ in
         enable = true;
         listen_uri = "127.0.0.1:8420";
         console_path = "/var/lib/crowdsec/state/console.yaml";
+        capi_whitelists_path = "/etc/crowdsec/capi-whitelists.yaml";
       };
     };
   };
@@ -121,6 +128,13 @@ in
         if ! $CSCLI bouncers list -o json | ${pkgs.jq}/bin/jq -e '.[] | select(.name == "traefik-bouncer")' > /dev/null; then
            $CSCLI bouncers add traefik-bouncer --key "$(< ${config.sops.secrets.crowdsec_traefik_bouncer_key.path})"
         fi
+
+        if ! $CSCLI allowlists inspect tailnet > /dev/null 2>&1; then
+          $CSCLI allowlists create tailnet --description "Authenticated Tailscale peers"
+        fi
+
+        $CSCLI allowlists add tailnet 100.64.0.0/10 || true
+        $CSCLI allowlists add tailnet fd7a:115c:a1e0::/48 || true
       '';
     };
 
