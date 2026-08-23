@@ -25,22 +25,17 @@
   # Add the report generated with `run0 nix run github:numtide/nixos-facter --
   # --output hosts/horus/facter.json` before evaluating or deploying this host.
   hardware.facter.reportPath = ./facter.json;
-
-  isVirtual = false;
-  latestZFSKernel = false;
+  
   role = "desktop";
 
   # support building for anubis
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
-  networking = {
-    useNetworkd = false;
-  };
-
   home-manager.users.${config.username} = {
     imports = [
       ../../home-manager/base.nix
       ../../home-manager/desktop
+      ./apps
     ];
   };
 
