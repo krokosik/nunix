@@ -12,5 +12,6 @@
     moonlight-qt
     obsidian
     pinta
+    proton-vpn
   ];
 }
