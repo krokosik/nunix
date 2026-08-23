@@ -5,6 +5,7 @@
     ./fwupd.nix
     ./firewall.nix
     ./nix.nix
+    ./niks3.nix
     ./options.nix
     ./packages.nix
     ./resolved.nix

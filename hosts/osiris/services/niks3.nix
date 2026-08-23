@@ -9,7 +9,6 @@ in
 {
   sops.secrets = {
     niks3_api_token = {
-      key = "niks3/api_token";
       owner = "niks3";
       restartUnits = [ "niks3.service" ];
     };
