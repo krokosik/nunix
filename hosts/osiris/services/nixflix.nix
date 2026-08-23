@@ -162,7 +162,7 @@
     };
 
     recyclarr = {
-      enable = true;
+      enable = false;
     };
   };
 
