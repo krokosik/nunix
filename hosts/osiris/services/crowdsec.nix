@@ -6,6 +6,7 @@
   ...
 }:
 let
+  inherit (lib.lists) singleton;
   secretspath = toString inputs.my-secrets;
 in
 {
@@ -83,18 +84,15 @@ in
     wants = [ "crowdsec.service" ];
   };
 
-  services.traefik = {
-    dynamicConfigOptions.http = {
-      services.crowdsec-svc.loadBalancer.servers = [
-        { url = "http://${config.services.crowdsec.settings.general.api.server.listen_uri}"; }
-      ];
-      routers.crowdsec-rtr = {
-        rule = "Host(`crowdsec.${config.privateDomain}`)";
-        entryPoints = [ "websecure" ];
-        service = "crowdsec-svc";
-        middlewares = [ "chain-lapi" ];
-      };
-    };
+  mkAllowlistChain.lapi = [
+    "${config.vpsPrivateIp}/32" # anubis tailscale
+    "${config.homeserverPrivateIp}/32" # osiris tailscale
+    "192.168.91.0/24" # local network
+  ];
+
+  mkTraefikServices.crowdsec = {
+    port = 8420;
+    chain = singleton "chain-lapi";
   };
 
   systemd.services.crowdsec =

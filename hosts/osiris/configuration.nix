@@ -20,6 +20,7 @@
     inputs.home-manager.nixosModules.home-manager
     inputs.sops-nix.nixosModules.sops
     inputs.nixflix.nixosModules.default
+    inputs.niks3.nixosModules.default
   ];
 
   hardware.facter.reportPath = ./facter.json;

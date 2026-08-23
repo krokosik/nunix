@@ -57,6 +57,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    niks3 = {
+      url = "github:Mic92/niks3";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     lazyvim.url = "github:pfassina/lazyvim-nix";
 
     # Native NixOS module for authentik (server, worker, outposts).

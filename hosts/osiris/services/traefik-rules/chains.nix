@@ -1,24 +1,50 @@
-{ ... }:
+{ config, lib, ... }:
+let
+  allowlistChains = config.mkAllowlistChain;
+in
 {
-  services.traefik.dynamicConfigOptions.http.middlewares = {
-    chain-authentik.chain.middlewares = [
-      "middlewares-crowdsec-bouncer"
-      "middlewares-geoblock"
-      "middlewares-rate-limit"
-      "middlewares-secure-headers"
-      "middlewares-authentik"
-    ];
-
-    chain-lapi.chain.middlewares = [
-      "middlewares-lapi-allowlist"
-      "middlewares-secure-headers"
-    ];
-
-    chain-no-auth.chain.middlewares = [
-      "middlewares-crowdsec-bouncer"
-      "middlewares-geoblock"
-      "middlewares-rate-limit"
-      "middlewares-secure-headers"
-    ];
+  options.mkAllowlistChain = lib.mkOption {
+    type = lib.types.attrsOf (lib.types.listOf lib.types.str);
+    default = { };
+    description = ''
+      IP ranges for generated Traefik allowlist chains. Each entry creates
+      `middlewares-<name>-allowlist` and `chain-<name>` middlewares.
+    '';
   };
+
+  config.services.traefik.dynamicConfigOptions.http.middlewares = lib.mkMerge [
+    {
+      chain-authentik.chain.middlewares = [
+        "middlewares-crowdsec-bouncer"
+        "middlewares-geoblock"
+        "middlewares-rate-limit"
+        "middlewares-secure-headers"
+        "middlewares-authentik"
+      ];
+
+      chain-no-auth.chain.middlewares = [
+        "middlewares-crowdsec-bouncer"
+        "middlewares-geoblock"
+        "middlewares-rate-limit"
+        "middlewares-secure-headers"
+      ];
+    }
+
+    (lib.mapAttrs' (
+      name: sourceRange:
+      lib.nameValuePair "middlewares-${name}-allowlist" {
+        ipAllowList = { inherit sourceRange; };
+      }
+    ) allowlistChains)
+
+    (lib.mapAttrs' (
+      name: _:
+      lib.nameValuePair "chain-${name}" {
+        chain.middlewares = [
+          "middlewares-${name}-allowlist"
+          "middlewares-secure-headers"
+        ];
+      }
+    ) allowlistChains)
+  ];
 }
