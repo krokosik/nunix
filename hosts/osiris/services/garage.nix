@@ -152,6 +152,7 @@ in
 
       mkAllowlistChain.garage = [
         "100.64.0.0/10"
+        "fd7a:115c:a1e0::/48"
         "127.0.0.1/32"
         "::1/128"
       ];
@@ -211,7 +212,7 @@ in
           after = [ "garage.service" ];
           requires = [ "garage.service" ];
           wants = [ "sops-install-secrets.service" ];
-          wantedBy = bucket.consumerService;
+          requiredBy = bucket.consumerService;
           before = bucket.consumerService;
           unitConfig.ConditionPathExists = [
             bucket.accessKeyFile
@@ -236,6 +237,19 @@ in
             access_key="$(<"$CREDENTIALS_DIRECTORY/s3_access_key")"
             secret_key="$(<"$CREDENTIALS_DIRECTORY/s3_secret_key")"
             garage=${lib.getExe config.services.garage.package}
+
+            for _ in {1..60}; do
+              if "$garage" status > /dev/null 2>&1; then
+                break
+              fi
+
+              ${lib.getExe' pkgs.coreutils "sleep"} 1
+            done
+
+            if ! "$garage" status > /dev/null 2>&1; then
+              echo "ERROR: Garage did not become ready within 60 seconds" >&2
+              exit 1
+            fi
 
             if ! "$garage" key info "$access_key" > /dev/null 2>&1; then
               "$garage" key import --yes "$access_key" "$secret_key"
