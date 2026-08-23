@@ -35,11 +35,8 @@ in
         enable = true;
         maxGenerations = 10;
         efiSupport = pkgs.stdenv.hostPlatform.isEfi;
-        enrollConfig = false;
-        validateChecksums = false;
-        panicOnChecksumMismatch = false;
         secureBoot = {
-          enable = false;
+          enable = true;
           autoGenerateKeys = true;
           autoEnrollKeys.enable = true;
         };
