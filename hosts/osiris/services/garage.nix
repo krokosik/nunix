@@ -161,6 +161,8 @@ in
         port = s3_port;
         chain = singleton "chain-garage";
       };
+
+      networking.hosts."127.0.0.1" = singleton "garage.${config.privateDomain}";
     }
 
     (lib.mkIf (buckets != { }) {

@@ -51,4 +51,6 @@ in
     port = 5751;
     chain = singleton "chain-niks3";
   };
+
+  networking.hosts."127.0.0.1" = singleton "niks3.${config.privateDomain}";
 }
