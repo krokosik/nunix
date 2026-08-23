@@ -9,6 +9,7 @@
     ./options.nix
     ./packages.nix
     ./resolved.nix
+    ./run0.nix
     ./smartmon.nix
     ./ssh.nix
     ./sops.nix

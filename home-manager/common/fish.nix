@@ -49,9 +49,9 @@ in
       hw = "hwinfo --short";
       d = "docker";
       dc = "docker compose";
-      smbup = "sudo systemctl start smb";
-      smbdown = "sudo systemctl stop smb";
-      please = "sudo";
+      smbup = "run0 systemctl start smb";
+      smbdown = "run0 systemctl stop smb";
+      please = "run0";
       tb = "nc termbin.com 9999";
       jctl = "journalctl -p 3 -xb";
       ff = "fzf --preview 'bat --style=numbers --color=always {}'";
@@ -156,10 +156,10 @@ in
           if contains -- --user $argv; or not contains -- $argv[1] $root_commands
               command systemctl $argv
           else
-              command sudo systemctl $argv
+               command run0 systemctl $argv
           end
         '';
-        description = "wraps privileged and user systemctl commands to use sudo when necessary";
+        description = "wraps privileged and user systemctl commands to use run0 when necessary";
         wraps = "systemctl";
       };
     };

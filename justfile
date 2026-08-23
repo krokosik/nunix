@@ -11,12 +11,12 @@ default:
 # Deploy the current host using the local flake configuration
 [group("nixos deploy")]
 deploy-local:
-    nh os switch .
+    nh os switch --elevation-strategy run0 .
 
 # Deploy a remote host using the local flake configuration. If no IP is provided, it will default to using the hostname.
 [group("nixos deploy")]    
 deploy-remote host ip="":
-    nh os switch --target-host {{username}}@{{ if ip == "" { host } else { ip } }} -e passwordless{{ if ip == "anubis" { " --build-host anubis"} else { "" }}} .
+    nh os switch --target-host {{username}}@{{ if ip == "" { host } else { ip } }} --elevation-strategy passwordless{{ if ip == "anubis" { " --build-host anubis"} else { "" }}} .
 
 # Open REPL for a particular host configuration.
 [group("utils")]
@@ -42,7 +42,7 @@ fetch-hash url:
 [group("nix utils")]
 delete-broken-derivations depth="1":
     @echo "🧹 Deleting broken derivations with depth {{depth}}..."
-    nix-store --query --referrers-closure $(find /nix/store -maxdepth {{depth}} -type f -name '*.drv' -size 0) | xargs sudo nix-store --delete --ignore-liveness
+    nix-store --query --referrers-closure $(find /nix/store -maxdepth {{depth}} -type f -name '*.drv' -size 0) | xargs run0 nix-store --delete --ignore-liveness
 
 # Bootstrap a new host using the internal flake template
 [group("bootstrap")]

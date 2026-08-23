@@ -2,7 +2,7 @@
   imports = [
     ./msmtp.nix
     ./neovim.nix
-    ./nopasswd.nix
+    ./run0.nix
     ./sshd.nix
     ./tailscale.nix
   ];

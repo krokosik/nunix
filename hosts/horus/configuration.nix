@@ -22,7 +22,7 @@
     inputs.sops-nix.nixosModules.sops
   ];
 
-  # Add the report generated with `sudo nix run github:numtide/nixos-facter --
+  # Add the report generated with `run0 nix run github:numtide/nixos-facter --
   # --output hosts/horus/facter.json` before evaluating or deploying this host.
   hardware.facter.reportPath = ./facter.json;
 
