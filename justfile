@@ -16,7 +16,7 @@ deploy-local:
 # Deploy a remote host using the local flake configuration. If no IP is provided, it will default to using the hostname.
 [group("nixos deploy")]    
 deploy-remote host ip="":
-    nh os switch --target-host {{username}}@{{ if ip == "" { host } else { ip } }} --elevation-strategy passwordless{{ if ip == "anubis" { " --build-host anubis"} else { "" }}} .
+    nh os switch --hostname {{host}} --target-host {{username}}@{{ if ip == "" { host } else { ip } }} --elevation-strategy passwordless .
 
 # Open REPL for a particular host configuration.
 [group("utils")]

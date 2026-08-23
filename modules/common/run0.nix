@@ -1,7 +1,6 @@
+{ inputs, ... }:
 {
-  security = {
-    polkit.enable = true;
+  imports = [ inputs.run0-sudo-shim.nixosModules.default ];
 
-    sudo.enable = false;
-  };
+  security.run0-sudo-shim.enable = true;
 }
