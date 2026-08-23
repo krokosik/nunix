@@ -124,6 +124,9 @@ in
       '';
     };
 
+  # cscli must be run as crowdsec user
+  environment.shellAliases.cscli = "run0 -u crowdsec cscli";
+
   systemd.services.crowdsec-update-hub.serviceConfig.DynamicUser = lib.mkForce false;
   systemd.services.crowdsec-firewall-bouncer.serviceConfig.DynamicUser = lib.mkForce false;
   systemd.services.crowdsec-firewall-bouncer-register.serviceConfig.DynamicUser = lib.mkForce false;

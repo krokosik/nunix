@@ -19,4 +19,19 @@
     mode = "0400";
   };
 
+  # Never generate remediation decisions for authenticated tailnet peers.
+  services.crowdsec.localConfig.parsers.s02Enrich = [
+    {
+      name = "local/tailnet-whitelist";
+      description = "Whitelist authenticated tailnet traffic";
+      whitelist = {
+        reason = "Tailnet peer";
+        cidr = [
+          "100.64.0.0/10"
+          "fd7a:115c:a1e0::/48"
+        ];
+      };
+    }
+  ];
+
 }
