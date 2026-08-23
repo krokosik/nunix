@@ -30,6 +30,9 @@
   latestZFSKernel = false;
   role = "desktop";
 
+  # support building for anubis
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+
   networking = {
     useNetworkd = false;
   };
