@@ -1,5 +1,8 @@
-{ ... }:
+{ pkgs, ... }:
 {
+  # --no-update flag seems broken on nixos 26.05
+  home.packages = [ pkgs.unstable.beeper ];
+
   xdg.configFile."BeeperTexts/custom.css".text = ''
     /* Tokyo Night theme for Beeper Desktop v4.
      * Palette: Stylix base16 tokyo-night-dark.
