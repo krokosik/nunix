@@ -84,15 +84,10 @@ in
     wants = [ "crowdsec.service" ];
   };
 
-  mkAllowlistChain.lapi = [
-    "${config.vpsPrivateIp}/32" # anubis tailscale
-    "${config.homeserverPrivateIp}/32" # osiris tailscale
-    "192.168.91.0/24" # local network
-  ];
-
   mkTraefikServices.crowdsec = {
+    host = "127.0.0.1";
     port = 8420;
-    chain = singleton "chain-lapi";
+    chain = singleton "chain-tailscale";
   };
 
   systemd.services.crowdsec =

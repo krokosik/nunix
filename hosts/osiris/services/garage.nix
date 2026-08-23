@@ -150,16 +150,10 @@ in
         '';
       };
 
-      mkAllowlistChain.garage = [
-        "100.64.0.0/10"
-        "fd7a:115c:a1e0::/48"
-        "127.0.0.1/32"
-        "::1/128"
-      ];
 
       mkTraefikServices.garage = {
         port = s3_port;
-        chain = singleton "chain-garage";
+        chain = singleton "chain-tailscale";
       };
 
       networking.hosts."127.0.0.1" = singleton "garage.${config.privateDomain}";

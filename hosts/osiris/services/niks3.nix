@@ -39,17 +39,10 @@ in
     };
   };
 
-  mkAllowlistChain.niks3 = [
-    "100.64.0.0/10"
-    "fd7a:115c:a1e0::/48"
-    "127.0.0.1/32"
-    "::1/128"
-  ];
-
   mkTraefikServices.niks3 = {
     host = "127.0.0.1";
     port = 5751;
-    chain = singleton "chain-niks3";
+    chain = singleton "chain-tailscale";
   };
 
   networking.hosts."127.0.0.1" = singleton "niks3.${config.privateDomain}";
