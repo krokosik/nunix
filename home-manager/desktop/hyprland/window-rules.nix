@@ -11,9 +11,9 @@ in
       "SUPER SHIFT ALT, B, Browser (private), exec, setsid uwsm-app -- ${browser} --private-window"
       "SUPER SHIFT, N, Editor, exec, uwsm-app -- ${editor}"
       "SUPER SHIFT, T, Activity, exec, dms ipc call widget toggle cpuUsage"
-      "SUPER SHIFT, G, Beeper, exec, launch-or-focus Beeper -- uwsm-app -- beeper"
-      "SUPER SHIFT, O, Obsidian, exec, launch-or-focus '^obsidian$' -- uwsm-app -- obsidian"
-      "SUPER SHIFT, M, Mattermost, exec, launch-or-focus Mattermost -- uwsm-app -- mattermost-desktop"
+      "SUPER SHIFT, G, Beeper, exec, launch-or-focus '^[Bb]eeper(texts)?$' -- beeper"
+      "SUPER SHIFT, O, Obsidian, exec, launch-or-focus '^obsidian$' -- obsidian"
+      "SUPER SHIFT, M, Mattermost, exec, launch-or-focus '^[Mm]attermost([\.-][Dd]esktop)?$' -- mattermost-desktop"
       "SUPER CTRL, W, WiFi, exec, dms ipc call widget toggle controlCenterButton"
       "SUPER CTRL, B, Bluetooth, exec, dms ipc call widget toggle controlCenterButton"
     ];
