@@ -150,13 +150,10 @@ in
         '';
       };
 
-
       mkTraefikServices.garage = {
         port = s3_port;
         chain = singleton "chain-tailscale";
       };
-
-      networking.hosts."127.0.0.1" = singleton "garage.${config.privateDomain}";
     }
 
     (lib.mkIf (buckets != { }) {
