@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 let
@@ -9,22 +8,6 @@ let
 in
 {
   sops.secrets = {
-    niks3_s3_access_key = {
-      key = "niks3/s3_access_key";
-      owner = "niks3";
-      restartUnits = [
-        "niks3-garage-bootstrap.service"
-        "niks3.service"
-      ];
-    };
-    niks3_s3_secret_key = {
-      key = "niks3/s3_secret_key";
-      owner = "niks3";
-      restartUnits = [
-        "niks3-garage-bootstrap.service"
-        "niks3.service"
-      ];
-    };
     niks3_api_token = {
       key = "niks3/api_token";
       owner = "niks3";
@@ -37,35 +20,7 @@ in
     };
   };
 
-  systemd.services.niks3-garage-bootstrap = {
-    description = "Provision the niks3 Garage bucket and access key";
-    after = [ "garage.service" ];
-    requires = [ "garage.service" ];
-    before = [ "niks3.service" ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      LoadCredential = [
-        "s3_access_key:${config.sops.secrets.niks3_s3_access_key.path}"
-        "s3_secret_key:${config.sops.secrets.niks3_s3_secret_key.path}"
-      ];
-    };
-    script = ''
-      access_key="$(<"$CREDENTIALS_DIRECTORY/s3_access_key")"
-      secret_key="$(<"$CREDENTIALS_DIRECTORY/s3_secret_key")"
-      garage=${lib.getExe pkgs.garage_2}
-
-      if ! "$garage" key info "$access_key" > /dev/null 2>&1; then
-        "$garage" key import --yes "$access_key" "$secret_key"
-      fi
-
-      if ! "$garage" bucket info niks3 > /dev/null 2>&1; then
-        "$garage" bucket create niks3
-      fi
-
-      "$garage" bucket allow --read --write niks3 --key "$access_key"
-    '';
-  };
+  mkGarageBucket.niks3 = { };
 
   services.niks3 = {
     enable = true;
@@ -76,23 +31,24 @@ in
     readProxy.enable = true;
     s3 = {
       endpoint = "garage.${config.privateDomain}";
-      bucket = "niks3";
+      bucket = config.mkGarageBucket.niks3.bucketName;
       region = "garage";
       useSSL = true;
       bucketLookup = "path";
-      accessKeyFile = config.sops.secrets.niks3_s3_access_key.path;
-      secretKeyFile = config.sops.secrets.niks3_s3_secret_key.path;
+      accessKeyFile = config.mkGarageBucket.niks3.accessKeyFile;
+      secretKeyFile = config.mkGarageBucket.niks3.secretKeyFile;
     };
   };
+
+  mkAllowlistChain.niks3 = [
+    "100.64.0.0/10"
+    "127.0.0.1/32"
+    "::1/128"
+  ];
 
   mkTraefikServices.niks3 = {
     host = "127.0.0.1";
     port = 5751;
-    chain = singleton "chain-tailscale";
-  };
-
-  systemd.services.niks3 = {
-    after = [ "niks3-garage-bootstrap.service" ];
-    requires = [ "niks3-garage-bootstrap.service" ];
+    chain = singleton "chain-niks3";
   };
 }
