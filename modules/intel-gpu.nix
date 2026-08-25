@@ -1,4 +1,6 @@
 {
+  config,
+  lib,
   pkgs,
   ...
 }:
@@ -8,11 +10,15 @@
   hardware.graphics = {
     enable = true;
     extraPackages = with pkgs; [
-      intel-compute-runtime # 13th gen and newer
       intel-media-driver
+      intel-compute-runtime # 13th gen and newer
+      intel-media-runtime
       vpl-gpu-rt # 11th gen and newer
     ];
   };
+
+  hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+
   environment.sessionVariables = {
     LIBVA_DRIVER_NAME = "iHD";
   };
