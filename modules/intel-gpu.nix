@@ -12,7 +12,6 @@
     extraPackages = with pkgs; [
       intel-media-driver
       intel-compute-runtime # 13th gen and newer
-      intel-media-runtime
       vpl-gpu-rt # 11th gen and newer
     ];
   };
