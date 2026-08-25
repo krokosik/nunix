@@ -1,4 +1,15 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+let
+  luksEncryptionEnabled = config.boot.initrd.luks.devices != { };
+  tpm2UnlockEnabled = lib.any (
+    device: lib.any (option: lib.hasPrefix "tpm2-device=" option) device.crypttabExtraOpts
+  ) (lib.attrValues config.boot.initrd.luks.devices);
+in
 {
   programs.dms-shell = {
     enable = true;
@@ -25,19 +36,29 @@
     };
   };
 
-  services.displayManager.dms-greeter = {
-    enable = true;
-    compositor.name = "hyprland";
-    configHome = "/home/${config.username}";
-  };
-
   services.displayManager = {
     autoLogin = {
-      enable = true;
+      enable = luksEncryptionEnabled && !tpm2UnlockEnabled;
       user = config.username;
     };
 
-    # Required for auto-login: identifies which session to launch.
-    defaultSession = "hyprland-uwsm";
+    dms-greeter = {
+      enable = true;
+      compositor = {
+        name = "hyprland";
+        customConfig = ''
+          env = DMS_RUN_GREETER,1
+
+          misc {
+              disable_hyprland_logo = true
+          }
+        '';
+      };
+      configHome = "/home/${config.username}";
+    };
+  };
+
+  systemd.services.plymouth-quit = lib.mkIf (!config.services.displayManager.autoLogin.enable) {
+    after = [ "greetd.service" ];
   };
 }
