@@ -5,7 +5,7 @@
     ./dms.nix
     ./file-manager.nix
     ./hyprland.nix
-    ./keyring.nix
+    ./greeter.nix
     ./network-manager.nix
     ./peripherals.nix
     ./pipewire.nix

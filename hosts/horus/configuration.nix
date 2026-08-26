@@ -28,8 +28,6 @@
   role = "desktop";
 
   boot.initrd = {
-    luks.devices.cryptroot.crypttabExtraOpts = [ "tpm2-device=auto" ];
-    luks.devices.cryptswap.crypttabExtraOpts = [ "tpm2-device=auto" ];
     # we don't use nvidia gpu, as we let nixos-hardware set the configs
     kernelModules = [
       "nvidia"
