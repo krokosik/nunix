@@ -9,6 +9,7 @@ configs live in `hosts/<name>/`; shared modules under `modules/common`,
 
 The user is new to NixOS but an experienced sysadmin (Proxmox VMs, Docker).
 - Always back design choices with a brief rationale; propose alternatives.
+- Check the current hostname with the shell command
 - Ask for confirmation before non-trivial system config changes.
 - Security is a primary concern; prefer least-privilege defaults
   (firewall on, role-gated services, immutable users).
