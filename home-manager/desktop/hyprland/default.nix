@@ -15,9 +15,6 @@
     configType = "hyprlang";
 
     extraConfig = /* hyprlang */ ''
-      # MONITOR CONFIG
-      monitor = , preferred, auto, auto
-
       # ANIMATIONS
       animations {
         enabled = true
