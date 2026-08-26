@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
   inherit (config.xdg)
     cacheHome
@@ -37,7 +37,7 @@ in
 
     # GTK 1 and 2
     GTK_RC_FILES = "${configHome}/gtk-1.0/gtkrc";
-    GTK2_RC_FILES = "${configHome}/gtk-2.0/gtkrc:${configHome}/gtk-2.0/gtkrc.mine";
+    GTK2_RC_FILES = lib.mkForce "${configHome}/gtk-2.0/gtkrc:${configHome}/gtk-2.0/gtkrc.mine";
 
     # Java
     _JAVA_OPTIONS = "-Djava.util.prefs.userRoot=${configHome}/java";
