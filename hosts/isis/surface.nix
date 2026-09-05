@@ -40,9 +40,6 @@ in
     "xhci_pci"
   ];
 
-  # This device advertises s2idle only; deep/S3 is unavailable.
-  boot.kernelParams = singleton "mem_sleep_default=s2idle";
-
   # CAMERAS
   # Use the in-tree ISYS driver and libcamera's software ISP. Facter's generic
   # IPU6 module installs a different proprietary HAL/relay stack.
@@ -60,16 +57,6 @@ in
     "wireplumber.profiles".main."monitor.libcamera" = "wanted";
   };
 
-  # iptsd exposes virtual input devices; applications need libwacom's Surface
-  # bus support as well as its tablet definitions. Keep this override host-local.
-  nixpkgs.overlays = singleton (
-    _final: prev: {
-      libwacom = prev.callPackage "${inputs.nixpkgs}/pkgs/by-name/li/libwacom-surface/package.nix" {
-        libwacom = prev.libwacom;
-      };
-    }
-  );
-
   # FIRMWARE AND TOOLS
   hardware.cpu.intel.updateMicrocode = true;
 
@@ -78,7 +65,6 @@ in
   # iio-hyprland consumes accelerometer orientation from iio-sensor-proxy.
   hardware.sensor.iio.enable = true;
 
-  # surface-control is a CLI, not a daemon. TLP owns automatic profile changes.
   environment.systemPackages = [
     pkgs.surface-control
     pkgs.iptsd
