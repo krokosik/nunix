@@ -116,6 +116,7 @@
           system = "aarch64-linux";
         };
         horus = mkSystem { host = "horus"; };
+        isis = mkSystem { host = "isis"; };
       };
 
       formatter.x86_64-linux = pkgs.nixfmt-tree;

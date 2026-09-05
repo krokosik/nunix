@@ -1,28 +1,35 @@
 {
   config,
   inputs,
+  lib,
   ...
 }:
 {
   imports = [
     ./disko-config.nix
-    ./windows.nix
+    ./surface.nix
+    ./power.nix
     inputs.nixos-hardware.nixosModules.microsoft-surface-pro-intel
     ../../modules/boot-limine.nix
     ../../modules/desktop
     ../../modules/hibernation.nix
-    # ../../modules/power.nix
   ];
 
-  # Add the report generated with `run0 nix run github:numtide/nixos-facter --
-  # --output hosts/horus/facter.json` before evaluating or deploying this host.
+  # Generated on this Surface Pro 8 with run0 nix run github:numtide/nixos-facter.
   hardware.facter.reportPath = ./facter.json;
-  
-  # hardware.nvidia.branch = "legacy_580";
 
   role = "desktop";
 
   hardware.microsoft-surface.kernelVersion = "stable";
+
+  # Enroll boot keys explicitly after checking Surface UEFI support and backups.
+  boot.loader.limine.secureBoot.autoEnrollKeys.enable = lib.modules.mkForce false;
+
+  # Keep kernel builds within the tablet's memory budget.
+  nix.settings = {
+    max-jobs = 1;
+    cores = 2;
+  };
 
   home-manager.users.${config.username} = {
     imports = [

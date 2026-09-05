@@ -1,0 +1,54 @@
+Subject: [PATCH] media: ov5693: gate the clock lane on Surface Pro 8
+
+Local, DMI-scoped backport of the bit-5 fix discussed in linux-surface PR
+2171. The original patch writes 0x2d to 0x4800 unconditionally. Later
+Surface Pro 8 and Pro 9 measurements establish that bit 5 alone suffices.
+Preserve the other bits, propagate I2C errors, and repeat before every
+stream-on (including after mode changes and runtime power cycles).
+
+Restrict this workaround to Microsoft Surface Pro 8; IPU3 and Rockchip
+users of the same sensor must retain their existing behavior. This is
+not the full upstream v4 series, which instead conveys non-continuous
+clock mode through IPU bridge endpoint properties. Remove this backport
+when that series reaches the selected Surface kernel.
+
+Original discovery: Arsalan Naeem (naeemarsalan)
+Bit characterization: Fernando Rimoli (femito1), Zann580
+Link: https://github.com/linux-surface/linux-surface/pull/2171
+Link: https://github.com/linux-surface/linux-surface/pull/2171#issuecomment-5298352360
+Link: https://lore.kernel.org/linux-media/20260831181858.325109-1-fernandorimoli11@gmail.com/
+
+--- a/drivers/media/i2c/ov5693.c
++++ b/drivers/media/i2c/ov5693.c
+@@ -16,6 +16,7 @@
+ #include <linux/clk.h>
+ #include <linux/delay.h>
+ #include <linux/device.h>
++#include <linux/dmi.h>
+ #include <linux/i2c.h>
+ #include <linux/module.h>
+ #include <linux/pm_runtime.h>
+@@ -36,5 +37,9 @@
+ #define OV5693_SW_RESET				0x01
+ 
++/* MIPI clock lane control */
++#define OV5693_MIPI_CTRL00_REG			CCI_REG8(0x4800)
++#define OV5693_MIPI_CTRL00_CLK_GATE		BIT(5)
++
+ #define OV5693_REG_CHIP_ID			CCI_REG16(0x300a)
+ /* Yes, this is right. The datasheet for the OV5693 gives its ID as 0x5690 */
+ #define OV5693_CHIP_ID				0x5690
+@@ -611,6 +616,13 @@ static int ov5693_enable_streaming(struct ov5693_device *ov5693, bool enable)
+ {
+ 	int ret = 0;
+ 
++	/* The Pro 8's IPU6 receiver needs clock gating before each stream. */
++	if (enable && dmi_match(DMI_SYS_VENDOR, "Microsoft Corporation") &&
++	    dmi_match(DMI_PRODUCT_NAME, "Surface Pro 8"))
++		cci_update_bits(ov5693->regmap, OV5693_MIPI_CTRL00_REG,
++				OV5693_MIPI_CTRL00_CLK_GATE,
++				OV5693_MIPI_CTRL00_CLK_GATE, &ret);
++
+ 	cci_write(ov5693->regmap, OV5693_SW_STREAM_REG,
+ 		  enable ? OV5693_START_STREAMING : OV5693_STOP_STREAMING,
+ 		  &ret);
