@@ -17,5 +17,5 @@
   services.accounts-daemon.enable = true;
   services.printing.enable = true;
   services.upower.enable = true;
-  boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
+  # boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
 }

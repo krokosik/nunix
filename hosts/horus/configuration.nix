@@ -22,16 +22,6 @@
 
   role = "desktop";
 
-  boot.initrd = {
-    # we don't use nvidia gpu, as we let nixos-hardware set the configs
-    kernelModules = [
-      "nvidia"
-      "nvidia_modeset"
-      "nvidia_uvm"
-      "nvidia_drm"
-    ];
-  };
-
   # support building for anubis
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
