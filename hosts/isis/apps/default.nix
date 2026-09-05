@@ -1,3 +1,7 @@
+{ lib, ... }:
+let
+  inherit (lib.lists) singleton;
+in
 {
-  imports = [ ];
+  imports = singleton ./tablet.nix;
 }

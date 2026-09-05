@@ -173,12 +173,19 @@ needed to join a network automatically. See [upstream radio settings](https://li
    installation; fwupd is enabled but does not promise all Microsoft firmware
    updates. Keep recovery media. The SP8 wiki's EDID workaround removes 60 Hz,
    so do not apply it preemptively. First test native resolution, scaling,
-   rotation, 60/120 Hz, and external displays. IIO availability alone does not
-   configure compositor rotation. See the [SP8 notes](https://github.com/linux-surface/linux-surface/wiki/Surface-Pro-8).
+   rotation, 60/120 Hz, and external displays. `iio-hyprland` starts with Hyprland
+   to rotate `eDP-1` and touch input using iio-sensor-proxy. Check pen and touch
+   coordinates in all orientations. See the [SP8 notes](https://github.com/linux-surface/linux-surface/wiki/Surface-Pro-8).
 6. **Desktop migration:** shared Hyprland configuration still contains Horus
    monitor descriptions and DMS-generated output settings. Review those on this
    device; the iptsd migration is complete, but this is not a wholesale migration
    of Arch/Omarchy application data or per-user desktop state.
+   The host-local `apps/tablet.nix` loads Hyprgrass for three-finger touchscreen
+   workspace swipes with sensitivity 4.0. It uses the configured compositor's
+   Hyprland package to keep the plugin build aligned. Both additions use pinned
+   Nixpkgs packages; no hyprpm installation is needed. See
+   [Hyprgrass](https://github.com/horriblename/hyprgrass) and
+   [iio-hyprland](https://github.com/JeanSchoeller/iio-hyprland).
 7. **Kernel upkeep:** the pinned custom kernel requires periodic security review
    and rebuilds. Build on the stronger machine, retain a known-good generation,
    and keep rescue media that can unlock Btrfs/LUKS with a USB keyboard. Space

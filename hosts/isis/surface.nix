@@ -75,6 +75,9 @@ in
 
   hardware.enableRedistributableFirmware = true;
 
+  # iio-hyprland consumes accelerometer orientation from iio-sensor-proxy.
+  hardware.sensor.iio.enable = true;
+
   # surface-control is a CLI, not a daemon. TLP owns automatic profile changes.
   environment.systemPackages = [
     pkgs.surface-control
