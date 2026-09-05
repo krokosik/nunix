@@ -8,17 +8,10 @@
     ./disko-config.nix
     ./windows.nix
     inputs.nixos-hardware.nixosModules.lenovo-legion-15ach6h-nvidia
-    ../../modules/avahi.nix
     ../../modules/boot-limine.nix
-    ../../modules/common
     ../../modules/desktop
-    ../../modules/desktop/theme.nix
     ../../modules/hibernation.nix
     # ../../modules/power.nix
-    ../../home-manager/home-manager.nix
-    inputs.disko.nixosModules.disko
-    inputs.home-manager.nixosModules.home-manager
-    inputs.sops-nix.nixosModules.sops
   ];
 
   # Add the report generated with `run0 nix run github:numtide/nixos-facter --

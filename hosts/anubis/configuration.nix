@@ -7,15 +7,10 @@
   imports = [
     ./disko-config.nix
     ./services
-    ../../modules/common
     ../../modules/server
-    ../../modules/avahi.nix
     ../../modules/boot.nix
     ../../modules/zfs.nix
     ../../home-manager/home-manager.nix
-    inputs.disko.nixosModules.disko
-    inputs.home-manager.nixosModules.home-manager
-    inputs.sops-nix.nixosModules.sops
   ];
 
   hardware.facter.reportPath = ./facter.json;

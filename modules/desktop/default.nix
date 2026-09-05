@@ -1,6 +1,7 @@
 { lib, pkgs, ... }:
 {
   imports = [
+    ../common
     ./bluetooth.nix
     ./dms.nix
     ./file-manager.nix
@@ -10,6 +11,7 @@
     ./peripherals.nix
     ./pipewire.nix
     ./tailscale.nix
+    ./theme.nix
   ];
 
   services.accounts-daemon.enable = true;

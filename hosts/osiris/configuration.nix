@@ -7,19 +7,13 @@
   imports = [
     ./disko-config.nix
     ./services
-    ../../modules/common
     ../../modules/server
-    ../../modules/avahi.nix
     ../../modules/boot.nix
     ../../modules/disable-deep-sleep.nix
     ../../modules/oci-containers.nix
     ../../modules/intel-gpu.nix
     ../../modules/zfs.nix
-    ../../home-manager/home-manager.nix
     inputs.nixos-hardware.nixosModules.common-pc-ssd
-    inputs.disko.nixosModules.disko
-    inputs.home-manager.nixosModules.home-manager
-    inputs.sops-nix.nixosModules.sops
     inputs.nixflix.nixosModules.default
     inputs.niks3.nixosModules.default
   ];
