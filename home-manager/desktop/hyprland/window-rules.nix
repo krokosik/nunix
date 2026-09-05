@@ -1,23 +1,5 @@
-let
-  browser = "zen-twilight";
-  editor = "codium";
-in
 {
   wayland.windowManager.hyprland.settings = {
-    bindd = [
-      # APPLICATION LAUNCHERS
-      "SUPER SHIFT, F, File manager, exec, uwsm-app -- nautilus --new-window"
-      "SUPER SHIFT, B, Browser, exec, uwsm-app -- ${browser}"
-      "SUPER SHIFT ALT, B, Browser (private), exec, setsid uwsm-app -- ${browser} --private-window"
-      "SUPER SHIFT, N, Editor, exec, uwsm-app -- ${editor}"
-      "SUPER SHIFT, T, Activity, exec, dms ipc call widget toggle cpuUsage"
-      "SUPER SHIFT, G, Beeper, exec, launch-or-focus '^[Bb]eeper(texts)?$' -- beeper"
-      "SUPER SHIFT, O, Obsidian, exec, launch-or-focus '^obsidian$' -- obsidian"
-      "SUPER SHIFT, M, Mattermost, exec, launch-or-focus '^[Mm]attermost([\.-][Dd]esktop)?$' -- mattermost-desktop"
-      "SUPER CTRL, W, WiFi, exec, dms ipc call widget toggle controlCenterButton"
-      "SUPER CTRL, B, Bluetooth, exec, dms ipc call widget toggle controlCenterButton"
-    ];
-
     windowrule = [
       # Browser classification, opacity, tiling, and screen-sharing placement
       "tag +chromium-based-browser, match:class ((google-)?[cC]hrom(e|ium)|[bB]rave-browser|[mM]icrosoft-edge|Vivaldi-stable|helium)"
