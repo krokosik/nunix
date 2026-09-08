@@ -40,7 +40,7 @@
       "opacity 1 1, match:class qemu"
 
       # Scratchpad application placement
-      "workspace special:scratchpad, match:class ^(obsidian|[Bb]eeper(texts)?|[Mm]attermost([\\.-][Dd]esktop)?)$"
+      "workspace special:scratchpad, match:class ^((md\.)?[Oo]bsidian|[Bb]eeper(texts)?|[Mm]attermost([\\.-][Dd]esktop)?)$"
 
       # Steam window sizing, floating, opacity, and idle inhibition
       "float on, match:class steam"
