@@ -12,6 +12,7 @@
     ./pipewire.nix
     ./tailscale.nix
     ./theme.nix
+    ./tlp.nix
   ];
 
   services.accounts-daemon.enable = true;

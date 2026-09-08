@@ -8,7 +8,6 @@
   imports = [
     ./disko-config.nix
     ./surface.nix
-    ./power.nix
     inputs.nixos-hardware.nixosModules.microsoft-surface-pro-intel
     ../../modules/boot-limine.nix
     ../../modules/desktop
