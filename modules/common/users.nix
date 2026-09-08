@@ -4,7 +4,7 @@
   ...
 }:
 {
-  users.mutableUsers = false;
+  users.mutableUsers = true;
 
   sops.secrets.login_password_hash.neededForUsers = true;
 
