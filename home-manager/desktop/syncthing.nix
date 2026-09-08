@@ -34,6 +34,9 @@
         horus = {
           id = "K3O7KTE-DNJI5ER-XVDOVZK-I5TSY5Z-P2WRORE-QK57BHA-RM55CIL-NVA6UAM";
         };
+        isis = {
+          id = "F4A6FSM-WHSWT36-PI7A4XW-IDR3FL3-7TORBUX-M5THI4Z-56Z3KIW-ZTSODQX";
+        };
       };
       folders = {
         vault = {
@@ -42,6 +45,7 @@
             "lindbladian"
             "khonsu"
             "horus"
+            "isis"
           ];
           id = "7nqdz-vurey";
         };
