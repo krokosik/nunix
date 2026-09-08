@@ -31,6 +31,9 @@
         lindbladian = {
           id = "K5Y6JJO-IQD2LPY-IT3WGH5-HMEXXPB-MQHMEJK-YECAIZS-CCWLWA2-7X5U6A4";
         };
+        horus = {
+          id = "K3O7KTE-DNJI5ER-XVDOVZK-I5TSY5Z-P2WRORE-QK57BHA-RM55CIL-NVA6UAM";
+        };
       };
       folders = {
         vault = {
@@ -38,6 +41,7 @@
           devices = [
             "lindbladian"
             "khonsu"
+            "horus"
           ];
           id = "7nqdz-vurey";
         };
