@@ -49,6 +49,26 @@
           ];
           id = "7nqdz-vurey";
         };
+        dms-hypr = {
+          path = "${config.xdg.configHome}/hypr/dms";
+          devices = [
+            "lindbladian"
+            "khonsu"
+            "horus"
+            "isis"
+          ];
+          id = "a9heq-yzbov";
+        };
+        dms = {
+          path = "${config.xdg.configHome}/DankMaterialShell";
+          devices = [
+            "lindbladian"
+            "khonsu"
+            "horus"
+            "isis"
+          ];
+          id = "e3hvo-mqvsu";
+        };
       };
     };
   };
