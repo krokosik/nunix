@@ -58,6 +58,7 @@
             "isis"
           ];
           id = "a9heq-yzbov";
+          ignorePatterns = [ "outputs.conf" ];
         };
         dms = {
           path = "${config.xdg.configHome}/DankMaterialShell";
