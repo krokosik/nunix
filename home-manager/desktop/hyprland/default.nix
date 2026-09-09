@@ -40,11 +40,6 @@
       source = ${config.xdg.configHome}/hypr/dms/cursor.conf
       source = ${config.xdg.configHome}/hypr/dms/binds.conf
       source = ${config.xdg.configHome}/hypr/dms/windowrules.conf
-
-      # assign workspaces to monitors
-      workspace=name:1, monitor:desc:Dell Inc. DELL S2725QS 3H8D364
-      workspace=name:2, monitor:desc:BOE 0x0A1C
-      exec-once = hyprctl dispatch workspace 1
     '';
   };
 }
