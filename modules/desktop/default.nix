@@ -10,6 +10,7 @@
     ./network-manager.nix
     ./peripherals.nix
     ./pipewire.nix
+    ./plymouth.nix
     ./tailscale.nix
     ./theme.nix
     ./tlp.nix

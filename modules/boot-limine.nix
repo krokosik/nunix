@@ -1,29 +1,7 @@
+{ pkgs, ... }:
 {
-  config,
-  pkgs,
-  lib,
-  ...
-}:
-let
-  isDesktop = (config.role == "desktop");
-in
-{
-  environment.systemPackages = lib.mkIf isDesktop [
-    pkgs.sbctl
-    pkgs.plymouth
-  ];
 
-  # Limine Configuration with plymouth
   boot = {
-    consoleLogLevel = 0;
-    kernelParams = [
-      "quiet"
-      "udev.log_level=0"
-      "splash"
-      "loglevel=0"
-      "systemd.show_status=0"
-      "vt.global_cursor_default=0"
-    ];
     initrd = {
       systemd = {
         enable = true;
@@ -46,18 +24,5 @@ in
         canTouchEfiVariables = true;
       };
     };
-    plymouth = lib.mkIf isDesktop {
-      enable = true;
-    };
-  };
-
-  # hold on the plymouth splash screen for longer
-  systemd.services = lib.mkIf isDesktop {
-    plymouth-quit.after = [ "graphical.target" ];
-    plymouth-quit-wait.enable = false;
-
-    plymouth-poweroff.wantedBy = [ "poweroff.target" ];
-    plymouth-halt.wantedBy = [ "halt.target" ];
-    plymouth-reboot.wantedBy = [ "reboot.target" ];
   };
 }

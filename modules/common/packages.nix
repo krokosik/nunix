@@ -3,6 +3,9 @@
   ...
 }:
 {
+  # fix for ghostty terminfo
+  environment.enableAllTerminfo = true;
+
   # General systemwide packages
   environment.systemPackages = with pkgs; [
     btop
