@@ -3,8 +3,7 @@
   ...
 }:
 {
-  # fix for ghostty terminfo
-  environment.enableAllTerminfo = true;
+  services.flatpak.enable = true;
 
   # General systemwide packages
   environment.systemPackages = with pkgs; [
