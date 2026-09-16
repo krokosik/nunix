@@ -6,9 +6,10 @@
 }:
 let
   inherit (lib.attrsets) genAttrs;
-  inherit (lib.meta) getExe';
+  inherit (lib.meta) getExe getExe';
   inherit (lib.strings) concatMapStringsSep;
 
+  flatpakExe = getExe pkgs.flatpak;
   install = getExe' pkgs.coreutils "install";
   dmsFiles = [
     "DankMaterialShell/settings.json"
@@ -43,7 +44,25 @@ in
 
     home.username = username;
     home.homeDirectory = "/home/${username}";
+
+    home.packages = with pkgs; [
+      flatpak
+      bazaar
+    ];
+
+    programs.fish.shellAliases.flatpak = "${flatpakExe} --user";
+
+    systemd.user.services.flatpak-repo = {
+      Unit.Description = "Add the per-user Flathub remote";
+      Service = {
+        Type = "oneshot";
+        ExecStart = "${flatpakExe} remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo";
+      };
+      Install.WantedBy = [ "default.target" ];
+    };
   });
+
+  services.flatpak.enable = config.extraUsers != [ ];
 
   system.activationScripts.seedExtraUserDms = {
     deps = [ "users" ];

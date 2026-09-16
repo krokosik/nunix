@@ -3,8 +3,6 @@
   ...
 }:
 {
-  services.flatpak.enable = true;
-
   # General systemwide packages
   environment.systemPackages = with pkgs; [
     btop
