@@ -29,7 +29,7 @@
     ];
   };
 
-  role = "server"; # Set role of the machine (desktop/shared/server)
+  role = "server"; # Set role of the machine (desktop/server)
 
   networking.hostId = "aec20762"; # head -c4 /dev/urandom | od -A none -t x4
   networking.useNetworkd = true;

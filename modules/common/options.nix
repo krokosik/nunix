@@ -23,7 +23,6 @@
     role = lib.mkOption {
       type = lib.types.enum [
         "desktop"
-        "shared"
         "server"
       ];
       default = "server"; # least privileged by default
