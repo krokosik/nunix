@@ -24,10 +24,11 @@
   systemd.services = {
     plymouth-quit = {
       after = [ "multi-user.target" ];
-      serviceConfig.ExecStart = [
-        "${lib.getExe' pkgs.plymouth "plymouth"} quit --retain-splash"
+      serviceConfig.ExecStart = lib.mkForce [
+        "-${lib.getExe' pkgs.plymouth "plymouth"} quit --retain-splash"
       ];
     };
+    # We do not want boot to wait for splash to be dismissed
     plymouth-quit-wait.enable = false;
 
     plymouth-poweroff.wantedBy = [ "poweroff.target" ];
