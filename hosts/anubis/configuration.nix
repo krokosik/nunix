@@ -20,7 +20,7 @@
 
   home-manager.users.${config.username} = {
     imports = [
-      ../../home-manager/base.nix
+      ../../home-manager/shared/common
     ];
   };
 

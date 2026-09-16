@@ -16,7 +16,7 @@
   # Add the report generated with `run0 nix run github:numtide/nixos-facter --
   # --output hosts/horus/facter.json` before evaluating or deploying this host.
   hardware.facter.reportPath = ./facter.json;
-  
+
   role = "desktop";
 
   boot.initrd = {
@@ -34,8 +34,7 @@
 
   home-manager.users.${config.username} = {
     imports = [
-      ../../home-manager/base.nix
-      ../../home-manager/desktop
+      ../../home-manager/private/desktop
       ./apps
     ];
   };

@@ -20,6 +20,11 @@
       default = "krokosik";
       description = "Username for the main user account";
     };
+    extraUsers = lib.mkOption {
+      type = lib.types.listOf (lib.types.strMatching "^[a-z_][a-z0-9_-]*$");
+      default = [ ];
+      description = "Additional interactive users receiving the shared configuration";
+    };
     role = lib.mkOption {
       type = lib.types.enum [
         "desktop"

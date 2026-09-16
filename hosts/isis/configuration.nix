@@ -18,6 +18,7 @@
   hardware.facter.reportPath = ./facter.json;
 
   role = "desktop";
+  extraUsers = [ "guest" ];
 
   hardware.microsoft-surface.kernelVersion = "stable";
 
@@ -32,9 +33,7 @@
 
   home-manager.users.${config.username} = {
     imports = [
-      ../../home-manager/base.nix
-      ../../home-manager/desktop
-      ./apps
+      ../../home-manager/private/desktop
     ];
   };
 

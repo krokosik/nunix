@@ -7,6 +7,7 @@
 }:
 let
   rtk = pkgs.unstable.rtk;
+  skillsPath = "${../../../ai/skills}";
 in
 {
   home.packages = [ rtk ];
@@ -24,7 +25,7 @@ in
   programs.codex = {
     enable = true;
     package = pkgs.unstable.codex;
-    skills = "${../../ai/skills}";
+    skills = skillsPath;
     enableMcpIntegration = config.programs.mcp.enable;
   };
 
@@ -38,7 +39,7 @@ in
       nixpkgs-fmt
       ruff
     ];
-    skills = "${../../ai/skills}";
+    skills = skillsPath;
     enableMcpIntegration = config.programs.mcp.enable;
     settings = {
       autoupdate = false;

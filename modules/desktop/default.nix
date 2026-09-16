@@ -4,6 +4,7 @@
     ../common
     ./bluetooth.nix
     ./dms.nix
+    ./extra-users.nix
     ./file-manager.nix
     ./hyprland.nix
     ./greeter.nix
