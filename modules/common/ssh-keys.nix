@@ -5,6 +5,7 @@
     anubis = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGUTKDQm7saPW6jNaNQUgrABtzK3M8vQssCCCXLRryrG krokosik@anubis";
     horus = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKw9/vuQetryM92flnnOazWpHJSfvK9am/JVmUiZLHsu krokosik@horus";
     osiris = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID7sOgLyyDNodmu4kHYGbFWfKhYIQYRIxBRCBaPTD2vU krokosik@osiris";
+    isis = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPt1+HyL2KLfuEfNmOsSciwfIWmJMrEUAgpHbwg6iyIF krokosik@isis";
   };
 
   # Pin GitHub's published ED25519 host key for the github-secrets alias.
