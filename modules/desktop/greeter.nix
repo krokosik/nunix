@@ -36,8 +36,10 @@ in
 
   systemd = {
     services = {
-      greetd.serviceConfig.KeyringMode = lib.mkForce "inherit";
-      plymouth-quit.after = [ "greetd.service" ];
+      greetd = {
+        after = [ "plymouth-quit.service" ];
+        serviceConfig.KeyringMode = lib.mkForce "inherit";
+      };
     };
 
     tmpfiles.settings."11-tuigreet-last-user"."/var/cache/tuigreet/lastuser".f = {

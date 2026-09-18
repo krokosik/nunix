@@ -22,8 +22,6 @@ in
     "SUPER CTRL, W, WiFi, exec, dms ipc call widget toggle controlCenterButton"
     "SUPER CTRL, B, Bluetooth, exec, dms ipc call widget toggle controlCenterButton"
 
-    
-
     # WORKSPACE MANAGEMENT
     "SUPER, S, Toggle scratchpad, togglespecialworkspace, scratchpad"
     "SUPER ALT, S, Move window to scratchpad, movetoworkspacesilent, special:scratchpad"
