@@ -102,7 +102,6 @@ in
       "nvidia-settings" = "nvidia-settings --config=${configHome}/nvidia/settings";
       wget = "wget --hsts-file=${stateHome}/wget-hsts";
       code = "code --extensions-dir ${dataHome}/vscode";
-      codium = "codium --extensions-dir ${dataHome}/vscode";
     };
   };
 
@@ -110,7 +109,6 @@ in
     "nvidia-settings" = "nvidia-settings --config=${configHome}/nvidia/settings";
     wget = "wget --hsts-file=${stateHome}/wget-hsts";
     code = "code --extensions-dir ${dataHome}/vscode";
-    codium = "codium --extensions-dir ${dataHome}/vscode";
   };
 
   home.sessionPath = [

@@ -7,6 +7,18 @@
 let
   inherit (pkgs) vscode-extensions;
 
+  vscodium = pkgs.vscodium.overrideAttrs (oldAttrs: {
+    postPatch = (oldAttrs.postPatch or "") + /* bash */ ''
+      substituteInPlace resources/app/product.json \
+        --replace-fail '"dataFolderName": ".vscode-oss"' \
+        '"dataFolderName": ".local/share/codium"'
+
+      substituteInPlace resources/app/out/cli.js \
+        --replace-fail 'dataFolderName:".vscode-oss"' \
+        'dataFolderName:".local/share/codium"'
+    '';
+  });
+
   commonExtensions = with vscode-extensions; [
     aaron-bond.better-comments
     christian-kohler.path-intellisense
@@ -219,9 +231,11 @@ in
 {
   programs.vscodium = {
     enable = true;
-    package = pkgs.vscodium;
+    package = vscodium;
     profiles = profiles;
   };
+
+  home.file.".vscode-oss/extensions".target = ".local/share/codium/extensions";
 
   stylix.targets.vscodium.profileNames = lib.attrNames profiles;
 }
