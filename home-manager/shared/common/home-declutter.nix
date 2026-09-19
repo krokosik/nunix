@@ -9,6 +9,9 @@ let
 in
 {
   home.preferXdgDirectories = true;
+  # prevent creating .icons and .themes: https://github.com/nix-community/stylix/issues/1830
+  home.pointerCursor.dotIcons.enable = false;
+  stylix.targets.gtk.flatpakSupport.enable = false;
 
   # as per https://wiki.archlinux.org/title/XDG_Base_Directory#Partial
   home.sessionVariables = {
