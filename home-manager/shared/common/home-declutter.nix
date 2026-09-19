@@ -9,6 +9,12 @@ let
 in
 {
   home.preferXdgDirectories = true;
+
+  # Fish enables these caches by default, which creates ~/.manpath.
+  programs.man.generateCaches = false;
+
+  xresources.path = "${configHome}/X11/xresources";
+
   # prevent creating .icons and .themes: https://github.com/nix-community/stylix/issues/1830
   home.pointerCursor.dotIcons.enable = false;
   stylix.targets.gtk.flatpakSupport.enable = false;
