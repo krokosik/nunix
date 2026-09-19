@@ -50,6 +50,7 @@ in
         "networkmanager"
         "users"
         "wheel"
+        "input"
       ];
       uid = 1000;
       hashedPasswordFile = config.sops.secrets.login_password_hash.path; # Create with: echo -n "password" | mkpasswd -s
