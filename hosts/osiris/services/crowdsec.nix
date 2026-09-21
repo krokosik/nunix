@@ -142,7 +142,14 @@ in
   environment.shellAliases.cscli = "run0 -u crowdsec cscli";
 
   systemd.services.crowdsec-update-hub.serviceConfig.DynamicUser = lib.mkForce false;
-  systemd.services.crowdsec-firewall-bouncer.serviceConfig.DynamicUser = lib.mkForce false;
+  systemd.services.crowdsec-firewall-bouncer = {
+    startLimitIntervalSec = lib.mkForce 0;
+    serviceConfig = {
+      DynamicUser = lib.mkForce false;
+      Restart = "always";
+      RestartSec = "30s";
+    };
+  };
   systemd.services.crowdsec-firewall-bouncer-register.serviceConfig.DynamicUser = lib.mkForce false;
 
   sops.secrets = {

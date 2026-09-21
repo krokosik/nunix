@@ -238,8 +238,11 @@ in
           "network-online.target"
           "systemd-resolved.service"
         ];
+        startLimitIntervalSec = lib.mkForce 0;
         serviceConfig = {
           EnvironmentFile = config.sops.templates."traefik_cloudflare.env".path;
+          Restart = lib.mkForce "always";
+          RestartSec = "30s";
 
           # Traefik disables every plugin after one download fails, invalidating
           # all routers that use those plugin middlewares.

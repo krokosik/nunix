@@ -1,6 +1,7 @@
 {
   config,
   inputs,
+  lib,
   ...
 }:
 {
@@ -13,6 +14,15 @@
       "--advertise-tags=tag:server"
     ];
   };
+
+  systemd.services.tailscaled-autoconnect = {
+    startLimitIntervalSec = lib.mkForce 0;
+    serviceConfig = {
+      Restart = "on-failure";
+      RestartSec = "30s";
+    };
+  };
+
   sops.secrets.tailscale_server_auth_key = {
     sopsFile = "${inputs.my-secrets}/server/secrets.yaml";
     owner = "root";
