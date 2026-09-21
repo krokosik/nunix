@@ -1,10 +1,17 @@
 {
   inputs,
+  lib,
   pkgs,
   ...
 }:
 {
   imports = [ inputs.stylix.nixosModules.stylix ];
+
+  home-manager.sharedModules = lib.lists.singleton {
+    # Prevent Home Manager and Stylix from creating ~/.icons and ~/.themes.
+    home.pointerCursor.dotIcons.enable = false;
+    stylix.targets.gtk.flatpakSupport.enable = false;
+  };
 
   fonts.packages = with pkgs; [
     inter

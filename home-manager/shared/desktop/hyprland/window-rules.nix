@@ -1,106 +1,271 @@
 {
   wayland.windowManager.hyprland.settings = {
-    windowrule = [
-      # Browser classification, opacity, tiling, and screen-sharing placement
-      "tag +chromium-based-browser, match:class ((google-)?[cC]hrom(e|ium)|[bB]rave-browser|[mM]icrosoft-edge|Vivaldi-stable|helium)"
-      "tag +firefox-based-browser, match:class ([fF]irefox|zen|librewolf)"
-      "tag -default-opacity, match:tag chromium-based-browser"
-      "tag -default-opacity, match:tag firefox-based-browser"
-      "tag -chromium-based-browser, match:class (chrome-youtube.com__-Default|chrome-app.zoom.us__wc_home-Default)"
-      "tag -default-opacity, match:class (chrome-youtube.com__-Default|chrome-app.zoom.us__wc_home-Default)"
-      "tile on, match:tag chromium-based-browser"
-      "opacity 1.0 0.97, match:tag chromium-based-browser"
-      "opacity 1.0 0.97, match:tag firefox-based-browser"
-      "workspace special silent, match:title .*is sharing.*"
+    window_rule = [
+      # BROWSER CLASSIFICATION, OPACITY, TILING, AND SCREEN SHARING
+      {
+        match.class = "((google-)?[cC]hrom(e|ium)|[bB]rave-browser|[mM]icrosoft-edge|Vivaldi-stable|helium)";
+        tag = "+chromium-based-browser";
+      }
+      {
+        match.class = "([fF]irefox|zen|librewolf)";
+        tag = "+firefox-based-browser";
+      }
+      {
+        match.tag = "chromium-based-browser";
+        tag = "-default-opacity";
+      }
+      {
+        match.tag = "firefox-based-browser";
+        tag = "-default-opacity";
+      }
+      {
+        match.class = "(chrome-youtube.com__-Default|chrome-app.zoom.us__wc_home-Default)";
+        tag = "-chromium-based-browser";
+      }
+      {
+        match.class = "(chrome-youtube.com__-Default|chrome-app.zoom.us__wc_home-Default)";
+        tag = "-default-opacity";
+      }
+      {
+        match.tag = "chromium-based-browser";
+        tile = true;
+        opacity = "1.0 0.97";
+      }
+      {
+        match.tag = "firefox-based-browser";
+        opacity = "1.0 0.97";
+      }
+      {
+        match.title = ".*is sharing.*";
+        workspace = "special silent";
+      }
 
-      # FreeCAD addon manager floating behavior
-      "float on, match:class org.freecad.FreeCAD, match:title Addon Manager"
-      "no_follow_mouse on, match:class org.freecad.FreeCAD"
+      # FREECAD ADDON MANAGER FLOATING BEHAVIOR
+      {
+        match = {
+          class = "org.freecad.FreeCAD";
+          title = "Addon Manager";
+        };
+        float = true;
+      }
+      {
+        match.class = "org.freecad.FreeCAD";
+        no_follow_mouse = true;
+      }
 
-      # Inkscape popup and document-window behavior
-      "float on, match:class org.inkscape.Inkscape"
-      "float off, match:title .*( - Inkscape)$"
+      # INKSCAPE POPUP AND DOCUMENT-WINDOW BEHAVIOR
+      {
+        match.class = "org.inkscape.Inkscape";
+        float = true;
+      }
+      {
+        match.title = ".*( - Inkscape)$";
+        float = false;
+      }
 
-      # LocalSend and file-picker placement
-      "float on, match:class (Share|localsend)"
-      "center on, match:class (Share|localsend)"
+      # LOCALSEND AND FILE-PICKER PLACEMENT
+      {
+        match.class = "(Share|localsend)";
+        float = true;
+        center = true;
+      }
 
-      # Picture-in-picture sizing, pinning, and placement
-      "tag +pip, match:title (Picture.?in.?[Pp]icture)"
-      "float on, match:tag pip"
-      "pin on, match:tag pip"
-      "size 600 338, match:tag pip"
-      "keep_aspect_ratio on, match:tag pip"
-      "border_size 0, match:tag pip"
-      "opacity 1 1, match:tag pip"
-      "move (monitor_w-window_w-40) (monitor_h*0.04), match:tag pip"
+      # PICTURE-IN-PICTURE SIZING, PINNING, AND PLACEMENT
+      {
+        match.title = "(Picture.?in.?[Pp]icture)";
+        tag = "+pip";
+      }
+      {
+        match.tag = "pip";
+        float = true;
+        pin = true;
+        size = [
+          600
+          338
+        ];
+        keep_aspect_ratio = true;
+        border_size = 0;
+        opacity = "1 1";
+        move = [
+          "monitor_w-window_w-40"
+          "monitor_h*0.04"
+        ];
+      }
 
-      # QEMU opacity exceptions
-      "tag -default-opacity, match:class qemu"
-      "opacity 1 1, match:class qemu"
+      # QEMU OPACITY EXCEPTIONS
+      {
+        match.class = "qemu";
+        tag = "-default-opacity";
+        opacity = "1 1";
+      }
 
-      # Scratchpad application placement
-      "workspace special:scratchpad, match:class ^((md\.)?[Oo]bsidian|[Bb]eeper(texts)?|[Mm]attermost([\\.-][Dd]esktop)?)$"
+      # SCRATCHPAD APPLICATION PLACEMENT
+      {
+        match.class = "^((md\\.)?[Oo]bsidian|[Bb]eeper(texts)?|[Mm]attermost([\\.-][Dd]esktop)?)$";
+        workspace = "special:scratchpad";
+      }
 
-      # Steam window sizing, floating, opacity, and idle inhibition
-      "float on, match:class steam"
-      "center on, match:class steam, match:title Steam"
-      "opacity 1 1, match:class steam"
-      "size 1100 700, match:class steam, match:title Steam"
-      "size 460 800, match:class steam, match:title Friends List"
-      "idle_inhibit fullscreen, match:class steam"
-      "no_initial_focus on, match:class ^(steam)$, match:title ^(notificationtoasts)"
-      "pin on, match:class ^(steam)$, match:title ^(notificationtoasts)"
+      # STEAM WINDOW SIZING, FLOATING, OPACITY, AND IDLE INHIBITION
+      {
+        match.class = "steam";
+        float = true;
+        opacity = "1 1";
+        idle_inhibit = "fullscreen";
+      }
+      {
+        match = {
+          class = "steam";
+          title = "Steam";
+        };
+        center = true;
+        size = [
+          1100
+          700
+        ];
+      }
+      {
+        match = {
+          class = "steam";
+          title = "Friends List";
+        };
+        size = [
+          460
+          800
+        ];
+      }
+      {
+        match = {
+          class = "^(steam)$";
+          title = "^(notificationtoasts)";
+        };
+        no_initial_focus = true;
+        pin = true;
+      }
 
-      # Generic floating dialogs and media-window opacity
-      "float on, match:tag floating-window"
-      "center on, match:tag floating-window"
-      "size 875 600, match:tag floating-window"
-      "tag +floating-window, match:class (org.omarchy.bluetui|org.omarchy.impala|org.omarchy.wiremix|org.omarchy.btop|org.omarchy.terminal|org.omarchy.bash|org.gnome.NautilusPreviewer|org.gnome.Evince|com.gabm.satty|Omarchy|About|TUI.float|imv|mpv)"
-      "tag +floating-window, match:class (xdg-desktop-portal-gtk|sublime_text|DesktopEditors|org.gnome.Nautilus), match:title ^(Open.*Files?|Open [F|f]older.*|Save.*Files?|Save.*As|Save|All Files|.*wants to [open|save].*|[C|c]hoose.*|File.*|Save.*)"
-      "float on, match:class (zenity|kdialog)"
-      "float on, match:class org.gnome.Calculator"
-      "float on, match:class tics pro.exe"
-      "tag -default-opacity, match:class ^(blender|FreeCad|OrcaSlicer|BambuStudio|zoom|vlc|mpv|org.kde.kdenlive|com.obsproject.Studio|com.github.PintaProject.Pinta|imv|org.gnome.NautilusPreviewer)$"
-      "opacity 1 1, match:class ^(blender|FreeCad|OrcaSlicer|BambuStudio|zoom|vlc|mpv|org.kde.kdenlive|com.obsproject.Studio|com.github.PintaProject.Pinta|imv|org.gnome.NautilusPreviewer)$"
-      "fullscreen 1, match:class com.moonlight_stream.Moonlight"
-      "idle_inhibit fullscreen, match:class com.moonlight_stream.Moonlight"
-      "float on, match:class python3"
-      "size 800 600, match:class python3"
-      "no_initial_focus on, match:class python3"
-      "rounding 8, match:tag pop"
-      "idle_inhibit always, match:tag noidle"
-      "float on, match:class ^(xdg-desktop-portal)$"
+      # GENERIC FLOATING DIALOGS AND MEDIA-WINDOW OPACITY
+      {
+        match.tag = "floating-window";
+        float = true;
+        center = true;
+        size = [
+          875
+          600
+        ];
+      }
+      {
+        match.class = "(org.omarchy.bluetui|org.omarchy.impala|org.omarchy.wiremix|org.omarchy.btop|org.omarchy.terminal|org.omarchy.bash|org.gnome.NautilusPreviewer|org.gnome.Evince|com.gabm.satty|Omarchy|About|TUI.float|imv|mpv)";
+        tag = "+floating-window";
+      }
+      {
+        match = {
+          class = "(xdg-desktop-portal-gtk|sublime_text|DesktopEditors|org.gnome.Nautilus)";
+          title = "^(Open.*Files?|Open [F|f]older.*|Save.*Files?|Save.*As|Save|All Files|.*wants to [open|save].*|[C|c]hoose.*|File.*|Save.*)";
+        };
+        tag = "+floating-window";
+      }
+      {
+        match.class = "(zenity|kdialog)";
+        float = true;
+      }
+      {
+        match.class = "org.gnome.Calculator";
+        float = true;
+      }
+      {
+        match.class = "tics pro.exe";
+        float = true;
+      }
+      {
+        match.class = "^(blender|FreeCad|OrcaSlicer|BambuStudio|zoom|vlc|mpv|org.kde.kdenlive|com.obsproject.Studio|com.github.PintaProject.Pinta|imv|org.gnome.NautilusPreviewer)$";
+        tag = "-default-opacity";
+        opacity = "1 1";
+      }
+      {
+        match.class = "com.moonlight_stream.Moonlight";
+        fullscreen = true;
+        idle_inhibit = "fullscreen";
+      }
+      {
+        match.class = "python3";
+        float = true;
+        size = [
+          800
+          600
+        ];
+        no_initial_focus = true;
+      }
+      {
+        match.tag = "pop";
+        rounding = 8;
+      }
+      {
+        match.tag = "noidle";
+        idle_inhibit = "always";
+      }
+      {
+        match.class = "^(xdg-desktop-portal)$";
+        float = true;
+      }
 
-      # Terminal tagging and opacity
-      "tag +terminal, match:class (Alacritty|kitty|com.mitchellh.ghostty)"
-      "tag -default-opacity, match:tag terminal"
-      "opacity 0.97 0.9, match:tag terminal"
+      # TERMINAL TAGGING AND OPACITY
+      {
+        match.class = "(Alacritty|kitty|com.mitchellh.ghostty)";
+        tag = "+terminal";
+      }
+      {
+        match.tag = "terminal";
+        tag = "-default-opacity";
+        opacity = "0.97 0.9";
+      }
 
-      # Webcam overlay placement and focus behavior
-      "float on, match:title WebcamOverlay"
-      "pin on, match:title WebcamOverlay"
-      "no_initial_focus on, match:title WebcamOverlay"
-      "no_dim on, match:title WebcamOverlay"
-      "move (monitor_w-window_w-40) (monitor_h-window_h-40), match:title WebcamOverlay"
+      # WEBCAM OVERLAY PLACEMENT AND FOCUS BEHAVIOR
+      {
+        match.title = "WebcamOverlay";
+        float = true;
+        pin = true;
+        no_initial_focus = true;
+        no_dim = true;
+        move = [
+          "monitor_w-window_w-40"
+          "monitor_h-window_h-40"
+        ];
+      }
 
-      # Wine application floating behavior
-      "float on, match:tag wine-window"
-      "center on, match:tag wine-window"
-      "tag +wine-window, match:class (.*\\.exe)$"
+      # WINE APPLICATION FLOATING BEHAVIOR
+      {
+        match.tag = "wine-window";
+        float = true;
+        center = true;
+      }
+      {
+        match.class = "(.*\\.exe)$";
+        tag = "+wine-window";
+      }
 
-      # Zotero popup and main-window tagging
-      "tag +floating-window, match:class Zotero"
-      "tag -floating-window, match:title .*( - Zotero)$"
-      "tag -floating-window, match:title Zotero"
+      # ZOTERO POPUP AND MAIN-WINDOW TAGGING
+      {
+        match.class = "Zotero";
+        tag = "+floating-window";
+      }
+      {
+        match.title = ".*( - Zotero)$";
+        tag = "-floating-window";
+      }
+      {
+        match.title = "Zotero";
+        tag = "-floating-window";
+      }
     ];
 
-    layerrule = [
-      # Screenshot selection layer animation
-      "no_anim on, match:namespace selection"
-
-      # Walker layer animation
-      "no_anim on, match:namespace walker"
+    layer_rule = [
+      {
+        match.namespace = "selection";
+        no_anim = true;
+      }
+      {
+        match.namespace = "walker";
+        no_anim = true;
+      }
     ];
   };
 }

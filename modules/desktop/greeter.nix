@@ -1,14 +1,18 @@
 {
   config,
+  inputs,
   lib,
-  pkgs,
   ...
 }:
-let
-  inherit (lib.meta) getExe;
-  inherit (lib.strings) escapeShellArgs;
-in
 {
+  imports = [ inputs.dank-greeter.nixosModules.default ];
+
+  programs.dms-greeter = {
+    enable = true;
+    compositor.name = "hyprland";
+    configHome = "/home/${config.username}";
+  };
+
   security.pam.services.greetd = {
     enableGnomeKeyring = true;
     rules.auth.systemd_loadkey = {
@@ -20,33 +24,15 @@ in
 
   services.gnome.gnome-keyring.enable = true;
 
-  services.greetd = {
-    enable = true;
-    useTextGreeter = true;
-    settings.default_session = {
-      command = escapeShellArgs [
-        (getExe pkgs.tuigreet)
-        "--remember"
-        "--cmd"
-        "${getExe config.programs.uwsm.package} start -e -D Hyprland hyprland.desktop"
-      ];
-      user = "greeter";
+  services.greetd.settings.default_session.user = "greeter";
+
+  systemd.services.greetd = {
+    after = [ "plymouth-quit.service" ];
+    serviceConfig = {
+      KeyringMode = lib.mkForce "inherit";
+      StandardError = "journal";
     };
   };
 
-  systemd = {
-    services = {
-      greetd = {
-        after = [ "plymouth-quit.service" ];
-        serviceConfig.KeyringMode = lib.mkForce "inherit";
-      };
-    };
-
-    tmpfiles.settings."11-tuigreet-last-user"."/var/cache/tuigreet/lastuser".f = {
-      user = "greeter";
-      group = "greeter";
-      mode = "0644";
-      argument = config.username;
-    };
-  };
+  systemd.services."user@".serviceConfig.StandardError = "journal";
 }

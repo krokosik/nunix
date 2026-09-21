@@ -1,16 +1,23 @@
 {
   wayland.windowManager.hyprland = {
-    settings.exec-once = [
-      "[silent] uwsm-app -- obsidian"
-      "[silent] uwsm-app -- protonvpn-app"
-      "[silent] uwsm-app -- mattermost-desktop"
-      "[silent] uwsm-app -- beeper"
+    settings.workspace_rule = [
+      {
+        workspace = "name:1";
+        monitor = "desc:Dell Inc. DELL S2725QS 3H8D364";
+      }
+      {
+        workspace = "name:2";
+        monitor = "desc:BOE 0x0A1C";
+      }
     ];
-    extraConfig = ''
-      # assign workspaces to monitors
-      workspace=name:1, monitor:desc:Dell Inc. DELL S2725QS 3H8D364
-      workspace=name:2, monitor:desc:BOE 0x0A1C
-      exec-once = hyprctl dispatch workspace 1
+    extraConfig = /* lua */ ''
+      hl.on("hyprland.start", function()
+        hl.exec_cmd("uwsm-app -- obsidian")
+        hl.exec_cmd("uwsm-app -- protonvpn-app")
+        hl.exec_cmd("uwsm-app -- mattermost-desktop")
+        hl.exec_cmd("uwsm-app -- beeper")
+        hl.exec_cmd("hyprctl dispatch workspace 1")
+      end)
     '';
   };
 }

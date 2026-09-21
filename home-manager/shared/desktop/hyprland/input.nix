@@ -1,6 +1,6 @@
 {
   wayland.windowManager.hyprland.settings = {
-    input = {
+    config.input = {
       kb_layout = "pl";
       kb_options = "compose:caps";
       repeat_rate = 40;
@@ -14,9 +14,15 @@
       };
     };
 
-    windowrule = [
-      "scroll_touchpad 1.5, match:class (Alacritty|kitty)"
-      "scroll_touchpad 0.2, match:class com.mitchellh.ghostty"
+    window_rule = [
+      {
+        match.class = "(Alacritty|kitty)";
+        scroll_touchpad = 1.5;
+      }
+      {
+        match.class = "com.mitchellh.ghostty";
+        scroll_touchpad = 0.2;
+      }
     ];
   };
 }

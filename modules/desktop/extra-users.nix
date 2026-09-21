@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -11,7 +12,22 @@ let
 
   flatpakExe = getExe pkgs.flatpak;
   install = getExe' pkgs.coreutils "install";
-  dmsFiles = [
+  dmsHyprlandConfig = pkgs.callPackage (
+    { runCommand }:
+    runCommand "dms-hyprland-config" { } /* bash */ ''
+      mkdir --parents "$out"
+      cp "${inputs.dms}/core/internal/config/embedded/hypr-colors.lua" "$out/colors.lua"
+      cp "${inputs.dms}/core/internal/config/embedded/hypr-outputs.lua" "$out/outputs.lua"
+      cp "${inputs.dms}/core/internal/config/embedded/hypr-layout.lua" "$out/layout.lua"
+      cp "${inputs.dms}/core/internal/config/embedded/hypr-cursor.lua" "$out/cursor.lua"
+      cp "${inputs.dms}/core/internal/config/embedded/hypr-binds.lua" "$out/binds.lua"
+      cp "${inputs.dms}/core/internal/config/embedded/hypr-binds-user.lua" "$out/binds-user.lua"
+      cp "${inputs.dms}/core/internal/config/embedded/hypr-windowrules.lua" "$out/windowrules.lua"
+      substituteInPlace "$out/binds.lua" \
+        --replace-fail '{{TERMINAL_COMMAND}}' 'uwsm-app -- ghostty'
+    ''
+  ) { };
+  legacyDmsFiles = [
     "DankMaterialShell/settings.json"
     "DankMaterialShell/zen.css"
     "hypr/dms/binds.conf"
@@ -21,6 +37,31 @@ let
     "hypr/dms/outputs.conf"
     "hypr/dms/windowrules.conf"
   ];
+  dmsLuaFiles = [
+    "binds.lua"
+    "binds-user.lua"
+    "colors.lua"
+    "cursor.lua"
+    "layout.lua"
+    "outputs.lua"
+    "windowrules.lua"
+  ];
+  dmsFiles = legacyDmsFiles ++ map (file: "hypr/dms/${file}") dmsLuaFiles;
+  initializePrimaryDms = /* bash */ ''
+    ${install} \
+      --directory \
+      --owner=${config.username} \
+      --group=${config.username} \
+      --mode=0700 \
+      "/home/${config.username}/.config/hypr/dms"
+
+    ${concatMapStringsSep "\n" (file: ''
+      copy_if_missing \
+        "${dmsHyprlandConfig}/${file}" \
+        "/home/${config.username}/.config/hypr/dms/${file}" \
+        "${config.username}"
+    '') dmsLuaFiles}
+  '';
   seedDmsConfig = username: /* bash */ ''
     ${install} \
       --directory \
@@ -81,6 +122,8 @@ in
             "$destination"
         fi
       }
+
+      ${initializePrimaryDms}
 
       ${concatMapStringsSep "\n" seedDmsConfig config.extraUsers}
     '';

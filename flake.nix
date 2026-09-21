@@ -39,6 +39,21 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    dms = {
+      url = "github:AvengeMedia/DankMaterialShell/v1.6.2";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    dms-plugin-registry = {
+      url = "github:AvengeMedia/dms-plugin-registry";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    dank-greeter = {
+      url = "github:AvengeMedia/dank-greeter/v1.6.2";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     voxtype.url = "github:peteonrails/voxtype/v0.7.1";
 
     zen-browser = {

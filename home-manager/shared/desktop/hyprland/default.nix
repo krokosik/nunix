@@ -1,4 +1,4 @@
-{ config, ... }:
+{ lib, ... }:
 {
   imports = [
     ./bindings.nix
@@ -12,34 +12,74 @@
   wayland.windowManager.hyprland = {
     enable = true;
     package = null;
-    configType = "hyprlang";
+    configType = "lua";
 
-    extraConfig = /* hyprlang */ ''
-      # ANIMATIONS
-      animations {
-        enabled = true
-        animation = windowsIn, 1, 3, default
-        animation = windowsOut, 1, 3, default
-        animation = workspaces, 1, 5, default
-        animation = windowsMove, 1, 4, default
-        animation = fade, 1, 3, default
-        animation = border, 1, 3, default
-      }
+    settings = {
+      config = {
+        animations.enabled = true;
+        master.mfact = 0.5;
+      };
 
-      master {
-        mfact = 0.5
-      }
+      animation = [
+        {
+          leaf = "windowsIn";
+          enabled = true;
+          speed = 3;
+          bezier = "default";
+        }
+        {
+          leaf = "windowsOut";
+          enabled = true;
+          speed = 3;
+          bezier = "default";
+        }
+        {
+          leaf = "workspaces";
+          enabled = true;
+          speed = 5;
+          bezier = "default";
+        }
+        {
+          leaf = "windowsMove";
+          enabled = true;
+          speed = 4;
+          bezier = "default";
+        }
+        {
+          leaf = "fade";
+          enabled = true;
+          speed = 3;
+          bezier = "default";
+        }
+        {
+          leaf = "border";
+          enabled = true;
+          speed = 3;
+          bezier = "default";
+        }
+      ];
 
-      layerrule = no_anim on, match:namespace ^(quickshell)$
-      layerrule = no_anim on, match:namespace ^dms:.*
+      layer_rule = [
+        {
+          match.namespace = "^(quickshell)$";
+          no_anim = true;
+        }
+        {
+          match.namespace = "^dms:.*";
+          no_anim = true;
+        }
+      ];
+    };
 
-      # DMS-generated files intentionally load last and remain dynamic.
-      source = ${config.xdg.configHome}/hypr/dms/colors.conf
-      source = ${config.xdg.configHome}/hypr/dms/outputs.conf
-      source = ${config.xdg.configHome}/hypr/dms/layout.conf
-      source = ${config.xdg.configHome}/hypr/dms/cursor.conf
-      source = ${config.xdg.configHome}/hypr/dms/binds.conf
-      source = ${config.xdg.configHome}/hypr/dms/windowrules.conf
+    extraConfig = lib.modules.mkAfter /* lua */ ''
+      -- DMS-generated files intentionally load last and remain dynamic.
+      require("dms.colors")
+      require("dms.outputs")
+      require("dms.layout")
+      require("dms.cursor")
+      require("dms.binds")
+      require("dms.binds-user")
+      require("dms.windowrules")
     '';
   };
 }

@@ -1,7 +1,12 @@
-{ pkgs, ... }:
+{ inputs, pkgs, ... }:
 
 {
-  programs.dms-shell = {
+  imports = [
+    inputs.dms.nixosModules.dank-material-shell
+    inputs.dms-plugin-registry.nixosModules.default
+  ];
+
+  programs.dank-material-shell = {
     enable = true;
     enableAudioWavelength = true;
     enableCalendarEvents = false;
@@ -13,17 +18,17 @@
       restartIfChanged = true;
     };
 
-    # For sha, use nix store prefetch-file --unpack --json <link to tar.gz>
-    plugins = {
-      screenRecorderLH = {
-        src = pkgs.fetchFromGitHub {
-          owner = "hthienloc";
-          repo = "dms-screen-recorder";
-          rev = "v1.1";
-          sha256 = "sha256-Gd7beNQYGnSlEyyE3hRnHEWXOhIMqlA1TNL1fFJR2FE=";
-        };
-      };
-    };
+    plugins.quickCapture.enable = true;
   };
 
+  # plugin deps
+  environment.systemPackages = with pkgs; [
+    # quick capture
+    ffmpeg
+    gpu-screen-recorder
+    imagemagick
+    img2pdf
+    tesseract
+    zbar
+  ];
 }
