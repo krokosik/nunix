@@ -153,6 +153,16 @@ in
     '';
   };
 
+  # # iptsd exposes virtual input devices; applications need libwacom's Surface
+  # # bus support as well as its tablet definitions. Keep this override host-local.
+  nixpkgs.overlays = singleton (
+    _final: prev: {
+      libwacom = prev.callPackage "${inputs.nixpkgs}/pkgs/by-name/li/libwacom-surface/package.nix" {
+        libwacom = prev.libwacom;
+      };
+    }
+  );
+
   # iio-hyprland consumes accelerometer orientation from iio-sensor-proxy.
   hardware.sensor.iio.enable = true;
 
