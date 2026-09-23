@@ -7,6 +7,7 @@
     ./garage.nix
     ./immich.nix
     ./ip2location.nix
+    ./livesync.nix
     ./nixflix.nix
     ./niks3.nix
     ./geoipupdate.nix
