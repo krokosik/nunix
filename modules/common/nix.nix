@@ -35,6 +35,8 @@ in
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "niks3-1:hTt2LKPgxvboGPM2ZNZYLhuAkUQVJz9SmxDZh6vWqtw="
     ];
+    connect-timeout = 2;
+    fallback = true;
 
     use-xdg-base-directories = true;
   };
