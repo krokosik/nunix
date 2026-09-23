@@ -12,10 +12,6 @@
     ];
     extraConfig = /* lua */ ''
       hl.on("hyprland.start", function()
-        hl.exec_cmd("uwsm-app -- obsidian")
-        hl.exec_cmd("uwsm-app -- protonvpn-app")
-        hl.exec_cmd("uwsm-app -- mattermost-desktop")
-        hl.exec_cmd("uwsm-app -- beeper")
         hl.exec_cmd("hyprctl dispatch workspace 1")
       end)
     '';

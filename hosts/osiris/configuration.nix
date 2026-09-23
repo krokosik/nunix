@@ -1,11 +1,13 @@
 {
   config,
   inputs,
+  lib,
   ...
 }:
 {
   imports = [
     ./disko-config.nix
+    ./storage-disko.nix
     ./services
     ../../modules/server
     ../../modules/boot.nix
@@ -33,6 +35,8 @@
 
   networking.hostId = "aec20762"; # head -c4 /dev/urandom | od -A none -t x4
   networking.useNetworkd = true;
+
+  boot.zfs.extraPools = lib.lists.singleton "tank";
 
   # Swap (zram)
   zramSwap.enable = true;
