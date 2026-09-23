@@ -12,6 +12,8 @@
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
+    opencode-flake.url = "github:noblepayne/opencode-flake";
+
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
     disko = {

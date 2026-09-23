@@ -677,6 +677,22 @@
     },
     "nixpkgs_5": {
       "locked": {
+        "lastModified": 1774709303,
+        "narHash": "sha256-D3Q07BbIA2KnTcSXIqqu9P586uWxN74zNoCH3h2ESHg=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "8110df5ad7abf5d4c0f6fb0f8f978390e77f9685",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_6": {
+      "locked": {
         "lastModified": 1774386573,
         "narHash": "sha256-4hAV26quOxdC6iyG7kYaZcM3VOskcPUrdCQd/nx8obc=",
         "owner": "NixOS",
@@ -713,6 +729,24 @@
       "original": {
         "owner": "nix-community",
         "repo": "NUR",
+        "type": "github"
+      }
+    },
+    "opencode-flake": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_5"
+      },
+      "locked": {
+        "lastModified": 1789762584,
+        "narHash": "sha256-jSocBuMYZCTNEIDv4TYspzKOSlqeayx68UChKpYlFYk=",
+        "owner": "noblepayne",
+        "repo": "opencode-flake",
+        "rev": "414c8241f25f2ab2c26ab5fda83f3f1aaf135ad8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "noblepayne",
+        "repo": "opencode-flake",
         "type": "github"
       }
     },
@@ -782,6 +816,7 @@
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_4",
         "nixpkgs-unstable": "nixpkgs-unstable",
+        "opencode-flake": "opencode-flake",
         "run0-sudo-shim": "run0-sudo-shim",
         "sops-nix": "sops-nix",
         "stylix": "stylix",
@@ -1080,7 +1115,7 @@
     "voxtype": {
       "inputs": {
         "flake-utils": "flake-utils_3",
-        "nixpkgs": "nixpkgs_5"
+        "nixpkgs": "nixpkgs_6"
       },
       "locked": {
         "lastModified": 1778507024,

@@ -46,7 +46,7 @@ in
 
   programs.opencode = {
     enable = true;
-    package = pkgs.unstable.opencode;
+    package = inputs.opencode-flake.packages.${pkgs.stdenv.hostPlatform.system}.opencode;
     extraPackages = with pkgs; [
       uv
       nixd
