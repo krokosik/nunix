@@ -12,6 +12,8 @@ let
   flakePath = "/home/${user}/work/nunix";
 in
 {
+  nix.channel.enable = false;
+
   nix.settings = {
     # Enable flakes
     experimental-features = [
