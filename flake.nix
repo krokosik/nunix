@@ -134,6 +134,7 @@
         };
         horus = mkSystem { host = "horus"; };
         isis = mkSystem { host = "isis"; };
+        lindbladian = mkSystem { host = "lindbladian"; };
       };
 
       formatter.x86_64-linux = pkgs.nixfmt-tree;

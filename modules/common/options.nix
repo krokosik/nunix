@@ -23,7 +23,11 @@
     extraUsers = lib.mkOption {
       type = lib.types.listOf (lib.types.strMatching "^[a-z_][a-z0-9_-]*$");
       default = [ ];
-      description = "Additional interactive users receiving the shared configuration";
+      description = ''
+        Additional interactive users receiving the shared configuration.
+        Each user requires a password hash under login_password_hashes/<username>
+        in the host's encrypted secrets.yaml.
+      '';
     };
     role = lib.mkOption {
       type = lib.types.enum [

@@ -22,9 +22,6 @@
 
   hardware.microsoft-surface.kernelVersion = "stable";
 
-  # Enroll boot keys explicitly after checking Surface UEFI support and backups.
-  boot.loader.limine.secureBoot.autoEnrollKeys.enable = lib.modules.mkForce false;
-
   # Keep kernel builds within the tablet's memory budget.
   nix.settings = {
     max-jobs = 1;
