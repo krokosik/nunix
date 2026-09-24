@@ -12,6 +12,7 @@ let
 
   flatpakExe = getExe pkgs.flatpak;
   install = getExe' pkgs.coreutils "install";
+  chown = getExe' pkgs.coreutils "chown";
   dmsHyprlandConfig = pkgs.callPackage (
     { runCommand }:
     runCommand "dms-hyprland-config" { } /* bash */ ''
@@ -55,6 +56,11 @@ let
       --mode=0700 \
       "/home/${config.username}/.config/hypr/dms"
 
+    # install --directory owns the final directory, but not parents it creates.
+    ${chown} --no-dereference ${config.username}:${config.username} \
+      "/home/${config.username}/.config" \
+      "/home/${config.username}/.config/hypr"
+
     ${concatMapStringsSep "\n" (file: ''
       copy_if_missing \
         "${dmsHyprlandConfig}/${file}" \
@@ -70,6 +76,10 @@ let
       --mode=0700 \
       "/home/${username}/.config/DankMaterialShell" \
       "/home/${username}/.config/hypr/dms"
+
+    ${chown} --no-dereference ${username}:${username} \
+      "/home/${username}/.config" \
+      "/home/${username}/.config/hypr"
 
     ${concatMapStringsSep "\n" (file: ''
       copy_if_missing \
