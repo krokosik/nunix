@@ -32,6 +32,10 @@
     };
   };
 
+  systemd.services.immich-server.unitConfig.RequiresMountsFor = [
+    config.services.immich.mediaLocation
+  ];
+
   mkPostgresServices.immich = { };
 
   services.postgresql = {

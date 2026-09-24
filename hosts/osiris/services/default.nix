@@ -13,6 +13,7 @@
     ./geoipupdate.nix
     ./postgresql.nix
     ./splitpro.nix
+    ./storage-backups.nix
     ./traefik.nix
   ];
 }

@@ -55,6 +55,21 @@
           type = "zfs_fs";
           options.mountpoint = "none";
         };
+        "data/media" = {
+          type = "zfs_fs";
+          options.mountpoint = "legacy";
+          mountpoint = "/srv/media";
+        };
+        "data/immich" = {
+          type = "zfs_fs";
+          options.mountpoint = "legacy";
+          mountpoint = "/var/lib/immich";
+        };
+        "data/postgresql-backups" = {
+          type = "zfs_fs";
+          options.mountpoint = "legacy";
+          mountpoint = "/var/backup/postgresql";
+        };
         reserved = {
           type = "zfs_fs";
           options = {

@@ -1,4 +1,8 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  ...
+}:
 {
   sops.secrets = {
     sonarr_api_key.key = "sonarr/api_key";
@@ -165,6 +169,12 @@
       enable = false;
     };
   };
+
+  systemd.services.sonarr.unitConfig.RequiresMountsFor = [ config.nixflix.mediaDir ];
+  systemd.services.radarr.unitConfig.RequiresMountsFor = [ config.nixflix.mediaDir ];
+  systemd.services.jellyfin.unitConfig.RequiresMountsFor = [ config.nixflix.mediaDir ];
+  systemd.services.qbittorrent.unitConfig.RequiresMountsFor = [ config.nixflix.mediaDir ];
+  systemd.services.maintainerr.unitConfig.RequiresMountsFor = [ config.nixflix.mediaDir ];
 
   mkTraefikServices = {
     sonarr = {
