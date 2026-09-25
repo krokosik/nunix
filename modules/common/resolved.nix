@@ -1,5 +1,15 @@
 {
-  networking.nameservers = [
+  config,
+  lib,
+  ...
+}:
+let
+  nm = config.networking.networkmanager.enable;
+  inherit (lib) mkIf;
+  ifStatic = mkIf (!nm);
+in
+{
+  networking.nameservers = ifStatic [
     "1.1.1.1#one.one.one.one"
     "1.0.0.1#one.one.one.one"
   ];
@@ -9,13 +19,14 @@
 
     settings = {
       Resolve = {
-        DNSSEC = "true";
-        Domains = [ "~." ];
-        FallbackDNS = [
+        DNSSEC = ifStatic "true";
+        MulticastDNS = "resolve";
+        Domains = ifStatic [ "~." ];
+        FallbackDNS = ifStatic [
           "1.1.1.1#one.one.one.one"
           "1.0.0.1#one.one.one.one"
         ];
-        DNSOverTLS = "true";
+        DNSOverTLS = ifStatic "true";
         DNSStubListenerExtra = "172.17.0.1";
       };
     };
