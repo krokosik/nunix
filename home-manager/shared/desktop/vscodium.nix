@@ -1,5 +1,5 @@
 {
-  config,
+  osConfig,
   lib,
   pkgs,
   ...
@@ -33,10 +33,10 @@ let
     continue.continue
   ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
     {
-      publisher = "czhang03";
-      name = "unicode-math-input";
-      version = "0.7.0";
-      sha256 = "sha256-uVTL16oTJYfeYasHgYxnULZMPxIfUifeDxsajjRVHx4=";
+      publisher = "yellpika";
+      name = "latex-input";
+      version = "2.3.0";
+      sha256 = "sha256-wWhqMbHzUW9Ar44Jur0zZPM/bTQD04sD2J2L0v4qmcs=";
     }
   ];
 
@@ -86,16 +86,6 @@ let
     "remote.SSH.enableX11Forwarding" = false;
     "remote.SSH.useExecServer" = false;
     "remote.SSH.useLocalServer" = false;
-    "remote.SSH.remotePlatform" = {
-      "coder-vscode.coder.qodl.eu--wkrokosz--mpmath.main" = "linux";
-      qotex = "linux";
-      kwsd = "linux";
-      kws = "linux";
-      lindbladian = "linux";
-      "kwsd.chimp-qilin.ts.net" = "linux";
-      icm = "linux";
-      osiris = "linux";
-    };
 
     "[yaml]" = {
       "editor.defaultFormatter" = "redhat.vscode-yaml";
@@ -113,6 +103,11 @@ let
       "editor.defaultFormatter" = "charliermarsh.ruff";
       "editor.formatOnSave" = true;
     };
+    "yaml.schemas" = {
+      "file:///home/${osConfig.username}/.local/share/codium/extensions/Continue.continue/config-yaml-schema.json" = [
+        ".continue/**/*.yaml"
+      ];
+    };
   };
 
   pythonExtensions = with vscode-extensions; [
@@ -120,6 +115,7 @@ let
     ms-python.python
     detachhead.basedpyright
     ms-toolsai.jupyter
+    njpwerner.autodocstring
   ];
 
   rustExtensions = with vscode-extensions; [
