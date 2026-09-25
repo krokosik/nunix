@@ -59,6 +59,7 @@ skill for the full migration runbook and postgres patterns.
   rather than calling `systemctl cat` and parsing the output.
 - Suspected broken unit configs can be checked with `systemd-analyze verify <unit>`.
 - When dealing with psql, prefer single-string queries over a sequence of psql commands.
+- nix Comma is installed, meaning that if an executable is not found on the system, prepend the invocation with a comma "," to fetch from nixpkgs. For example `, cowsay dupa`
 
 ## Commands
 

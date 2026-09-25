@@ -6,6 +6,7 @@
     inputs.home-manager.nixosModules.home-manager
     inputs.sops-nix.nixosModules.sops
     ./avahi.nix
+    ./comma.nix
     ./env.nix
     ./dev.nix
     ./fwupd.nix
