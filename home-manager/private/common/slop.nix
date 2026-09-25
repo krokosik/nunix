@@ -59,7 +59,7 @@ in
     settings = {
       autoupdate = false;
       enabled_providers = [
-        "opencode-go"
+        # "opencode-go"
         "openai"
       ];
       provider = {
