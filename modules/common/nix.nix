@@ -68,6 +68,7 @@ in
       pkg:
       elem (getName pkg) [
         "beeper"
+        "parsec-bin"
         "nvidia-x11"
         "nvidia-settings"
         "nvidia-kernel-modules"
