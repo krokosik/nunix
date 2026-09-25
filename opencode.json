@@ -4,14 +4,6 @@
     "nunix-secrets": {
       "path": "../nunix-secrets",
       "description": "Per-host secrets for the nunix flake (secrets.yaml under anubis, common, osiris, server). Used by the NixOS configuration, likely via sops-nix or similar. Reference for resolving secret names and structure during service migrations."
-    },
-    "omarchy": {
-      "path": "../omarchy",
-      "description": "Old shell that I used for my desktop experience. I liked some of the choices and they are worth bringing over, but only when you are specifically asked to."
-    },
-    "dotfiles": {
-      "path": "../dotfiles",
-      "description": "My old dotfiles used in conjuction with Omarchy, only look into it when asked to bring something over."
     }
   },
   "permission": {
