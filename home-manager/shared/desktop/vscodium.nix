@@ -30,6 +30,14 @@ let
     redhat.vscode-yaml
     tamasfe.even-better-toml
     vscode-icons-team.vscode-icons
+    continue.continue
+  ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
+    {
+      publisher = "czhang03";
+      name = "unicode-math-input";
+      version = "0.7.0";
+      sha256 = "sha256-uVTL16oTJYfeYasHgYxnULZMPxIfUifeDxsajjRVHx4=";
+    }
   ];
 
   baseSettings = {
