@@ -173,6 +173,9 @@ in
     boot.kernel.sysctl."net.ipv4.ip_forward" = lib.mkForce 1;
     boot.kernel.sysctl."net.ipv6.conf.all.forwarding" = lib.mkForce 1;
 
+    # add Docker DNS to resolved
+    services.resolved.settings.Resolve.DNSStubListenerExtra = "172.17.0.1";
+
     # Parent directory for all containerized svc state. svcs create their
     # own subdirs (/var/lib/containers/<svc>) owned by the server user,
     # which lets a single backup path cover every svc automatically.
