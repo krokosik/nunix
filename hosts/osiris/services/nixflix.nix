@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   ...
 }:
@@ -175,6 +176,39 @@
   systemd.services.jellyfin.unitConfig.RequiresMountsFor = [ config.nixflix.mediaDir ];
   systemd.services.qbittorrent.unitConfig.RequiresMountsFor = [ config.nixflix.mediaDir ];
   systemd.services.maintainerr.unitConfig.RequiresMountsFor = [ config.nixflix.mediaDir ];
+
+  # vpn-confinement's wg-down deletes the namespace on a failed start but
+  # cannot remove nonempty NAT chains. Clear those orphaned chains before
+  # retrying, without touching unrelated iptables-nft or Docker rules.
+  systemd.services.wg.serviceConfig.ExecStartPre = lib.getExe (
+    pkgs.writeShellApplication {
+      name = "cleanup-stale-wg-nat";
+      runtimeInputs = [
+        pkgs.iproute2
+        pkgs.iptables
+      ];
+      text = /* bash */ ''
+        if ip netns list | ${lib.getExe pkgs.gnugrep} --quiet '^wg\([[:space:]]\|$\)'; then
+          exit 0
+        fi
+
+        for tool in iptables ip6tables; do
+          for chain in wg-prerouting wg-postrouting; do
+            if "$tool" --table nat --list-rules "$chain" >/dev/null 2>&1; then
+              for parent in PREROUTING POSTROUTING; do
+                while "$tool" --table nat --check "$parent" --jump "$chain" 2>/dev/null; do
+                  "$tool" --table nat --delete "$parent" --jump "$chain"
+                done
+              done
+
+              "$tool" --table nat --flush "$chain"
+              "$tool" --table nat --delete-chain "$chain"
+            fi
+          done
+        done
+      '';
+    }
+  );
 
   mkTraefikServices = {
     sonarr = {
