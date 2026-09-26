@@ -28,8 +28,8 @@ in
     shellAbbrs = {
       sc = "systemctl";
       scu = "systemctl --user";
-      jr = "journalctl";
-      jru = "journalctl --user";
+      jr = "journalctl --no-pager";
+      jru = "journalctl --user --no-pager";
     };
     shellAliases = {
       ls = "eza -al --color=always --group-directories-first --icons";

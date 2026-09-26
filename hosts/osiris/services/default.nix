@@ -1,5 +1,6 @@
 {
   imports = [
+    ./actualbudget.nix
     ./authentik.nix
     ./bentopdf.nix
     ./convertx.nix
