@@ -203,6 +203,7 @@
         displayName = "qBittorrent";
         displayGroup = "Arr";
         accessGroup = "admins";
+        iconUrl = "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/qbittorrent.png";
         host = config.mkTraefikServices.qbittorrent.fullHostname;
       };
     };

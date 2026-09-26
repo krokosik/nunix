@@ -15,7 +15,7 @@ in
     displayName = "Actual Budget";
     displayGroup = "Finance";
     accessGroup = "friends";
-    iconUrl = "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/actual-budget.png"
+    iconUrl = "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/actual-budget.png";
     redirectUris = [ "${config.mkTraefikServices.actual.fullHostname}/openid/callback" ];
     credentials = {
       clientId = {
