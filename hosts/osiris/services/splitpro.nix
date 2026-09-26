@@ -65,7 +65,7 @@ in
   };
 
   virtualisation.oci-containers.containers.splitpro = {
-    image = "ossapps/splitpro:v2.1.4";
+    image = "ossapps/splitpro:v2.1.5";
     extraOptions = [
       "--add-host=host.docker.internal:host-gateway"
     ];
@@ -75,10 +75,10 @@ in
     environment = {
       HOSTNAME = "0.0.0.0";
       DEFAULT_HOMEPAGE = "/balances";
-      NEXTAUTH_URL = "https://splitpro.${config.publicDomain}";
+      NEXTAUTH_URL = config.mkTraefikServices.splitpro.fullHostname;
       ENABLE_SENDING_INVITES = "false";
       CURRENCY_RATE_PROVIDER = "nbp";
-      AUTHENTIK_ISSUER = "https://authentik.${config.publicDomain}/application/o/splitpro";
+      AUTHENTIK_ISSUER = "${config.mkTraefikServices.authentik.fullHostname}/application/o/splitpro";
     };
     environmentFiles = [
       config.sops.templates."splitpro.env".path
