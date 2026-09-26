@@ -277,6 +277,12 @@ in
           restartUnits = [ "traefik.service" ];
         };
       };
+
+      mkAuthentik.forwardAuthApps.traefik = {
+        displayName = "Traefik";
+        host = "https://traefik.${config.privateDomain}";
+      };
     })
   ];
+
 }

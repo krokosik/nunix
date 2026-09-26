@@ -36,6 +36,7 @@
       enable = true;
       config = {
         apiKey._secret = config.sops.secrets.sonarr_api_key.path;
+        hostConfig.authenticationMethod = "basic";
         hostConfig.password._secret = config.sops.secrets.sonarr_password.path;
       };
     };
@@ -44,6 +45,7 @@
       enable = true;
       config = {
         apiKey._secret = config.sops.secrets.radarr_api_key.path;
+        hostConfig.authenticationMethod = "external";
         hostConfig.password._secret = config.sops.secrets.radarr_password.path;
       };
     };
@@ -52,6 +54,7 @@
       enable = true;
       config = {
         apiKey._secret = config.sops.secrets.prowlarr_api_key.path;
+        hostConfig.authenticationMethod = "external";
         hostConfig.password._secret = config.sops.secrets.prowlarr_password.path;
         indexers = [
           {
@@ -171,6 +174,28 @@
     };
   };
 
+  mkAuthentik.forwardAuthApps =
+    lib.genAttrs
+      [
+        "sonarr"
+        "radarr"
+        "prowlarr"
+      ]
+      (
+        name:
+        {
+          displayName = lib.toUpper (lib.substring 0 1 name) + lib.substring 1 (-1) name;
+          displayGroup = "Arr";
+          accessGroup = "admins";
+        }
+        // lib.optionalAttrs (name == "sonarr") {
+          basicAuth = {
+            username = config.nixflix.sonarr.config.hostConfig.username;
+            passwordSecretName = "sonarr_password";
+          };
+        }
+      );
+
   systemd.services.sonarr.unitConfig.RequiresMountsFor = [ config.nixflix.mediaDir ];
   systemd.services.radarr.unitConfig.RequiresMountsFor = [ config.nixflix.mediaDir ];
   systemd.services.jellyfin.unitConfig.RequiresMountsFor = [ config.nixflix.mediaDir ];
@@ -213,15 +238,12 @@
   mkTraefikServices = {
     sonarr = {
       port = config.nixflix.sonarr.settings.server.port;
-      chain = [ "chain-no-auth" ];
     };
     radarr = {
       port = config.nixflix.radarr.settings.server.port;
-      chain = [ "chain-no-auth" ];
     };
     prowlarr = {
       port = config.nixflix.prowlarr.settings.server.port;
-      chain = [ "chain-no-auth" ];
     };
     jellyfin = {
       public = true;

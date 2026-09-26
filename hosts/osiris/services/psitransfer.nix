@@ -1,9 +1,10 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
   name = "psitransfer";
   port = 3039;
   containerUser = config.username; # UID/GID 1000 on osiris
   containerUnit = "${config.virtualisation.oci-containers.backend}-${name}.service";
+  dataPath = "/var/lib/psitransfer";
 in
 {
   mkContainerServices.psitransfer = {
@@ -26,11 +27,16 @@ in
   };
 
   virtualisation.oci-containers.containers.psitransfer = {
-    image = "ghcr.io/psitrax/psitransfer:v2.4.4";
+    image = "psitrax/psitransfer:v2.4.4";
     volumes = [
-      "/var/lib/psitransfer:/data"
+      "${dataPath}:/data"
     ];
   };
+
+  system.activationScripts.makePsiTransferDir = lib.stringAfter [ "var" ] ''
+    mkdir -p ${dataPath}
+    chown -R 1000:1000 ${dataPath}
+  '';
 
   mkTraefikServices.psitransfer = {
     inherit port;

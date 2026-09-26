@@ -1,3 +1,4 @@
+{ config, ... }:
 let
   port = 3023;
 in
@@ -21,5 +22,12 @@ in
     inherit port;
     public = true;
     subdomain = "pdf";
+  };
+
+  mkAuthentik.forwardAuthApps.bentopdf = {
+    displayName = "PDF";
+    accessGroup = "users";
+    displayGroup = "Apps";
+    host = config.mkTraefikServices.bentopdf.fullHostname;
   };
 }

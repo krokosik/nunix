@@ -37,6 +37,7 @@ let
 
   fwApps = config.mkAuthentik.forwardAuthApps;
   fwAppNames = lib.attrNames fwApps;
+  basicAuthApps = lib.filterAttrs (_: app: app.basicAuth != null) fwApps;
 
   inherit (config.mkAuthentik) oidcApps;
   credentialType = import ../../../lib/types/credential.nix;
@@ -109,7 +110,7 @@ let
         attrs:
           is_superuser: true
           parents:
-            - !KeyOf grp-family'
+            - !KeyOf grp-family
   '';
 
   # Split out from `forward-auth-apps.yaml` because authentik's `!KeyOf`
@@ -130,10 +131,17 @@ let
         name: ${name}
       attrs:
         mode: forward_single
-        external_host: https://${app.host}
+        external_host: ${app.host}
         authentication_flow: !Find [authentik_flows.flow, [slug, default-authentication-flow]]
         authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
         invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+    ${lib.optionalString (app.basicAuth != null) (
+      lib.concatStringsSep "\n" [
+        "    basic_auth_enabled: true"
+        "    basic_auth_user_attribute: ${name}_user"
+        "    basic_auth_password_attribute: ${name}_password"
+      ]
+    )}
 
     - model: authentik_core.application
       id: app-${name}
@@ -144,7 +152,7 @@ let
         provider: !KeyOf prov-${name}
         group: ${app.displayGroup}
         open_in_new_tab: true
-        meta_launch_url: https://${app.host}
+        meta_launch_url: ${app.host}
         meta_icon: ${app.iconUrl}
         policy_engine_mode: all
 
@@ -190,6 +198,33 @@ let
   '';
 
   fwBlueprintDir = pkgs.writeTextDir "forward-auth-apps.yaml" fwBlueprintContent;
+
+  # Group attributes cannot be filled in at build time. The oneshot reads
+  # sops credentials and updates only the admins group's Basic credentials.
+  adminBasicAuthAttributes = lib.concatMapStringsSep ",\n" (
+    name:
+    ''"${name}_user": os.environ["${lib.toUpper name}_USERNAME"], "${name}_password": os.environ["${lib.toUpper name}_PASSWORD"]''
+  ) (lib.attrNames basicAuthApps);
+
+  adminBasicAuthCommand = pkgs.writeText "authentik-admin-basic-auth.py" /* python */ ''
+    import os
+    from authentik.core.models import Group
+
+    group = Group.objects.get(name="admins")
+    attrs = {${adminBasicAuthAttributes}}
+    group.update_attributes({"attributes": attrs})
+  '';
+
+  adminBasicAuthScript = pkgs.writeShellScript "authentik-admin-basic-auth" /* bash */ ''
+    set -euo pipefail
+    ${lib.concatMapStringsSep "\n" (name: ''
+      test -s "$CREDENTIALS_DIRECTORY/${name}_password"
+      export ${lib.toUpper name}_USERNAME=${lib.escapeShellArg basicAuthApps.${name}.basicAuth.username}
+      export ${lib.toUpper name}_PASSWORD="$(<"$CREDENTIALS_DIRECTORY/${name}_password")"
+    '') (lib.attrNames basicAuthApps)}
+    exec ${config.services.authentik.authentikComponents.manage}/bin/manage.py shell \
+      < ${adminBasicAuthCommand}
+  '';
 
   # Quote user-provided YAML scalars, keeping URLs and names safe from
   # YAML punctuation and preventing a value from becoming a YAML tag.
@@ -336,7 +371,7 @@ in
             options = {
               host = lib.mkOption {
                 type = lib.types.str;
-                default = "${name}.${config.publicDomain}";
+                default = config.mkTraefikServices.${name}.fullHostname;
                 description = "External hostname Traefik matches and authentik enforces.";
               };
               displayName = lib.mkOption {
@@ -369,6 +404,24 @@ in
                   Infrastructure (admin/ops tools). Purely cosmetic —
                   no policy evaluation touches display groups.
                 '';
+              };
+              basicAuth = lib.mkOption {
+                type = lib.types.nullOr (
+                  lib.types.submodule {
+                    options = {
+                      username = lib.mkOption {
+                        type = lib.types.str;
+                        description = "Upstream Basic Auth username.";
+                      };
+                      passwordSecretName = lib.mkOption {
+                        type = lib.types.str;
+                        description = "Name of an existing sops secret holding the upstream Basic Auth password.";
+                      };
+                    };
+                  }
+                );
+                default = null;
+                description = "Enable upstream HTTP Basic Auth, using credentials restricted to Authentik admins.";
               };
             };
           }
@@ -623,6 +676,38 @@ in
     # blueprints use the baseline groups supplied independently above.
     (lib.mkIf (fwApps != { }) {
       mkAuthentik.extraBlueprints = [ fwBlueprintDir ];
+    })
+
+    (lib.mkIf (basicAuthApps != { }) {
+      assertions = lib.mapAttrsToList (name: app: {
+        assertion = app.accessGroup == "admins";
+        message = "mkAuthentik.forwardAuthApps.${name}: basicAuth requires accessGroup = admins";
+      }) basicAuthApps;
+
+      systemd.services.authentik-admin-basic-auth = {
+        description = "Update Authentik admins' Basic Auth credentials";
+        after = [
+          "authentik-ready.service"
+          "sops-install-secrets.service"
+        ];
+        requires = [ "authentik-ready.service" ];
+        wants = [ "sops-install-secrets.service" ];
+        wantedBy = [ "multi-user.target" ];
+        environment.PYTHONPATH = "${config.services.authentik.authentikComponents.staticWorkdirDeps}";
+        path = [ config.services.authentik.authentikComponents.pythonEnv ];
+        serviceConfig = {
+          Type = "oneshot";
+          DynamicUser = true;
+          User = "authentik";
+          StateDirectory = "authentik";
+          WorkingDirectory = "/var/lib/authentik";
+          EnvironmentFile = [ config.sops.templates."authentik.env".path ];
+          LoadCredential = lib.mapAttrsToList (
+            name: app: "${name}_password:${config.sops.secrets.${app.basicAuth.passwordSecretName}.path}"
+          ) basicAuthApps;
+          ExecStart = adminBasicAuthScript;
+        };
+      };
     })
 
     (lib.mkIf (oidcApps != { }) {

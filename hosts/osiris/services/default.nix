@@ -11,6 +11,7 @@
     ./nixflix.nix
     ./niks3.nix
     ./geoipupdate.nix
+    ./psitransfer.nix
     ./postgresql.nix
     ./splitpro.nix
     ./storage-backups.nix
