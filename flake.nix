@@ -142,13 +142,13 @@
         lindbladian = mkSystem { host = "lindbladian"; };
       };
 
-      formatter.x86_64-linux = pkgs.nixfmt-tree;
+      formatter.x86_64-linux = pkgs.nixfmt;
 
       packages.x86_64-linux.rescue-iso = rescueIso.config.system.build.isoImage;
 
       devShells.x86_64-linux.default = pkgs.mkShell {
         packages = with pkgs; [
-          nixfmt-tree
+          nixfmt
           nixd
           nh
           nix-prefetch

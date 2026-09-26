@@ -23,6 +23,8 @@
     lazygit
     libsecret
     nix-tree
+    nixfmt
+    nixd
     pciutils
     python3
     ripgrep

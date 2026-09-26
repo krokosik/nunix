@@ -59,6 +59,8 @@ in
     flake = flakePath;
   };
 
+  environment.sessionVariables.NIXOS_HOST = config.networking.hostName;
+
   # Add unstable to flake registry to use locally (e.g. `nix run nixpkgs-unstable#hatch`)
   nix.registry.nixpkgs-unstable.flake = inputs.nixpkgs-unstable;
 

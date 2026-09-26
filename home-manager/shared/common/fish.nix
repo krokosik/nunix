@@ -30,7 +30,7 @@ in
       scu = "systemctl --user";
       jr = "journalctl --no-pager";
       jru = "journalctl --user --no-pager";
-       nl = "git -C $NH_FLAKE pull";
+      nl = "git -C $NH_FLAKE pull";
       nos = "nh os switch";
     };
     shellAliases = {
@@ -169,7 +169,7 @@ in
           set -l attr (string join "." $argv)
 
           nix eval \
-            "$NH_FLAKE#nixosConfigurations.$hostname.config.$attr" \
+            "$NH_FLAKE#nixosConfigurations.$NIXOS_HOST.config.$attr" \
             --json
         '';
         description = "Evaluate a NixOS configuration option";
@@ -180,7 +180,7 @@ in
           set -l attr (string join "." $argv)
 
           nix eval \
-            "$NH_FLAKE#nixosConfigurations.$hostname.config.home-manager.users.$USER.$attr" \
+            "$NH_FLAKE#nixosConfigurations.$NIXOS_HOST.config.home-manager.users.$USER.$attr" \
             --json
         '';
         description = "Evaluate a Home Manager configuration option";
