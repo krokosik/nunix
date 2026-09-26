@@ -130,8 +130,9 @@ let
       identifiers:
         name: ${name}
       attrs:
-        mode: forward_single
+        mode: ${app.mode}
         external_host: ${app.host}
+    ${lib.optionalString (app.mode == "forward_domain") "    cookie_domain: ${app.cookieDomain}"}
         authentication_flow: !Find [authentik_flows.flow, [slug, default-authentication-flow]]
         authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
         invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
@@ -154,6 +155,7 @@ let
         open_in_new_tab: true
         meta_launch_url: ${app.host}
         meta_icon: ${app.iconUrl}
+    ${lib.optionalString app.hide "    meta_hide: true"}
         policy_engine_mode: all
 
     - model: authentik_policies.policybinding
@@ -356,9 +358,11 @@ in
         `providers` list entry. One blueprint owns the outpost's
         `providers` list, so every forward-auth app on the host must
         register through this option rather than emitting its own
-        outpost block. The Traefik router + middleware chain is
-        configured in each app's own service module via
-        `mkTraefikServices.<name>`.
+        outpost block. Regular apps use `forward_single` and configure their
+        Traefik router + middleware chain in the service module via
+        `mkTraefikServices.<name>`. A domain-level provider uses
+        `mode = "forward_domain"` with an explicit `host` and `cookieDomain`;
+        it does not require an app route.
 
         Both `accessGroup` and `displayGroup` are validated against the
         fixed taxonomy declared in this module (see `accessGroupNames`
@@ -372,11 +376,29 @@ in
               host = lib.mkOption {
                 type = lib.types.str;
                 default = config.mkTraefikServices.${name}.fullHostname;
-                description = "External hostname Traefik matches and authentik enforces.";
+                description = "External URL Traefik matches (or the domain-level authentication URL).";
+              };
+              mode = lib.mkOption {
+                type = lib.types.enum [
+                  "forward_single"
+                  "forward_domain"
+                ];
+                default = "forward_single";
+                description = "Authentik proxy provider forward-auth mode.";
+              };
+              cookieDomain = lib.mkOption {
+                type = lib.types.nullOr lib.types.str;
+                default = null;
+                description = "Cookie domain shared by hosts using a domain-level provider.";
               };
               displayName = lib.mkOption {
                 type = lib.types.str;
                 description = "Human-facing app name (authentik tile).";
+              };
+              hide = lib.mkOption {
+                type = lib.types.bool;
+                default = false;
+                description = "Hide this application from the Authentik library (e.g. a domain-level provider).";
               };
               iconUrl = lib.mkOption {
                 type = lib.types.str;
@@ -581,7 +603,13 @@ in
             assertion = lib.length accessGroupNames == 4 && lib.length displayGroupNames == 4;
             message = "mkAuthentik: group taxonomy lists changed shape — revisit assertions";
           }
-        ];
+        ]
+        # A domain-level provider must be explicit about cookie scope; a
+        # single-app provider cannot accidentally set a broad cookie domain.
+        ++ lib.mapAttrsToList (name: app: {
+          assertion = (app.mode == "forward_domain") == (app.cookieDomain != null);
+          message = "mkAuthentik.forwardAuthApps.${name}: cookieDomain is required only for forward_domain";
+        }) fwApps;
 
       sops.secrets = {
         authentik_secret_key.key = "authentik/secret_key";
@@ -677,6 +705,19 @@ in
     (lib.mkIf (fwApps != { }) {
       mkAuthentik.extraBlueprints = [ fwBlueprintDir ];
     })
+
+    # KWS provides domain-level forward auth for hosts without their own
+    # single-app proxy provider; it is not a Traefik router or web service.
+    {
+      mkAuthentik.forwardAuthApps.kws = {
+        displayName = "KWS";
+        mode = "forward_domain";
+        host = config.mkTraefikServices.authentik.fullHostname;
+        cookieDomain = config.publicDomain;
+        hide = true;
+        accessGroup = "admins";
+      };
+    }
 
     (lib.mkIf (basicAuthApps != { }) {
       assertions = lib.mapAttrsToList (name: app: {

@@ -175,7 +175,7 @@
   };
 
   mkAuthentik.forwardAuthApps =
-    lib.genAttrs
+    (lib.genAttrs
       [
         "sonarr"
         "radarr"
@@ -194,7 +194,18 @@
             passwordSecretName = "sonarr_password";
           };
         }
-      );
+      )
+    )
+    // {
+      # The WebUI stays password-protected when accessed directly; the
+      # proxy enforces the admins policy for the qbit hostname.
+      qbittorrent = {
+        displayName = "qBittorrent";
+        displayGroup = "Arr";
+        accessGroup = "admins";
+        host = config.mkTraefikServices.qbittorrent.fullHostname;
+      };
+    };
 
   systemd.services.sonarr.unitConfig.RequiresMountsFor = [ config.nixflix.mediaDir ];
   systemd.services.radarr.unitConfig.RequiresMountsFor = [ config.nixflix.mediaDir ];
@@ -258,7 +269,6 @@
     qbittorrent = {
       host = config.nixflix.torrentClients.qbittorrent.connectionAddress;
       port = config.nixflix.torrentClients.qbittorrent.webuiPort;
-      chain = [ "chain-no-auth" ];
       subdomain = "qbit";
     };
     maintainerr = {

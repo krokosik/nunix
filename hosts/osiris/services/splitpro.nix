@@ -38,6 +38,7 @@ in
     displayName = "SplitPro";
     displayGroup = "Finance";
     accessGroup = "users";
+    iconUrl = "https://raw.githubusercontent.com/krokosik/split-pro/main/public/logo_circle.png";
     launchUrl = "${config.mkTraefikServices.splitpro.fullHostname}/auth/signin";
     redirectUris = [ "${config.mkTraefikServices.splitpro.fullHostname}/api/auth/callback/authentik" ];
     logoutUri = "${config.mkTraefikServices.splitpro.fullHostname}/api/auth/signout";

@@ -171,8 +171,16 @@ Traefik's `forward_auth`. Register the app via
 `mkAuthentik.forwardAuthApps.<name>` — the aggregator emits the
 proxy provider + application + policy binding into a single merged
 blueprint per host (so two forward-auth apps don't clobber the
-embedded outpost's global `providers` list) **and** wires a Traefik
-`chain-authentik` middleware for the app's route.
+embedded outpost's global `providers` list). The app's Traefik router
+uses `chain-authentik` to require that provider's access group.
+
+qBittorrent registers under `qbit` to match its Traefik subdomain;
+the existing WebUI password still applies after Authentik lets an
+admin through. KWS is the hidden `forward_domain` fallback for hosts
+without a dedicated provider: its authentication URL is Authentik's
+public hostname and its cookie domain is `config.publicDomain`.
+Its own access binding is restricted to `admins`; keep apps with
+different access rules on separate `forward_single` providers.
 
 OIDC apps use the `chain-no-auth` middleware instead, which skips the forward-auth check and
 lets the app talk to Authentik directly.
