@@ -16,6 +16,7 @@
   sops.secrets.smtp_token = {
     key = "proton/smtp_token";
     mode = "0400";
+    restartUnits = [ "msmptd.service" ];
   };
 
   programs.msmtp = {
@@ -47,8 +48,6 @@
   # to the protonmail relay configured above via the same `programs.msmtp`
   systemd.services.msmtpd = {
     description = "Local SMTP relay (msmtpd → protonmail)";
-    after = [ "sops-install-secrets.service" ];
-    wants = [ "sops-install-secrets.service" ];
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       Type = "simple";
