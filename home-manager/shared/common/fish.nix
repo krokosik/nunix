@@ -57,6 +57,8 @@ in
       ff = "fzf --preview 'bat --style=numbers --color=always {}'";
       c = "opencode";
       gti = "ghostty_terminfo_push";
+      nl = "git -C $NH_FLAKE pull";
+      nos = "nh os switch";
     };
     functions = {
       fish_greeting = "";
@@ -161,6 +163,27 @@ in
         '';
         description = "wraps privileged and user systemctl commands to use run0 when necessary";
         wraps = "systemctl";
+      };
+      nxeval = {
+        body = ''
+          set -l attr (string join "." $argv)
+
+          nix eval \
+            "$NH_FLAKE#nixosConfigurations.$hostname.config.$attr" \
+            --json
+        '';
+        description = "Evaluate a NixOS configuration option";
+      };
+
+      hmeval = {
+        body = ''
+          set -l attr (string join "." $argv)
+
+          nix eval \
+            "$NH_FLAKE#nixosConfigurations.$hostname.config.home-manager.users.$USER.$attr" \
+            --json
+        '';
+        description = "Evaluate a Home Manager configuration option";
       };
     };
     interactiveShellInit = ''
