@@ -7,6 +7,7 @@
   imports = [
     ./disko-config.nix
     ./windows.nix
+    ./fbcon-fix.nix
     inputs.nixos-hardware.nixosModules.lenovo-legion-15ach6h-nvidia
     ../../modules/boot-limine.nix
     ../../modules/desktop

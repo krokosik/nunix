@@ -30,6 +30,8 @@ in
       scu = "systemctl --user";
       jr = "journalctl --no-pager";
       jru = "journalctl --user --no-pager";
+       nl = "git -C $NH_FLAKE pull";
+      nos = "nh os switch";
     };
     shellAliases = {
       ls = "eza -al --color=always --group-directories-first --icons";
@@ -57,8 +59,6 @@ in
       ff = "fzf --preview 'bat --style=numbers --color=always {}'";
       c = "opencode";
       gti = "ghostty_terminfo_push";
-      nl = "git -C $NH_FLAKE pull";
-      nos = "nh os switch";
     };
     functions = {
       fish_greeting = "";

@@ -34,5 +34,10 @@
     };
   };
 
-  systemd.services."user@".serviceConfig.StandardError = "journal";
+  systemd.services."user@" = {
+    serviceConfig = {
+      StandardOutput = "journal";
+      StandardError = "journal";
+    };
+  };
 }
