@@ -117,8 +117,11 @@ Real files via `cp -L` are required.
    `accessGroup` and `displayGroup` as needed. Optional Authentik
    properties include `displayName`, `providerName` (default
    `provider for <app>`), `slug`, `host`, `launchUrl`, `iconUrl`, and
-   `logoutUri`. The computed `issuerUrl` defaults to the Authentik
-   Traefik URL plus `/application/o/<slug>`.
+    `logoutUri` and `logoutMethod`. For Authentik back-channel logout,
+    set `logoutMethod = "backchannel"` alongside the app's back-channel
+    `logoutUri` (as in Immich). The computed `issuerUrl` defaults to the Authentik
+    Traefik URL plus `/application/o/<slug>/` (including the trailing
+    slash required to match Authentik's discovery `issuer`).
 3. Deliver the credentials in the *app* module using the exposed
    `credentials.clientId.secretName` and
    `credentials.clientSecret.secretName`. SplitPro, for instance, maps

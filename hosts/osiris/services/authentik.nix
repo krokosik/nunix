@@ -213,7 +213,12 @@ let
           "      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]"
           "      signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]"
           "      issuer_mode: per_provider"
+          "      property_mappings:"
+          "        - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/oauth2/scope-openid]]"
+          "        - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/oauth2/scope-email]]"
+          "        - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/oauth2/scope-profile]]"
         ]
+        ++ lib.optionals (app.logoutMethod != null) [ "      logout_method: ${app.logoutMethod}" ]
         ++ lib.optionals (app.logoutUri != null) [ "      logout_uri: ${yamlString app.logoutUri}" ]
         ++ [ "      redirect_uris:" ]
         ++ lib.concatMap (url: [
@@ -411,7 +416,7 @@ in
               };
               issuerUrl = lib.mkOption {
                 type = lib.types.str;
-                default = "${outerConfig.mkTraefikServices.authentik.fullHostname}/application/o/${config.slug}";
+                default = "${outerConfig.mkTraefikServices.authentik.fullHostname}/application/o/${config.slug}/";
                 description = "OIDC issuer URL derived from the Authentik route and application slug.";
               };
               providerName = lib.mkOption {
@@ -427,6 +432,16 @@ in
                 type = lib.types.nullOr lib.types.str;
                 default = null;
                 description = "Optional OIDC logout callback URL.";
+              };
+              logoutMethod = lib.mkOption {
+                type = lib.types.nullOr (
+                  lib.types.enum [
+                    "backchannel"
+                    "frontchannel"
+                  ]
+                );
+                default = null;
+                description = "Optional Authentik OAuth2 logout method; null leaves Authentik's default.";
               };
               publicClient = lib.mkOption {
                 type = lib.types.bool;
