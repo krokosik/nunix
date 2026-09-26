@@ -6,12 +6,12 @@ let
   browser = "zen-twilight";
   editor = "codium";
   lua = mkLuaInline;
-  luaValue = toLua { };
+  luaValue = toLua { multiline = false; };
   mkBind = keys: dispatcher: description: {
     _args = [
       keys
       (lua dispatcher)
-      { inherit description; }
+      (lua "{ description = ${luaValue description} }")
     ];
   };
   mkExecBind =
@@ -71,6 +71,9 @@ in
     )
     (mkBind "SUPER + SHIFT + code:21" "hl.dsp.window.resize({ x = 0, y = 100, relative = true })"
       "Expand window down"
+    )
+    (mkBind "SUPER + BACKSPACE" ''hl.dsp.window.set_prop({ prop = "opaque", value = "toggle" })''
+      "Toggle window transparency"
     )
   ]
   ++ workspaceBindings;
