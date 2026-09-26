@@ -5,6 +5,7 @@
 let
   name = "splitpro";
   port = 3000;
+  oidc = config.mkAuthentik.oidcApps.splitpro;
   containerUser = config.username; # UID/GID 1000 on osiris
   containerUnit = "${config.virtualisation.oci-containers.backend}-${name}.service";
 in
@@ -33,11 +34,18 @@ in
     stateDirs = [ "/var/lib/splitpro/uploads" ];
   };
 
+  mkAuthentik.oidcApps.splitpro = {
+    displayName = "SplitPro";
+    displayGroup = "Finance";
+    accessGroup = "users";
+    launchUrl = "${config.mkTraefikServices.splitpro.fullHostname}/auth/signin";
+    redirectUris = [ "${config.mkTraefikServices.splitpro.fullHostname}/api/auth/callback/authentik" ];
+    logoutUri = "${config.mkTraefikServices.splitpro.fullHostname}/api/auth/signout";
+  };
+
   sops = {
     secrets = {
       nextauth_secret.key = "splitpro/nextauth_secret";
-      authentik_id.key = "splitpro/authentik_id";
-      authentik_secret.key = "splitpro/authentik_secret";
       webpush_public_key.key = "splitpro/webpush_public_key";
       webpush_private_key.key = "splitpro/webpush_private_key";
     };
@@ -47,8 +55,8 @@ in
         DATABASE_URL=postgresql://${name}:${
           config.sops.placeholder.${config.mkPostgresServices.splitpro.secretName}
         }@host.docker.internal:5432/${name}
-        AUTHENTIK_ID=${config.sops.placeholder.authentik_id}
-        AUTHENTIK_SECRET=${config.sops.placeholder.authentik_secret}
+        AUTHENTIK_ID=${config.sops.placeholder.${oidc.credentials.clientId.secretName}}
+        AUTHENTIK_SECRET=${config.sops.placeholder.${oidc.credentials.clientSecret.secretName}}
         WEB_PUSH_PUBLIC_KEY=${config.sops.placeholder.webpush_public_key}
         WEB_PUSH_PRIVATE_KEY=${config.sops.placeholder.webpush_private_key}
       '';
@@ -78,7 +86,7 @@ in
       NEXTAUTH_URL = config.mkTraefikServices.splitpro.fullHostname;
       ENABLE_SENDING_INVITES = "false";
       CURRENCY_RATE_PROVIDER = "nbp";
-      AUTHENTIK_ISSUER = "${config.mkTraefikServices.authentik.fullHostname}/application/o/splitpro";
+      AUTHENTIK_ISSUER = oidc.issuerUrl;
     };
     environmentFiles = [
       config.sops.templates."splitpro.env".path

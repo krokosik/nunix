@@ -7,8 +7,8 @@ To add a host:
    <!-- (`networks."wg0".address`). -->
 <!-- 3. Add its LAN IPs to `networking.hosts` in -->
    <!-- `hosts/modules/desktops/networking.nix`. -->
-4. Add sops keys (see the install/post-install sections below).
-5. Install per [General Install Procedures](#general-install-procedures).
+2. Add sops keys (see the install/post-install sections below).
+3. Install per [General Install Procedures](#general-install-procedures).
 
 ## General Install Procedures
 
@@ -53,7 +53,7 @@ cat /tmp/nixos-anywhere-extra/etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age
 ### PostgreSQL major-version upgrades
 
 `services.postgresql.package` is pinned to a specific major
-(`postgresql_17` at time of writing) in `modules/system/postgresql.nix` so
+(`postgresql_17` at time of writing) in `hosts/osiris/services/postgresql.nix` so
 that rebuilds never silently dump-and-restore the cluster. Major upgrades
 are a manual operation, following the canonical NixOS recipe:
 
@@ -71,12 +71,12 @@ helper options should exist in `modules/oci-containers.nix` and shared services 
 or Authentik. If the helper options are insufficient for a service, it should be expanded to cover
 the additional use case. A reference implementation is in `hosts/osiris/services/splitpro.nix` which
 connects to Postgres in `hosts/osiris/services/postgresql.nix`, Traefik in `hosts/osiris/services/traefik.nix`,
-and uses the helper options in `modules/oci-containers.nix`. Once Authentik is deployed, it should also
-follow the same pattern for deploying providers via blueprints.
+and uses the helper options in `modules/oci-containers.nix`. SplitPro also
+registers its OIDC provider via `mkAuthentik.oidcApps.splitpro`.
 
 ## Authentik (SSO)
 
-`modules/apps/authentik.nix` deploys Authentik as native systemd units via
+`hosts/osiris/services/authentik.nix` deploys Authentik as native systemd units via
 the [`nix-community/authentik-nix`](https://github.com/nix-community/authentik-nix)
 flake input — *not* containers. The module's `services.authentik` runs three
 units (`authentik`, `authentik-worker`, `authentik-migrate`) under
@@ -87,9 +87,10 @@ at `authentik.${config.publicDomain}`.
 ### Declarative configuration via blueprints
 
 Groups, applications, OAuth/proxy providers, and group bindings are
-all managed as Authentik **blueprints** (YAML, applied idempotently by the
-worker on a periodic Celery task and on startup). No terraform, no UI
-clicks except for user enrollemnt and management. Starter blueprints live under `hosts/osiris/authentik-blueprints/`.
+managed as Authentik **blueprints** (YAML, applied idempotently by the
+worker on startup and periodically). The factory generates the OIDC and
+forward-auth app blueprints from Nix declarations; other blueprint
+directories can be contributed via `mkAuthentik.extraBlueprints`.
 
 The module merges its blueprints with the upstream-bundled set into a
 single `blueprints_dir` via `pkgs.runCommandLocal` + `cp -rL`. **Do not
@@ -101,19 +102,50 @@ Real files via `cp -L` are required.
 
 ### Adding an OIDC service to Authentik
 
-Services that speak OIDC natively register via the `mkAuthentik.oidcApps`
-aggregator from `hosts/osiris/services/authentik.nix`. The aggregator
-generates the sops secret pair, contributes the per-app blueprint
-dir, and stacks one merged worker-side env file onto authentik so
-blueprint `!Env` placeholders resolve. Apps that read OIDC creds
-from env vars get their own per-app env file too; apps that store
-creds in their own DB/UI opt out via `clientCredsInAppEnv = false`.
+1. From this repo, run `just oidc-secrets <app> [host]` (default host:
+   `osiris`). The recipe generates random client credentials under
+    `<app>/oidc_client_id` and `<app>/oidc_client_secret` in
+    `../nunix-secrets/<host>/secrets.yaml`, stages and commits only that
+    file in the secrets repo, pushes, then runs
+    `nix flake update my-secrets` here.
+   It requires a clean secrets checkout on `main` synced with `origin/main`
+   and refuses to overwrite existing or partial credentials. It never
+   prints their values. If the push fails, the lockfile is not updated;
+   resolve the push before updating the lockfile.
+2. Register `mkAuthentik.oidcApps.<app>` in the application's module.
+   Supply `redirectUris` (strictly matched callback URLs) and choose
+   `accessGroup` and `displayGroup` as needed. Optional Authentik
+   properties include `displayName`, `providerName` (default
+   `provider for <app>`), `slug`, `host`, `launchUrl`, `iconUrl`, and
+   `logoutUri`. The computed `issuerUrl` defaults to the Authentik
+   Traefik URL plus `/application/o/<slug>`.
+3. Deliver the credentials in the *app* module using the exposed
+   `credentials.clientId.secretName` and
+   `credentials.clientSecret.secretName`. SplitPro, for instance, maps
+   these to `AUTHENTIK_ID` and `AUTHENTIK_SECRET` in its own
+   `sops.templates."splitpro.env"`, and assigns `oidc.issuerUrl` to
+   `AUTHENTIK_ISSUER`. Consumer env files, restarts, and startup ordering
+   belong to the consuming service. Set its Traefik chain to
+   `chain-no-auth` so the app can handle OIDC itself.
+4. Review and commit `flake.lock` alongside the Nix changes and run
+   `nix flake check` before deployment. A missing key at deployment
+   usually means the pinned secrets revision is stale.
 
-Blueprint secrets must reference `!Env <APP>_OIDC_CLIENT_ID` /
-`<APP>_OIDC_CLIENT_SECRET` (uppercased app name with hyphens →
-underscores) so they never land in `/nix/store`.
+The factory registers the sops credentials, generates an Authentik OAuth2
+provider, application and access-policy binding, and passes the values to
+the blueprint importer using `!Env`. It does **not** generate random values
+during Nix evaluation or configure the app's credential delivery. The
+default sops secret names and source keys are `<app>/oidc_client_id` and
+`<app>/oidc_client_secret`. Override `credentials.<kind>.key` only when
+adopting differently named existing keys; `owner`, `group`, and `mode`
+default to `root`, `root`, and `0400` for the decrypted files.
 
-**Always set `grant_types` explicitly.** authentik 2026.x added
+For a public/PKCE client, set `publicClient = true`: the factory reads only
+the client ID and never provisions or references a client secret. The
+`oidc-secrets` recipe currently generates *both* values, including an
+unused secret for public clients.
+
+**The generated blueprint sets `grant_types` explicitly.** authentik 2026.x added
 `OAuth2Provider.grant_types` (defaults to an empty list) and the
 authorize view now rejects any flow whose grant isn't listed
 (`Invalid grant_type for provider` → the app sees a malformed-request
