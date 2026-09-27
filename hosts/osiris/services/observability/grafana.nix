@@ -1,6 +1,14 @@
-{ config, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 {
   mkAuthentik.oidcApps.grafana = {
+    # The Authentik application host and callback must use the same private
+    # hostname as Grafana's Traefik route and root_url.
+    host = lib.removePrefix "https://" config.mkTraefikServices.grafana.fullHostname;
     displayName = "Grafana";
     displayGroup = "Infrastructure";
     accessGroup = "admins";

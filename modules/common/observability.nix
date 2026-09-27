@@ -91,6 +91,8 @@ let
       labels = { };
     };
   };
+  # Agents see declarations from this host only. Nothing here evaluates or
+  # imports another nixosConfiguration to discover its services.
   scrapeTargets = localTargets // serviceTargets // postgresTarget // smartTarget;
 
   scrapeJobs = lib.mapAttrsToList (
@@ -333,6 +335,8 @@ in
 
     services.journald.upload = {
       enable = true;
+      # journal-upload keeps the structured journal format; local vlagent
+      # handles disk-backed retries when the central VictoriaLogs is offline.
       settings.Upload.URL = "http://${loopback}:9429/insert/journald";
     };
 

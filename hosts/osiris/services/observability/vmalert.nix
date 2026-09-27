@@ -7,6 +7,8 @@ let
   serviceLogRules = lib.mapAttrs' (
     name: service: lib.nameValuePair "service-${name}" service.logAlerts
   ) config.mkObservabilityServices;
+  # Only declarations in this host evaluation are visible here. Fleet-wide
+  # rules are explicitly contributed to mkObservability.metricRules/logRules.
   metricGroups =
     lib.mapAttrsToList
       (name: rules: {
@@ -18,6 +20,7 @@ let
         lib.filterAttrs (_: rules: rules != [ ]) (config.mkObservability.metricRules // serviceMetricRules)
       );
   logRules = config.mkObservability.logRules // serviceLogRules;
+  # A log group's interval is also vmalert's default LogsQL look-back window.
   logGroups = lib.concatMap (
     name:
     lib.imap0 (index: entry: {
@@ -31,6 +34,8 @@ let
 in
 {
   services.vmalert.instances = {
+    # Each process has one datasource URL, so metrics and LogsQL need separate
+    # instances. Both notify the same local Alertmanager.
     metrics = {
       enable = true;
       settings = {

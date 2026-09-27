@@ -39,7 +39,9 @@ in
     };
   };
 
-  # The rendered htpasswd file must stay out of the Nix store.
+  # The rendered htpasswd file must stay out of the Nix store. sops-nix installs
+  # secrets during system activation (useSystemdActivation = false), so there
+  # is no sops-install-secrets.service to order this unit after.
   systemd.services.observability-ingest-auth = {
     description = "Render observability ingestion Basic Auth users";
     before = [ "traefik.service" ];
@@ -68,6 +70,8 @@ in
   };
 
   systemd.services.traefik = {
+    # An ingest-auth failure must not bring down the reverse proxy for every
+    # other service. The ingestion routes fail closed until usersFile exists.
     wants = [ "observability-ingest-auth.service" ];
     after = [ "observability-ingest-auth.service" ];
   };
