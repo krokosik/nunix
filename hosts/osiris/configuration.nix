@@ -33,6 +33,23 @@
 
   role = "server"; # Set role of the machine (desktop/server)
 
+  mkObservability = {
+    enable = true;
+    central = true;
+    monitoredUnits = [
+      "victoriametrics.service"
+      "victorialogs.service"
+      "vmalert-metrics.service"
+      "vmalert-logs.service"
+      "alertmanager.service"
+      "grafana.service"
+      "vmagent.service"
+      "vlagent.service"
+      "systemd-journal-upload.service"
+      "postgresql.service"
+    ];
+  };
+
   networking.hostId = "aec20762"; # head -c4 /dev/urandom | od -A none -t x4
   networking.useNetworkd = true;
 

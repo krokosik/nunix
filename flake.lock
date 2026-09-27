@@ -486,11 +486,11 @@
     "my-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1790436972,
-        "narHash": "sha256-U/JF+ShI6ZhLY0cuvMofJOPhJtj7QObAjyz7cexxRkU=",
+        "lastModified": 1790535626,
+        "narHash": "sha256-gQAGydrgNDaUnUO7wDQCoKJPuQpOZPD9C64y0UlKnME=",
         "ref": "refs/heads/main",
-        "rev": "f978fbf8ab1792fce3edd18a02acded5c3b7ac4d",
-        "revCount": 58,
+        "rev": "7e5a3e4e9bc0ef45b86b3bf719019463f68f5580",
+        "revCount": 62,
         "type": "git",
         "url": "ssh://git@github-secrets/krokosik/nunix-secrets.git"
       },

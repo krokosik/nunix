@@ -72,4 +72,11 @@ in
     chain = [ "chain-no-auth" ];
     port = config.services.immich.port;
   };
+
+  mkObservabilityServices.immich = {
+    units = [ "immich-server.service" ];
+    probes.public = {
+      url = "${config.mkTraefikServices.immich.fullHostname}/api/server/ping";
+    };
+  };
 }

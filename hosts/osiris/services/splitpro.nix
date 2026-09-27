@@ -73,6 +73,11 @@ in
     chain = [ "chain-no-auth" ];
   };
 
+  mkObservabilityServices.splitpro = {
+    units = [ containerUnit ];
+    probes.public.url = config.mkTraefikServices.splitpro.fullHostname;
+  };
+
   virtualisation.oci-containers.containers.splitpro = {
     image = "ossapps/splitpro:v2.1.5";
     extraOptions = [

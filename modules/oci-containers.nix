@@ -129,11 +129,7 @@ in
         enable = true;
         autoPrune.enable = true;
         daemon.settings = {
-          log-driver = "json-file";
-          log-opts = {
-            max-size = "10m";
-            max-file = "3";
-          };
+          log-driver = "journald";
           dns = [ "172.17.0.1" ];
           bip = "172.17.0.1/16";
         };

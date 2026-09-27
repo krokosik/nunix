@@ -56,6 +56,8 @@
     '';
   };
 
+  mkObservabilityServices.haproxy.units = [ "haproxy.service" ];
+
   networking.firewall.allowedTCPPorts = [
     80
     443

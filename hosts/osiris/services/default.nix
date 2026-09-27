@@ -11,6 +11,7 @@
     ./livesync.nix
     ./nixflix.nix
     ./niks3.nix
+    ./observability
     ./geoipupdate.nix
     ./psitransfer.nix
     ./postgresql.nix

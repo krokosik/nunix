@@ -1,3 +1,4 @@
+{ config, ... }:
 let
   port = 3024;
 in
@@ -41,5 +42,13 @@ in
     displayName = "ConvertX";
     accessGroup = "friends";
     displayGroup = "Apps";
+  };
+
+  mkObservabilityServices.convertx = {
+    units = [ "docker-convertx.service" ];
+    probes.public = {
+      url = config.mkTraefikServices.convertx.fullHostname;
+      module = "http_reachable";
+    };
   };
 }

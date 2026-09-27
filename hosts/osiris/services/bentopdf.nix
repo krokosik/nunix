@@ -30,4 +30,12 @@ in
     displayGroup = "Apps";
     host = config.mkTraefikServices.bentopdf.fullHostname;
   };
+
+  mkObservabilityServices.bentopdf = {
+    units = [ "docker-bentopdf.service" ];
+    probes.public = {
+      url = config.mkTraefikServices.bentopdf.fullHostname;
+      module = "http_reachable";
+    };
+  };
 }

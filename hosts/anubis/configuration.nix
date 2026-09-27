@@ -26,6 +26,13 @@
 
   role = "server"; # Set role of the machine (desktop/server)
 
+  mkObservability.enable = true;
+  mkObservability.monitoredUnits = [
+    "vmagent.service"
+    "vlagent.service"
+    "systemd-journal-upload.service"
+  ];
+
   networking.hostId = "98165cf2"; # head -c4 /dev/urandom | od -A none -t x4
   networking.useNetworkd = true;
 

@@ -48,4 +48,12 @@ in
     accessGroup = "friends";
     displayGroup = "Apps";
   };
+
+  mkObservabilityServices.psitransfer = {
+    units = [ containerUnit ];
+    probes.public = {
+      url = config.mkTraefikServices.psitransfer.fullHostname;
+      module = "http_reachable";
+    };
+  };
 }

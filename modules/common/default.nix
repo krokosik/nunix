@@ -14,6 +14,7 @@
     ./nix.nix
     ./niks3.nix
     ./options.nix
+    ./observability.nix
     ./packages.nix
     ./resolved.nix
     ./run0.nix

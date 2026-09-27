@@ -650,6 +650,14 @@ in
         chain = [ "chain-no-auth" ];
       };
 
+      mkObservabilityServices.authentik = {
+        units = [
+          "authentik.service"
+          "authentik-worker.service"
+        ];
+        probes.public.url = "${config.mkTraefikServices.authentik.fullHostname}/-/health/ready/";
+      };
+
       # Heal DynamicUser+StateDirectory idmap and rsynced appdata ownership.
       systemd.services.authentik-migrate.serviceConfig.ExecStartPre = [
         "+${pkgs.writeShellScript "authentik-state-chown" ''
@@ -729,10 +737,8 @@ in
         description = "Update Authentik admins' Basic Auth credentials";
         after = [
           "authentik-ready.service"
-          "sops-install-secrets.service"
         ];
         requires = [ "authentik-ready.service" ];
-        wants = [ "sops-install-secrets.service" ];
         wantedBy = [ "multi-user.target" ];
         environment.PYTHONPATH = "${config.services.authentik.authentikComponents.staticWorkdirDeps}";
         path = [ config.services.authentik.authentikComponents.pythonEnv ];

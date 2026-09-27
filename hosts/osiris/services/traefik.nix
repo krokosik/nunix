@@ -86,6 +86,11 @@ in
   # config cannot coexist with explicit config (needed for mkIf).
   config = lib.mkMerge [
     {
+      mkObservabilityServices.traefik = {
+        units = [ "traefik.service" ];
+        metrics.url = "http://127.0.0.1:8000/metrics";
+      };
+
       services.traefik = {
         enable = true;
 
@@ -165,6 +170,7 @@ in
 
           # Metrics & Logging
           metrics.prometheus = {
+            entryPoint = "traefik";
             addEntryPointsLabels = true;
             addRoutersLabels = true;
             addServicesLabels = true;
