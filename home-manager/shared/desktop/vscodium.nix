@@ -79,6 +79,8 @@ let
     "workbench.layoutControl.enabled" = false;
     "workbench.secondarySideBar.defaultVisibility" = "hidden";
 
+    "interactiveWindow.executeWithShiftEnter" = true;
+
     "workbench.keybindings" = [
       {
         key = "alt+left";
