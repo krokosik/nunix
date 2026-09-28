@@ -7,7 +7,8 @@
 let
   inherit (pkgs) vscode-extensions;
 
-  vscodium = pkgs.vscodium.overrideAttrs (oldAttrs: {
+  # trick to not clutter $HOME
+  vscodiumPatched = pkgs.vscodium.overrideAttrs (oldAttrs: {
     postPatch = (oldAttrs.postPatch or "") + /* bash */ ''
       substituteInPlace resources/app/product.json \
         --replace-fail '"dataFolderName": ".vscode-oss"' \
@@ -19,26 +20,33 @@ let
     '';
   });
 
-  commonExtensions = with vscode-extensions; [
-    aaron-bond.better-comments
-    christian-kohler.path-intellisense
-    eamodio.gitlens
-    jnoortheen.nix-ide
-    mkhl.direnv
-    ms-azuretools.vscode-docker
-    ms-vscode-remote.vscode-remote-extensionpack
-    redhat.vscode-yaml
-    tamasfe.even-better-toml
-    vscode-icons-team.vscode-icons
-    continue.continue
-  ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
-    {
-      publisher = "yellpika";
-      name = "latex-input";
-      version = "2.3.0";
-      sha256 = "sha256-wWhqMbHzUW9Ar44Jur0zZPM/bTQD04sD2J2L0v4qmcs=";
-    }
-  ];
+  # for extensions shipping prebuilt binaries that require linking to .so files
+  # the fhs attr is a wrapper around the package itself, so we take it after patching
+  vscodium = vscodiumPatched.fhs;
+
+  commonExtensions =
+    with vscode-extensions;
+    [
+      aaron-bond.better-comments
+      christian-kohler.path-intellisense
+      eamodio.gitlens
+      jnoortheen.nix-ide
+      mkhl.direnv
+      ms-azuretools.vscode-docker
+      ms-vscode-remote.vscode-remote-extensionpack
+      redhat.vscode-yaml
+      tamasfe.even-better-toml
+      vscode-icons-team.vscode-icons
+      continue.continue
+    ]
+    ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
+      {
+        publisher = "yellpika";
+        name = "latex-input";
+        version = "2.3.0";
+        sha256 = "sha256-wWhqMbHzUW9Ar44Jur0zZPM/bTQD04sD2J2L0v4qmcs=";
+      }
+    ];
 
   baseSettings = {
     "update.mode" = "none";
@@ -104,9 +112,10 @@ let
       "editor.formatOnSave" = true;
     };
     "yaml.schemas" = {
-      "file:///home/${osConfig.username}/.local/share/codium/extensions/Continue.continue/config-yaml-schema.json" = [
-        ".continue/**/*.yaml"
-      ];
+      "file:///home/${osConfig.username}/.local/share/codium/extensions/Continue.continue/config-yaml-schema.json" =
+        [
+          ".continue/**/*.yaml"
+        ];
     };
   };
 

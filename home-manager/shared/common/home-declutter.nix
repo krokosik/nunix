@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, ... }:
 let
   inherit (config.xdg)
     cacheHome
@@ -68,6 +68,9 @@ in
     PYTHON_HISTORY = "${stateHome}/python_history";
     PYTHONPYCACHEPREFIX = "${cacheHome}/python";
     PYTHONUSERBASE = "${dataHome}/python";
+
+    # IPython
+    IPYTHONDIR = "${configHome}/ipython";
 
     # Python setuptools
     PYTHON_EGG_CACHE = "${cacheHome}/python-eggs";
