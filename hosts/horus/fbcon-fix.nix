@@ -1,8 +1,4 @@
-{
-  pkgs,
-  lib,
-  ...
-}:
+{ pkgs, ... }:
 {
   systemd.services.fbcon-native-resolution = {
     description = "Set NVIDIA fbcon resolution after Plymouth";

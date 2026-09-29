@@ -1,10 +1,4 @@
 {
-  inputs,
-  lib,
-  pkgs,
-  ...
-}:
-{
   imports = [
     ../common
     ./bluetooth.nix
@@ -17,6 +11,7 @@
     ./peripherals.nix
     ./pipewire.nix
     ./plymouth.nix
+    ./sunshine.nix
     ./tailscale.nix
     ./theme.nix
     ./tlp.nix
@@ -25,5 +20,4 @@
   services.accounts-daemon.enable = true;
   services.printing.enable = true;
   services.upower.enable = true;
-  # boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
 }

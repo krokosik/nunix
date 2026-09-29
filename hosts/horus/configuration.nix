@@ -1,6 +1,7 @@
 {
   config,
   inputs,
+  pkgs,
   ...
 }:
 {
@@ -30,6 +31,8 @@
     ];
   };
 
+  hardware.nvidia.branch = "latest";
+
   # support building for anubis
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
@@ -37,6 +40,10 @@
     imports = [
       ../../home-manager/private/desktop
       ./apps
+    ];
+
+    home.packages = with pkgs; [
+      freecad
     ];
   };
 

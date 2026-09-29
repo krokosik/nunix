@@ -2,6 +2,7 @@
   config,
   inputs,
   lib,
+  pkgs,
   ...
 }:
 {
@@ -36,17 +37,27 @@
   hardware.nvidia = {
     modesetting.enable = true;
     open = true;
+    branch = "latest";
   };
 
   stylix.image = lib.mkForce ../../wallpapers/wallpaper_thz.jpg;
 
   username = "wkrokosz";
 
+  # support building for anubis
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+
   home-manager.users.${config.username} = {
     imports = [
       ../../home-manager/private/desktop
     ];
+
+    home.packages = with pkgs; [
+      freecad
+    ];
   };
+
+  services.sunshine.enable = true;
 
   system.stateVersion = "26.05";
 }
