@@ -121,13 +121,23 @@ let
     };
   };
 
-  pythonExtensions = with vscode-extensions; [
-    charliermarsh.ruff
-    ms-python.python
-    detachhead.basedpyright
-    ms-toolsai.jupyter
-    njpwerner.autodocstring
-  ];
+  pythonExtensions =
+    with vscode-extensions;
+    [
+      charliermarsh.ruff
+      ms-python.python
+      detachhead.basedpyright
+      njpwerner.autodocstring
+    ]
+    ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
+      {
+        publisher = "ms-toolsai";
+        name = "jupyter";
+        version = "2026.6.2026071501";
+        arch = "linux-x64";
+        hash = "sha256-0M/DqAdjXeqA5oEoaCmxcntXEJ88bhe7cegPsXbH1w8=";
+      }
+    ];
 
   rustExtensions = with vscode-extensions; [
     rust-lang.rust-analyzer
