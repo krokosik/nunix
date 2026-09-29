@@ -12,5 +12,6 @@
     parsec-bin
     pinta
     proton-vpn
+    zotero
   ];
 }
