@@ -4,7 +4,7 @@
   ...
 }:
 let
-  browser = "zen.desktop";
+  browser = "zen-twilight.desktop";
   editor = "codium.desktop";
   fileManager = "org.gnome.Nautilus.desktop";
   imageViewer = "imv.desktop";
