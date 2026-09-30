@@ -18,6 +18,7 @@
     };
 
     opencode-flake.url = "github:noblepayne/opencode-flake";
+    codex-cli-nix.url = "github:sadjow/codex-cli-nix";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 

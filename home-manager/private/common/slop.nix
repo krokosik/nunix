@@ -39,7 +39,7 @@ in
 
   programs.codex = {
     enable = true;
-    package = pkgs.unstable.codex;
+    package = inputs.codex-cli-nix.packages.${pkgs.system}.default;
     skills = skillsPath;
     enableMcpIntegration = config.programs.mcp.enable;
   };
