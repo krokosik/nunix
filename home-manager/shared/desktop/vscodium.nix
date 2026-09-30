@@ -5,7 +5,8 @@
   ...
 }:
 let
-  inherit (pkgs) vscode-extensions;
+  vscode-extensions = pkgs.nix-vscode-extensions.vscode-marketplace;
+  vscode-extensions-universal = pkgs.nix-vscode-extensions.vscode-marketplace-universal;
 
   # trick to not clutter $HOME
   vscodiumPatched = pkgs.vscodium.overrideAttrs (oldAttrs: {
@@ -24,29 +25,19 @@ let
   # the fhs attr is a wrapper around the package itself, so we take it after patching
   vscodium = vscodiumPatched.fhs;
 
-  commonExtensions =
-    with vscode-extensions;
-    [
-      aaron-bond.better-comments
-      christian-kohler.path-intellisense
-      eamodio.gitlens
-      jnoortheen.nix-ide
-      mkhl.direnv
-      ms-azuretools.vscode-docker
-      ms-vscode-remote.vscode-remote-extensionpack
-      redhat.vscode-yaml
-      tamasfe.even-better-toml
-      vscode-icons-team.vscode-icons
-      continue.continue
-    ]
-    ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
-      {
-        publisher = "yellpika";
-        name = "latex-input";
-        version = "2.3.0";
-        sha256 = "sha256-wWhqMbHzUW9Ar44Jur0zZPM/bTQD04sD2J2L0v4qmcs=";
-      }
-    ];
+  commonExtensions = with vscode-extensions; [
+    aaron-bond.better-comments
+    christian-kohler.path-intellisense
+    eamodio.gitlens
+    jnoortheen.nix-ide
+    mkhl.direnv
+    ms-azuretools.vscode-docker
+    ms-vscode-remote.vscode-remote-extensionpack
+    redhat.vscode-yaml
+    tamasfe.even-better-toml
+    vscode-icons-team.vscode-icons
+    continue.continue
+  ];
 
   baseSettings = {
     "update.mode" = "none";
@@ -121,25 +112,15 @@ let
     };
   };
 
-  pythonExtensions =
-    with vscode-extensions;
-    [
-      charliermarsh.ruff
-      ms-python.python
-      detachhead.basedpyright
-      njpwerner.autodocstring
-    ]
-    ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
-      {
-        publisher = "ms-toolsai";
-        name = "jupyter";
-        version = "2026.6.2026071501";
-        arch = "linux-x64";
-        hash = "sha256-0M/DqAdjXeqA5oEoaCmxcntXEJ88bhe7cegPsXbH1w8=";
-      }
-    ];
+  pythonExtensions = with vscode-extensions; [
+    charliermarsh.ruff
+    ms-python.python
+    detachhead.basedpyright
+    njpwerner.autodocstring
+  ];
 
-  rustExtensions = with vscode-extensions; [
+  # these come from https://github.com/nix-community/nix-vscode-extensions/tree/master/extensions
+  rustExtensions = with vscode-extensions-universal; [
     rust-lang.rust-analyzer
     vadimcn.vscode-lldb
   ];

@@ -12,6 +12,11 @@
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
+    nix-vscode-extensions = {
+      url = "github:nix-community/nix-vscode-extensions";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     opencode-flake.url = "github:noblepayne/opencode-flake";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
@@ -117,6 +122,7 @@
           modules = [
             {
               nixpkgs.hostPlatform = system;
+              nixpkgs.overlays = [ inputs.nix-vscode-extensions.overlays.default ];
               networking.hostName = host;
             }
             ./hosts/${host}/configuration.nix
