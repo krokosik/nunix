@@ -36,20 +36,23 @@ let
       inherit devices;
       id = "e3hvo-mqvsu";
     };
+
+    zotmoov = {
+      path = "${config.xdg.userDirs.documents}/zotmoov";
+      inherit devices;
+      id = "itlxc-1b7cj";
+    };
   };
 
   # Stable 26.05 HM doesn't know about ignorePatterns, evaluate on 26.11+.
-  syncthingFolders =
-    lib.mapAttrs (_: folder: removeAttrs folder [ "ignorePatterns" ]) folders;
+  syncthingFolders = lib.mapAttrs (_: folder: removeAttrs folder [ "ignorePatterns" ]) folders;
 
   # Generate .stignore for folders that define ignorePatterns.
   ignoreFiles = lib.mapAttrs' (
     _: folder:
-    lib.nameValuePair
-      "${lib.removePrefix "${config.home.homeDirectory}/" folder.path}/.stignore"
-      {
-        text = lib.concatLines folder.ignorePatterns;
-      }
+    lib.nameValuePair "${lib.removePrefix "${config.home.homeDirectory}/" folder.path}/.stignore" {
+      text = lib.concatLines folder.ignorePatterns;
+    }
   ) (lib.filterAttrs (_: folder: folder ? ignorePatterns) folders);
 in
 {
@@ -77,14 +80,10 @@ in
       };
 
       devices = {
-        khonsu.id =
-          "YLQZWQ7-DUKD2EP-CMXTWES-ZPFSP75-CYV7J3L-5OCMT6Q-ATCSN3Y-OJAUOAB";
-        lindbladian.id =
-          "JK6J5IF-GCC2C6T-3FG7G3Z-IKEH5FX-IXVDAEM-CD3RWC4-7EP2NVT-D3Y3FAT";
-        horus.id =
-          "K3O7KTE-DNJI5ER-XVDOVZK-I5TSY5Z-P2WRORE-QK57BHA-RM55CIL-NVA6UAM";
-        isis.id =
-          "F4A6FSM-WHSWT36-PI7A4XW-IDR3FL3-7TORBUX-M5THI4Z-56Z3KIW-ZTSODQX";
+        khonsu.id = "YLQZWQ7-DUKD2EP-CMXTWES-ZPFSP75-CYV7J3L-5OCMT6Q-ATCSN3Y-OJAUOAB";
+        lindbladian.id = "JK6J5IF-GCC2C6T-3FG7G3Z-IKEH5FX-IXVDAEM-CD3RWC4-7EP2NVT-D3Y3FAT";
+        horus.id = "K3O7KTE-DNJI5ER-XVDOVZK-I5TSY5Z-P2WRORE-QK57BHA-RM55CIL-NVA6UAM";
+        isis.id = "F4A6FSM-WHSWT36-PI7A4XW-IDR3FL3-7TORBUX-M5THI4Z-56Z3KIW-ZTSODQX";
       };
 
       folders = syncthingFolders;
