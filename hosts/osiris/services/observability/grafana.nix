@@ -4,6 +4,20 @@
   pkgs,
   ...
 }:
+let
+  inherit (lib.meta) getExe getExe';
+  dashboards = pkgs.runCommand "observability-dashboards" { } /* bash */ ''
+    ${getExe' pkgs.coreutils "mkdir"} "$out"
+    for source in ${./dashboards}/*.json; do
+      name="$(${getExe' pkgs.coreutils "basename"} "$source")"
+      ${getExe pkgs.jq} --arg name "$name" --from-file ${./prepare-dashboards.jq} "$source" > "$out/$name"
+    done
+    ${getExe pkgs.jq} --exit-status --slurp '
+      (map(.uid) | length == (unique | length)) and
+      all(.[]; (.title | type == "string") and (.uid | type == "string"))
+    ' "$out"/*.json > /dev/null
+  '';
+in
 {
   mkAuthentik.oidcApps.grafana = {
     # The Authentik application host and callback must use the same private
@@ -76,6 +90,14 @@
     };
     provision = {
       enable = true;
+      dashboards.settings.providers = lib.lists.singleton {
+        name = "observability";
+        folder = "Observability";
+        disableDeletion = false;
+        allowUiUpdates = false;
+        options.path = "${dashboards}";
+      };
+
       datasources.settings = {
         prune = true;
         datasources = [

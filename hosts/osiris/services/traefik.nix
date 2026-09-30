@@ -11,7 +11,10 @@ let
 in
 {
   # Imports cannot be conditional.
-  imports = [ ./traefik-rules ];
+  imports = [
+    ./traefik-rules
+    ./traefik-logs.nix
+  ];
 
   options.mkTraefikServices = lib.mkOption {
     type = lib.types.attrsOf (
@@ -187,12 +190,8 @@ in
             level = "INFO";
           };
           accessLog = {
+            format = "json";
             bufferingSize = 100;
-            filters.statusCodes = [
-              "204-299"
-              "400-499"
-              "500-599"
-            ];
             fields.headers.defaultMode = "drop";
             fields.headers.names = {
               User-Agent = "keep";

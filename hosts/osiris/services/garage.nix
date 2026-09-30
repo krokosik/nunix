@@ -134,6 +134,11 @@ in
           rpc_bind_addr = "127.0.0.1:${toString rpc_port}";
           rpc_public_addr = "127.0.0.1:${toString rpc_port}";
 
+          admin = {
+            api_bind_addr = "127.0.0.1:3903";
+            metrics_require_token = false;
+          };
+
           s3_api = {
             api_bind_addr = "127.0.0.1:${toString s3_port}";
             s3_region = "garage";
@@ -153,6 +158,11 @@ in
       mkTraefikServices.garage = {
         port = s3_port;
         chain = singleton "chain-tailscale";
+      };
+
+      mkObservabilityServices.garage = {
+        units = singleton "garage.service";
+        metrics.url = "http://${config.services.garage.settings.admin.api_bind_addr}/metrics";
       };
     }
 

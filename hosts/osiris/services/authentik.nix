@@ -651,12 +651,15 @@ in
       };
 
       mkObservabilityServices.authentik = {
+        metrics.url = "http://127.0.0.1:9300/metrics";
         units = [
           "authentik.service"
           "authentik-worker.service"
         ];
         probes.public.url = "${config.mkTraefikServices.authentik.fullHostname}/-/health/ready/";
       };
+
+      mkObservabilityServices.authentik-worker.metrics.url = "http://[::1]:9301/metrics";
 
       # Heal DynamicUser+StateDirectory idmap and rsynced appdata ownership.
       systemd.services.authentik-migrate.serviceConfig.ExecStartPre = [

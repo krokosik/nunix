@@ -1,4 +1,4 @@
-{ ... }:
+{ config, ... }:
 {
   mkObservability.metricRules = {
     hosts =
@@ -36,7 +36,10 @@
         expr = ''probe_success{job=~"probe/.*"} == 0'';
         for = "2m";
         labels.severity = "critical";
-        annotations.summary = "Public check for {{ $labels.service }} failed on {{ $labels.host }}";
+        annotations = {
+          summary = "{{ $labels.check }} IPv{{ $labels.ip_family }} check for {{ $labels.service }} failed from {{ $labels.vantage }}";
+          dashboard_url = "${config.mkTraefikServices.grafana.fullHostname}/d/NEzutrbMk";
+        };
       }
       {
         alert = "SystemdUnitInactive";

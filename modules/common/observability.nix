@@ -121,33 +121,88 @@ let
     name: service:
     lib.mapAttrs' (probeName: probe: lib.nameValuePair "${name}/${probeName}" probe) service.probes
   ) services;
-  probeJobs = lib.mapAttrsToList (name: probe: {
-    job_name = "probe/${name}";
-    metrics_path = "/probe";
-    scrape_interval = probe.interval;
-    params.module = singleton probe.module;
-    static_configs = singleton {
-      targets = singleton probe.url;
-      labels = probe.labels // {
-        service = lib.lists.head (lib.splitString "/" name);
-        check = lib.lists.last (lib.splitString "/" name);
+  probeFamilies = probe: lib.optional probe.checkIPv4 "4" ++ lib.optional probe.checkIPv6 "6";
+  probeJobs = lib.concatLists (
+    lib.mapAttrsToList (
+      name: probe:
+      map (family: {
+        job_name = "probe/${name}/ip${family}";
+        metrics_path = "/probe";
+        scrape_interval = probe.interval;
+        params.module = singleton "${probe.module}_ip${family}";
+        static_configs = singleton {
+          targets = singleton probe.url;
+          labels = probe.labels // {
+            service = lib.lists.head (lib.splitString "/" name);
+            check = lib.lists.last (lib.splitString "/" name);
+            ip_family = family;
+            vantage = host;
+          };
+        };
+        relabel_configs = [
+          {
+            source_labels = singleton "__address__";
+            target_label = "__param_target";
+          }
+          {
+            source_labels = singleton "__param_target";
+            target_label = "instance";
+          }
+          {
+            target_label = "__address__";
+            replacement = "${loopback}:${toString config.services.prometheus.exporters.blackbox.port}";
+          }
+        ];
+      }) (probeFamilies probe)
+    ) probes
+  );
+
+  probeModules = {
+    http_2xx = {
+      prober = "http";
+      timeout = "10s";
+      http = {
+        valid_status_codes = [ ];
+        follow_redirects = true;
       };
     };
-    relabel_configs = [
-      {
-        source_labels = singleton "__address__";
-        target_label = "__param_target";
-      }
-      {
-        source_labels = singleton "__param_target";
-        target_label = "instance";
-      }
-      {
-        target_label = "__address__";
-        replacement = "${loopback}:${toString config.services.prometheus.exporters.blackbox.port}";
-      }
-    ];
-  }) probes;
+    http_reachable = {
+      prober = "http";
+      timeout = "10s";
+      http = {
+        valid_status_codes = [
+          200
+          302
+          401
+        ];
+        follow_redirects = false;
+      };
+    };
+    tcp_connect.prober = "tcp";
+    icmp_ping.prober = "icmp";
+  };
+  blackboxModules = lib.concatMapAttrs (
+    name: module:
+    lib.listToAttrs (
+      map
+        (
+          family:
+          lib.nameValuePair "${name}_ip${family}" (
+            module
+            // {
+              ${module.prober} = (module.${module.prober} or { }) // {
+                preferred_ip_protocol = "ip${family}";
+                ip_protocol_fallback = false;
+              };
+            }
+          )
+        )
+        [
+          "4"
+          "6"
+        ]
+    )
+  ) probeModules;
   monitoredUnits = lib.unique (
     cfg.monitoredUnits ++ lib.concatMap (svc: svc.units) (lib.attrValues services)
   );
@@ -207,13 +262,18 @@ in
                   options = {
                     url = lib.mkOption { type = lib.types.str; };
                     module = lib.mkOption {
-                      type = lib.types.enum [
-                        "http_2xx"
-                        "http_reachable"
-                        "tcp_connect"
-                        "icmp_ping"
-                      ];
+                      type = lib.types.enum (lib.attrNames probeModules);
                       default = "http_2xx";
+                    };
+                    checkIPv4 = lib.mkOption {
+                      type = lib.types.bool;
+                      default = true;
+                      description = "Check IPv4 independently, without falling back to IPv6.";
+                    };
+                    checkIPv6 = lib.mkOption {
+                      type = lib.types.bool;
+                      default = true;
+                      description = "Check IPv6 independently, without falling back to IPv4. Disable for IPv4-only targets or probing hosts.";
                     };
                     interval = lib.mkOption {
                       type = lib.types.str;
@@ -248,40 +308,24 @@ in
     services.prometheus.exporters.node = {
       enable = true;
       listenAddress = loopback;
-      enabledCollectors = [ "systemd" ];
-      extraFlags = lib.optionals (monitoredUnits != [ ]) [
-        "--collector.systemd.unit-include=^(${lib.concatStringsSep "|" (map lib.escapeRegex monitoredUnits)})$"
+      enabledCollectors = [
+        "systemd"
+        "processes"
+        "tcpstat"
+        "interrupts"
       ];
+      extraFlags =
+        singleton "--collector.systemd.enable-start-time-metrics"
+        ++ lib.optionals (monitoredUnits != [ ]) [
+          "--collector.systemd.unit-include=^(${lib.concatStringsSep "|" (map lib.escapeRegex monitoredUnits)})$"
+        ];
     };
 
     services.prometheus.exporters.blackbox = lib.mkIf (probes != { }) {
       enable = true;
       listenAddress = loopback;
       configFile = (pkgs.formats.yaml { }).generate "blackbox.yaml" {
-        modules = {
-          http_2xx = {
-            prober = "http";
-            timeout = "10s";
-            http = {
-              valid_status_codes = [ ];
-              follow_redirects = true;
-            };
-          };
-          http_reachable = {
-            prober = "http";
-            timeout = "10s";
-            http = {
-              valid_status_codes = [
-                200
-                302
-                401
-              ];
-              follow_redirects = false;
-            };
-          };
-          tcp_connect.prober = "tcp";
-          icmp_ping.prober = "icmp";
-        };
+        modules = blackboxModules;
       };
     };
 
@@ -289,6 +333,10 @@ in
       enable = true;
       listenAddress = loopback;
       runAsLocalSuperUser = true;
+      extraFlags = [
+        "--collector.postmaster"
+        "--collector.stat_checkpointer"
+      ];
     };
 
     services.prometheus.exporters.smartctl = lib.mkIf (!config.isVirtual) {
@@ -321,6 +369,7 @@ in
         scrape_configs = scrapeJobs ++ probeJobs;
       };
       extraArgs = [
+        "-enableTCP6"
         "-httpListenAddr=${loopback}:8429"
         "-remoteWrite.maxDiskUsagePerURL=1GiB"
       ];
@@ -375,9 +424,14 @@ in
       };
     };
 
-    assertions = lib.mapAttrsToList (name: svc: {
-      assertion = lib.all (rule: rule.labels ? severity) (svc.metricAlerts ++ svc.logAlerts);
-      message = "mkObservabilityServices.${name}: every alert needs a severity label";
-    }) services;
+    assertions =
+      lib.mapAttrsToList (name: svc: {
+        assertion = lib.all (rule: rule.labels ? severity) (svc.metricAlerts ++ svc.logAlerts);
+        message = "mkObservabilityServices.${name}: every alert needs a severity label";
+      }) services
+      ++ lib.mapAttrsToList (name: probe: {
+        assertion = probe.checkIPv4 || probe.checkIPv6;
+        message = "mkObservabilityServices probe ${name}: at least one of checkIPv4 and checkIPv6 must be enabled";
+      }) probes;
   };
 }

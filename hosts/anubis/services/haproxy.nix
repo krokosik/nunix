@@ -2,7 +2,7 @@
 {
   services.haproxy = {
     enable = true;
-    config = ''
+    config = /* haproxy */ ''
       # HAProxy Configuration - serving only as a proxy for the homeserver, with rate limiting and connection limiting
       # Utilizes the PROXY protocol to pass the original client IP to the homeserver
       # requires the homeserver to be configured to accept the PROXY protocol on its ports
@@ -23,10 +23,12 @@
       # --- HTTP (Port 80) Frontend ---
       frontend http-frontend
         bind *:80
+        bind [::]:80 v6only
         option tcplog
         default_backend http-backend
 
-        stick-table type ip size 1m expire 10m store conn_cur,conn_rate(10s),sess_rate(10s)
+        # IPv4 source addresses are mapped to IPv6 keys, so both families are tracked.
+        stick-table type ipv6 size 1m expire 10m store conn_cur,conn_rate(10s),sess_rate(10s)
         tcp-request connection track-sc0 src
         acl too_many_conn sc0_conn_cur gt 40
         acl too_fast_conn sc0_conn_rate gt 80
@@ -40,10 +42,12 @@
       # --- HTTPS (Port 443) Frontend ---
       frontend https-frontend
         bind *:443
+        bind [::]:443 v6only
         option tcplog
         default_backend https-backend
 
-        stick-table type ip size 1m expire 10m store conn_cur,conn_rate(10s),sess_rate(10s)
+        # IPv4 source addresses are mapped to IPv6 keys, so both families are tracked.
+        stick-table type ipv6 size 1m expire 10m store conn_cur,conn_rate(10s),sess_rate(10s)
         tcp-request connection track-sc0 src
         acl too_many_conn sc0_conn_cur gt 40
         acl too_fast_conn sc0_conn_rate gt 80
@@ -53,10 +57,18 @@
       backend https-backend
         balance roundrobin
         server localserver ${config.homeserverPrivateIp}:443 check send-proxy-v2
+
+      # METRICS
+      frontend metrics
+        bind 127.0.0.1:8404
+        mode http
+        http-request use-service prometheus-exporter if { path /metrics }
+        http-request deny
     '';
   };
 
   mkObservabilityServices.haproxy.units = [ "haproxy.service" ];
+  mkObservabilityServices.haproxy.metrics.url = "http://127.0.0.1:8404/metrics";
 
   networking.firewall.allowedTCPPorts = [
     80
