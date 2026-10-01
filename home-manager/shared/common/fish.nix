@@ -251,7 +251,17 @@ in
 
   programs.fd.enable = true;
   programs.bat.enable = true;
-  programs.tealdeer.enable = true;
+  programs.tealdeer = {
+    enable = true;
+    settings = {
+      display.compact = true;
+      updates = {
+        auto_update = true;
+        auto_update_interval_hours = 240;
+      };
+    };
+    enableAutoUpdates = true;
+  };
 
   home.packages = [ pkgs.fish ];
 }
