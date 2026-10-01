@@ -6,6 +6,7 @@
 }:
 let
   vscode-extensions = pkgs.nix-vscode-extensions.vscode-marketplace;
+  vscode-extensions-open = pkgs.nix-vscode-extensions.open-vsx;
   vscode-extensions-universal = pkgs.nix-vscode-extensions.vscode-marketplace-universal;
 
   # trick to not clutter $HOME
@@ -37,6 +38,7 @@ let
     tamasfe.even-better-toml
     vscode-icons-team.vscode-icons
     continue.continue
+    yellpika.latex-input
   ];
 
   baseSettings = {
@@ -115,8 +117,14 @@ let
   pythonExtensions = with vscode-extensions; [
     charliermarsh.ruff
     ms-python.python
+    ms-python.debugpy
     detachhead.basedpyright
     njpwerner.autodocstring
+    ms-toolsai.jupyter
+    ms-toolsai.vscode-jupyter-slideshow
+    ms-toolsai.jupyter-renderers
+    ms-toolsai.jupyter-keymap
+    ms-toolsai.vscode-jupyter-cell-tags
   ];
 
   # these come from https://github.com/nix-community/nix-vscode-extensions/tree/master/extensions
