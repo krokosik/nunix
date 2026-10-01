@@ -36,6 +36,7 @@ let
     tamasfe.even-better-toml
     vscode-icons-team.vscode-icons
     yellpika.latex-input
+    sst-dev.opencode
   ];
 
   baseSettings = {

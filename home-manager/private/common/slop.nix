@@ -61,10 +61,22 @@ in
       enabled_providers = [
         # "opencode-go"
         "openai"
+        "macierz"
       ];
       provider = {
         "opencode-go".options.apiKey = "{file:${config.sops.secrets.opencode_go_api_key.path}}";
         openai.options.apiKey = "{file:${config.sops.secrets.openai_api_key.path}}";
+        macierz = {
+          npm = "@ai-sdk/openai-compatible";
+          name = "Macierz";
+          options = {
+            baseURL = "http://macierz.qot.internal:11789/v1";
+            apiKey = "123";
+          };
+          models = {
+            "qwen3.8-flash-next-coder-iq1_m".name = "qwen3.8-flash-coder";
+          };
+        };
       };
     };
   };
