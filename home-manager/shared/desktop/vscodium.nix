@@ -1,12 +1,10 @@
 {
-  osConfig,
   lib,
   pkgs,
   ...
 }:
 let
   vscode-extensions = pkgs.nix-vscode-extensions.vscode-marketplace;
-  vscode-extensions-open = pkgs.nix-vscode-extensions.open-vsx;
   vscode-extensions-universal = pkgs.nix-vscode-extensions.vscode-marketplace-universal;
 
   # trick to not clutter $HOME
@@ -37,7 +35,6 @@ let
     redhat.vscode-yaml
     tamasfe.even-better-toml
     vscode-icons-team.vscode-icons
-    continue.continue
     yellpika.latex-input
   ];
 
@@ -105,12 +102,6 @@ let
     "[python]" = {
       "editor.defaultFormatter" = "charliermarsh.ruff";
       "editor.formatOnSave" = true;
-    };
-    "yaml.schemas" = {
-      "file:///home/${osConfig.username}/.local/share/codium/extensions/Continue.continue/config-yaml-schema.json" =
-        [
-          ".continue/**/*.yaml"
-        ];
     };
   };
 
