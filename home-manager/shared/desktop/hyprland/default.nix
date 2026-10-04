@@ -59,6 +59,11 @@
         }
       ];
 
+      workspace_rule = lib.lists.singleton {
+        workspace = "special:scratchpad";
+        animation = "slidevert";
+      };
+
       layer_rule = [
         {
           match.namespace = "^(quickshell)$";
