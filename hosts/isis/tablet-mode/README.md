@@ -53,6 +53,12 @@ Hardware discovery and `Session.apply` are separate. The same policy controls
 iio-hyprland in tablet mode. It rotates `eDP-1` and touchscreen/stylus input;
 stopping it restores landscape without modifying synchronized monitor files.
 
+`../tablet-plugins.nix` also loads hyprgrass, hyprgrass-pulse and
+hyprgrass-backlight. They use the newer source from the pinned unstable input
+but compile against the host's exact Hyprland package. These provide touch,
+audio and backlight gesture capabilities; no custom gesture bindings are
+configured yet.
+
 Inspect operation with:
 
 ```sh

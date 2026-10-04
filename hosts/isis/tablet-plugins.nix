@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -8,6 +9,27 @@ let
   inherit (lib.lists) singleton;
   inherit (lib.meta) getExe getExe';
   inherit (lib.strings) makeBinPath;
+  hyprgrass =
+    (pkgs.hyprlandPlugins.override { hyprland = config.programs.hyprland.package; })
+    .hyprgrass.overrideAttrs
+      (old: {
+        # Stable's source predates Hyprland's Lua API. Keep the exact host ABI.
+        inherit
+          (inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.hyprlandPlugins.hyprgrass
+          )
+          version
+          src
+          ;
+        buildInputs = (old.buildInputs or [ ]) ++ [
+          pkgs.libpulseaudio
+          pkgs.glibmm
+          pkgs.systemd
+        ];
+        mesonFlags = (old.mesonFlags or [ ]) ++ [
+          "-Dhyprgrass-pulse=true"
+          "-Dhyprgrass-backlight=true"
+        ];
+      });
 in
 {
   programs.iio-hyprland = {
@@ -26,6 +48,12 @@ in
   home-manager.users.${config.username} =
     { config, osConfig, ... }:
     {
+      wayland.windowManager.hyprland.plugins = [
+        hyprgrass
+        "${hyprgrass}/lib/libhyprgrass-pulse.so"
+        "${hyprgrass}/lib/libhyprgrass-backlight.so"
+      ];
+
       # The tablet watcher owns activation; no login enablement or layout changes.
       systemd.user.services.surface-tablet-rotation = {
         Unit = {
