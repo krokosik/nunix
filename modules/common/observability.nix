@@ -204,7 +204,9 @@ let
     )
   ) probeModules;
   monitoredUnits = lib.unique (
-    cfg.monitoredUnits ++ lib.concatMap (svc: svc.units) (lib.attrValues services)
+    cfg.monitoredUnits
+    ++ cfg.inactiveAlertUnits
+    ++ lib.concatMap (svc: svc.units) (lib.attrValues services)
   );
   writableFilesystems = lib.filterAttrs (
     _: fs:
@@ -243,6 +245,13 @@ let
     + lib.concatMapStrings (pool: /* prometheus */ ''
       node_expected_zfs_pool{zpool=${lib.strings.toJSON pool}} 1
     '') expectedPools
+    + /* prometheus */ ''
+      # HELP node_expected_systemd_unit_active Systemd unit expected to remain active.
+      # TYPE node_expected_systemd_unit_active gauge
+    ''
+    + lib.concatMapStrings (unit: /* prometheus */ ''
+      node_expected_systemd_unit_active{name=${lib.strings.toJSON unit}} 1
+    '') cfg.inactiveAlertUnits
   );
   remoteMetricsUrl = "https://metrics-ingest.${config.privateDomain}/api/v1/write";
   remoteLogsUrl = "https://logs-ingest.${config.privateDomain}/insert/native";
@@ -275,6 +284,12 @@ in
         default = [ ];
         apply = lib.lists.unique;
         description = "Systemd units whose structured error-level logs are counted by the central RepeatedServiceErrors rule.";
+      };
+      inactiveAlertUnits = lib.mkOption {
+        type = lib.types.listOf lib.types.nonEmptyStr;
+        default = [ ];
+        apply = lib.lists.unique;
+        description = "Long-running systemd units expected to remain active. Adds them to node exporter collection and the per-host SystemdUnitInactive alert inventory.";
       };
       metricRules = lib.mkOption {
         type = lib.types.attrsOf (lib.types.listOf ruleType);
@@ -349,6 +364,12 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    mkObservability.inactiveAlertUnits = [
+      config.systemd.services.vmagent.name
+      config.systemd.services.vlagent.name
+      config.systemd.services.systemd-journal-upload.name
+    ];
+
     services.prometheus.exporters.node = {
       enable = true;
       listenAddress = loopback;

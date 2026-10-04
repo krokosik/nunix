@@ -96,6 +96,8 @@ in
 
       mkObservability.repeatedErrorUnits = lib.mkIf cfg.enable config.mkObservabilityServices.traefik.units;
 
+      mkObservability.inactiveAlertUnits = lib.mkIf cfg.enable config.mkObservabilityServices.traefik.units;
+
       services.traefik = {
         enable = true;
 

@@ -70,6 +70,8 @@
   mkObservabilityServices.haproxy.units = [ "haproxy.service" ];
   mkObservabilityServices.haproxy.metrics.url = "http://127.0.0.1:8404/metrics";
 
+  mkObservability.inactiveAlertUnits = config.mkObservabilityServices.haproxy.units;
+
   networking.firewall.allowedTCPPorts = [
     80
     443

@@ -186,7 +186,11 @@
       }
       {
         alert = "SystemdUnitInactive";
-        expr = ''node_systemd_unit_state{state="active",name=~"(vmagent|vlagent|systemd-journal-upload|victoriametrics|victorialogs|vmalert-metrics|vmalert-logs|alertmanager|grafana|traefik|haproxy)[.]service"} == 0'';
+        expr = /* promql */ ''
+          (node_systemd_unit_state{job="host/node",state="active"} == 0)
+          and on (host, environment, instance, name)
+            node_expected_systemd_unit_active{job="host/node"}
+        '';
         for = "5m";
         labels.severity = "critical";
         annotations.summary = "{{ $labels.name }} inactive on {{ $labels.host }}";
