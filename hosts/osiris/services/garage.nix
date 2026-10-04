@@ -164,6 +164,8 @@ in
         units = singleton "garage.service";
         metrics.url = "http://${config.services.garage.settings.admin.api_bind_addr}/metrics";
       };
+
+      mkObservability.inactiveAlertUnits = lib.mkIf config.services.garage.enable config.mkObservabilityServices.garage.units;
     }
 
     (lib.mkIf (buckets != { }) {

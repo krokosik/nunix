@@ -96,6 +96,27 @@ configuration, as with other rules.
 
 ## Host and storage alerts
 
+Services opt into `SystemdUnitInactive` with the mergeable, deduplicated
+`mkObservability.inactiveAlertUnits` list:
+
+```nix
+mkObservability.inactiveAlertUnits = lib.lists.singleton config.systemd.services.example.name;
+```
+
+Each host automatically includes these units in node exporter's systemd
+collector and publishes `node_expected_systemd_unit_active` expectation metrics.
+The central rule joins those with inactive unit states by host, environment,
+instance, and unit name, alerting after 5 minutes. This works for remote-host
+registrations without adding a second unit list on the central host. An empty
+list disables inactive-unit alerts for that host; `monitoredUnits` and service
+`units` alone select collection, not inactive alerts.
+Use `lib.mkForce [ ]` to clear registrations merged from service modules.
+
+Enroll main long-running services, not setup/configuration jobs or timers.
+Nixflix registers Sonarr, Radarr, Prowlarr, FlareSolverr, Jellyfin, Seerr,
+qBittorrent, and Maintainerr when enabled. Existing applications, PostgreSQL,
+CrowdSec and its firewall bouncer, and the observability stack are also enrolled.
+
 The central metric rules cover PostgreSQL availability (2 minutes) and use of
 more than 85% of non-reserved connection slots (10 minutes), SMART/NVMe health
 failures (2 minutes), and disk deterioration (10 minutes). Disk deterioration

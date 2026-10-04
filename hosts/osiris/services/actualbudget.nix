@@ -57,6 +57,10 @@ in
     config.services.actual.settings.dataDir
   ];
 
+  mkObservability.inactiveAlertUnits = lib.mkIf config.services.actual.enable (
+    lib.lists.singleton config.systemd.services.actual.name
+  );
+
   mkTraefikServices.actual = {
     inherit port;
     public = true;

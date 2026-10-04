@@ -78,6 +78,8 @@ in
     probes.public.url = config.mkTraefikServices.splitpro.fullHostname;
   };
 
+  mkObservability.inactiveAlertUnits = config.mkObservabilityServices.splitpro.units;
+
   virtualisation.oci-containers.containers.splitpro = {
     image = "ossapps/splitpro:v2.1.5";
     extraOptions = [

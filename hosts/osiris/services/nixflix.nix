@@ -174,6 +174,31 @@
     };
   };
 
+  mkObservability.inactiveAlertUnits = lib.mkIf config.nixflix.enable (
+    lib.optionals config.nixflix.sonarr.enable (lib.lists.singleton config.systemd.services.sonarr.name)
+    ++ lib.optionals config.nixflix.radarr.enable (
+      lib.lists.singleton config.systemd.services.radarr.name
+    )
+    ++ lib.optionals config.nixflix.prowlarr.enable (
+      lib.lists.singleton config.systemd.services.prowlarr.name
+    )
+    ++ lib.optionals config.nixflix.flaresolverr.enable (
+      lib.lists.singleton config.systemd.services.flaresolverr.name
+    )
+    ++ lib.optionals config.nixflix.jellyfin.enable (
+      lib.lists.singleton config.systemd.services.jellyfin.name
+    )
+    ++ lib.optionals config.nixflix.seerr.enable (
+      lib.lists.singleton config.systemd.services.seerr.name
+    )
+    ++ lib.optionals config.nixflix.torrentClients.qbittorrent.enable (
+      lib.lists.singleton config.systemd.services.qbittorrent.name
+    )
+    ++ lib.optionals config.nixflix.maintainerr.enable (
+      lib.lists.singleton config.systemd.services.maintainerr.name
+    )
+  );
+
   mkAuthentik.forwardAuthApps =
     (lib.genAttrs
       [

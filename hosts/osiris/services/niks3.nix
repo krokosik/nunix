@@ -44,4 +44,8 @@ in
     port = 5751;
     chain = singleton "chain-tailscale";
   };
+
+  mkObservability.inactiveAlertUnits = lib.mkIf config.services.niks3.enable (
+    singleton config.systemd.services.niks3.name
+  );
 }

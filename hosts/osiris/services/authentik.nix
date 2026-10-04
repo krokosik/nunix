@@ -661,6 +661,8 @@ in
 
       mkObservability.repeatedErrorUnits = lib.mkIf config.services.authentik.enable config.mkObservabilityServices.authentik.units;
 
+      mkObservability.inactiveAlertUnits = lib.mkIf config.services.authentik.enable config.mkObservabilityServices.authentik.units;
+
       mkObservabilityServices.authentik-worker.metrics.url = "http://[::1]:9301/metrics";
 
       # Heal DynamicUser+StateDirectory idmap and rsynced appdata ownership.

@@ -74,6 +74,10 @@ in
 
   config = lib.mkMerge [
     {
+      mkObservability.inactiveAlertUnits = lib.mkIf config.services.postgresql.enable (
+        lib.lists.singleton config.systemd.services.postgresql.name
+      );
+
       services.postgresql = {
         enable = true;
         package = pkgs.postgresql_17;

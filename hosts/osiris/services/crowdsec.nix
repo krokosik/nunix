@@ -86,6 +86,12 @@ in
     };
   };
 
+  mkObservability.inactiveAlertUnits =
+    lib.optionals config.services.crowdsec.enable (singleton config.systemd.services.crowdsec.name)
+    ++ lib.optionals config.services.crowdsec-firewall-bouncer.enable (
+      singleton config.systemd.services.crowdsec-firewall-bouncer.name
+    );
+
   systemd.services.traefik = lib.mkIf config.services.traefik.enable {
     after = [ "crowdsec.service" ];
     wants = [ "crowdsec.service" ];

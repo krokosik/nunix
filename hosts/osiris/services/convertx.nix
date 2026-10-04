@@ -51,4 +51,6 @@ in
       module = "http_reachable";
     };
   };
+
+  mkObservability.inactiveAlertUnits = config.mkObservabilityServices.convertx.units;
 }

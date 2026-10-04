@@ -106,4 +106,6 @@ in
     units = singleton "vector.service";
     metrics.url = "http://127.0.0.1:9598/metrics";
   };
+
+  mkObservability.inactiveAlertUnits = lib.mkIf config.services.vector.enable config.mkObservabilityServices.traefik-logs.units;
 }

@@ -79,4 +79,6 @@ in
       url = "${config.mkTraefikServices.immich.fullHostname}/api/server/ping";
     };
   };
+
+  mkObservability.inactiveAlertUnits = lib.mkIf config.services.immich.enable config.mkObservabilityServices.immich.units;
 }
