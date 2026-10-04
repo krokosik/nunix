@@ -23,6 +23,9 @@
 		],
 		"nix.serverSettings": {
 			"nixd": {
+				"nixpkgs": {
+					"expr": "let path = builtins.getEnv \"NH_FLAKE\"; flake = builtins.getFlake (if path != \"\" then path else builtins.getEnv \"HOME\" + \"/work/nunix\"); name = builtins.getEnv \"NIXOS_HOST\"; host = if name != \"\" then name else builtins.replaceStrings [ \"\\n\" ] [ \"\" ] (builtins.readFile /etc/hostname); in flake.nixosConfigurations.${host}.pkgs"
+				},
 				"formatting": {
 					"command": [
 						"nixfmt"
@@ -30,10 +33,10 @@
 				},
 				"options": {
 					"nixos": {
-						"expr": "let flake = builtins.getFlake (builtins.getEnv \"NH_FLAKE\"); host = builtins.getEnv \"NIXOS_HOST\"; in flake.nixosConfigurations.${host}.options"
+						"expr": "let path = builtins.getEnv \"NH_FLAKE\"; flake = builtins.getFlake (if path != \"\" then path else builtins.getEnv \"HOME\" + \"/work/nunix\"); name = builtins.getEnv \"NIXOS_HOST\"; host = if name != \"\" then name else builtins.replaceStrings [ \"\\n\" ] [ \"\" ] (builtins.readFile /etc/hostname); in flake.nixosConfigurations.${host}.options"
 					},
 					"home-manager": {
-						"expr": "let flake = builtins.getFlake (builtins.getEnv \"NH_FLAKE\"); host = builtins.getEnv \"NIXOS_HOST\"; in flake.nixosConfigurations.${host}.options.home-manager.users.type.getSubOptions []"
+						"expr": "let path = builtins.getEnv \"NH_FLAKE\"; flake = builtins.getFlake (if path != \"\" then path else builtins.getEnv \"HOME\" + \"/work/nunix\"); name = builtins.getEnv \"NIXOS_HOST\"; host = if name != \"\" then name else builtins.replaceStrings [ \"\\n\" ] [ \"\" ] (builtins.readFile /etc/hostname); in flake.nixosConfigurations.${host}.options.home-manager.users.type.getSubOptions []"
 					}
 				}
 			}
