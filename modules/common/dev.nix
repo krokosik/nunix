@@ -6,6 +6,7 @@
     uv
     ruff
     nodejs
+    corepack
     rustup
     stdenv.cc
   ];
