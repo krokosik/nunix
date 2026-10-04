@@ -1,0 +1,48 @@
+Subject: Apply input-method visibility atomically and outside Wayland callbacks
+
+activate/deactivate state is double-buffered until input-method-v2.done.
+Dispatching show() inside those callbacks also re-enters event processing
+through its round-trips. Apply the final committed state in the main loop
+instead, including any further done events received during show().
+
+--- a/main.c
++++ b/main.c
+@@ -520,7 +523,7 @@
+ void
+ im_activate(void *data, struct zwp_input_method_v2 *zwp_input_method_v2)
+ {
+-    show();
++    im_pending_active = true;
+ }
+ 
+ void
+@@ -526,7 +529,7 @@
+ void
+ im_deactivate(void *data, struct zwp_input_method_v2 *zwp_input_method_v2)
+ {
+-    hide();
++    im_pending_active = false;
+ }
+ 
+ void
+@@ -544,7 +551,9 @@
+ void
+ im_done(void *data, struct zwp_input_method_v2 *zwp_input_method_v2)
+ {
++    im_active = im_pending_active;
++    im_update_pending = true;
+ }
+ 
+ void
+ im_unavailable(void *data, struct zwp_input_method_v2 *zwp_input_method_v2)
+@@ -1190,2 +1195,10 @@
+             wl_display_dispatch(display);
++        // Visibility changes must not run inside input-method callbacks.
++        while (im_update_pending) {
++            im_update_pending = false;
++            if (im_active)
++                show();
++            else
++                hide();
++        }
+         if (fds[WAYLAND_FD].revents & POLLERR) {

@@ -10,7 +10,19 @@ let
   inherit (lib.lists) singleton;
   upstreamDms = inputs.dms.packages.${pkgs.stdenv.hostPlatform.system}.default;
   python = pkgs.python3.withPackages (packages: singleton packages.evdev);
-  wvkbd = inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.wvkbd;
+  wvkbd =
+    inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.wvkbd.overrideAttrs
+      (old: {
+        # Upstream PR 126: prevent --auto from creating orphaned layer surfaces.
+        patchFlags = [
+          "--strip=1"
+          "--fuzz=0"
+        ];
+        patches = (old.patches or [ ]) ++ [
+          ./patches/wvkbd-auto-reentrancy.patch
+          ./patches/wvkbd-input-method-done.patch
+        ];
+      });
 in
 {
   boot.kernelModules = singleton "surface_aggregator_tabletsw";
@@ -87,6 +99,10 @@ in
         };
         Service = {
           ExecStart = "${getExe wvkbd} --auto --hidden";
+          Environment = [
+            "WVKBD_HEIGHT=360"
+            "WVKBD_LANDSCAPE_HEIGHT=300"
+          ];
           Restart = "on-failure";
           RestartSec = 2;
           NoNewPrivileges = true;

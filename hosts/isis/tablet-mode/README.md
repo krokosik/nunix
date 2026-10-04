@@ -40,6 +40,14 @@ in tablet mode, with wvkbd 0.20 from the already-pinned unstable input, using
 that do not issue those requests will not summon the keyboard. Laptop mode
 removes its runtime activation marker and stops the service.
 
+The package includes upstream PR 126's `--auto` re-entrancy fix: Wayland
+round-trips during `show()` can otherwise create multiple orphaned keyboard
+surfaces when moving between text-input clients. A second patch commits
+input-method activation on `done` and applies visibility outside the Wayland
+callbacks, so focus handoff cannot leave a stale hide request. Heights are
+300 logical pixels in landscape and 360 in portrait, configured through the
+service environment.
+
 Hardware discovery and `Session.apply` are separate. Future touchscreen gesture
 services can follow that session policy without adding hardware detection to
 Hyprland Lua. No gestures are configured yet.
