@@ -39,7 +39,9 @@ in
     (mkExecBind "SUPER + SHIFT + N" "uwsm-app -- ${editor}" "Editor")
     (mkExecBind "SUPER + SHIFT + T" "dms ipc call widget toggle cpuUsage" "Activity")
     (mkExecBind "SUPER + SHIFT + G" "launch-or-focus '^[Bb]eeper(texts)?$' -- beeper" "Beeper")
-    (mkExecBind "SUPER + SHIFT + O" "launch-or-focus '^obsidian$' -- obsidian" "Obsidian")
+    (mkExecBind "SUPER + SHIFT + O" "launch-or-focus '^((md\\.)?([Oo]bsidian)+$' -- obsidian"
+      "Obsidian"
+    )
     (mkExecBind "SUPER + SHIFT + M"
       "launch-or-focus '^[Mm]attermost([\\.-][Dd]esktop)?$' -- mattermost-desktop"
       "Mattermost"

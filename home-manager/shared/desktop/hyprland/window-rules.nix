@@ -101,7 +101,7 @@
 
       # SCRATCHPAD APPLICATION PLACEMENT
       {
-        match.class = "^((md\\.)?[Oo]bsidian|[Bb]eeper(texts)?|[Mm]attermost([\\.-][Dd]esktop)?)$";
+        match.class = "^((md\\.)?([Oo]bsidian)+|[Bb]eeper(texts)?|[Mm]attermost([\\.-][Dd]esktop)?)$";
         workspace = "special:scratchpad";
       }
 
