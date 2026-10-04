@@ -78,9 +78,9 @@ replace("Modules/DankBar/DankBarContent.qml", "barConfig?.innerPadding ?? 4", "S
 replace("Common/SettingsData.qml", """        const value = bc?.[key];
         return value === undefined || value === null ? islandDefaults[key] : value;""", """        const value = bc?.[key] ?? islandDefaults[key];
         if (tabletModeEnabled && key === "islandCompactThickness")
-            return Math.max(56, value);
+            return Math.max(32, value);
         if (tabletModeEnabled && key === "islandReserveThickness")
-            return Math.max(64, value);
+            return Math.max(40, value);
         return value;""")
 
 for path, count in {
