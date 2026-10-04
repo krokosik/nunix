@@ -77,6 +77,13 @@ class Session:
                 raise RuntimeError(f"Hyprland layout: {response}")
 
         value = "true" if tablet else "false"
+        response = self.command(
+            "hyprctl", "eval",
+            "if surfaceTabletGestures then "
+            f"surfaceTabletGestures.set_enabled({value}) end",
+        )
+        if response != "ok":
+            raise RuntimeError(f"Hyprgrass gesture configuration: {response}")
         if self.command("dms", "ipc", "call", "surfaceTablet", "status") != value:
             response = self.command("dms", "ipc", "call", "surfaceTablet", "set", value)
             if response != "TABLET_SET_SUCCESS":

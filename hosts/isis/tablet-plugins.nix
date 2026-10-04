@@ -8,6 +8,7 @@
 let
   inherit (lib.lists) singleton;
   inherit (lib.meta) getExe getExe';
+  inherit (lib.modules) mkOrder;
   inherit (lib.strings) makeBinPath;
   hyprgrass =
     (pkgs.hyprlandPlugins.override { hyprland = config.programs.hyprland.package; })
@@ -29,6 +30,12 @@ let
           "-Dhyprgrass-pulse=true"
           "-Dhyprgrass-backlight=true"
         ];
+        # Border holds should not resize tiled gaps in the scrolling layout.
+        postPatch = (old.postPatch or "") + /* bash */ ''
+          substituteInPlace src/GestureManager.cpp \
+            --replace-fail 'if (w && !w->isFullscreen()) {' \
+              'if (w && w->m_isFloating && !w->isFullscreen()) {'
+        '';
       });
 in
 {
@@ -53,6 +60,11 @@ in
         "${hyprgrass}/lib/libhyprgrass-pulse.so"
         "${hyprgrass}/lib/libhyprgrass-backlight.so"
       ];
+
+      # Load after DMS's dynamic Lua so laptop-mode values can be restored.
+      wayland.windowManager.hyprland.extraConfig = mkOrder 1501 /* lua */ ''
+        dofile("${./tablet-mode/gestures.lua}")
+      '';
 
       # The tablet watcher owns activation; no login enablement or layout changes.
       systemd.user.services.surface-tablet-rotation = {

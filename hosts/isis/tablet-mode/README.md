@@ -56,8 +56,33 @@ stopping it restores landscape without modifying synchronized monitor files.
 `../tablet-plugins.nix` also loads hyprgrass, hyprgrass-pulse and
 hyprgrass-backlight. They use the newer source from the pinned unstable input
 but compile against the host's exact Hyprland package. These provide touch,
-audio and backlight gesture capabilities; no custom gesture bindings are
-configured yet.
+audio and backlight gesture capabilities. The host-local `gestures.lua` loads
+after DMS's Lua; the watcher enables its bindings in tablet mode and reconciles
+them after compositor config reloads or plugin startup.
+
+## GESTURES
+
+| Gesture | Action |
+| --- | --- |
+| Three-finger horizontal swipe | Smooth scrolling-layout navigation, snapping to a column on release |
+| Four-finger horizontal swipe | Change workspace |
+| Three-finger swipe up | Toggle layout-aware fullscreen |
+| Four-finger swipe down | Close the focused window normally |
+| Three-finger tap | Toggle floating |
+| Four-finger tap | Toggle the scratchpad |
+| Three-finger hold | Center the current scrolling column |
+| Two-finger hold, then drag | Move a floating window |
+| One-finger border/corner hold, then drag | Resize a floating window |
+
+Holds activate after 500 ms. Floating border grab areas expand to 24 logical
+pixels in tablet mode; a narrow hyprgrass build patch restricts border resizing
+to floating windows. Center holds and floating drags are guarded against the
+wrong layout/window type. Ordinary one-finger holds inside applications and
+two-finger pinches remain available to applications.
+
+Right-edge volume and left-edge brightness gestures are deferred until NixOS
+26.11, when the upstream Lua extras/live-gesture API can be revisited. No edge
+gestures are currently assigned.
 
 Inspect operation with:
 
