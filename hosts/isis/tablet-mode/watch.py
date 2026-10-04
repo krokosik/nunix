@@ -60,7 +60,7 @@ class Session:
         # Stop the OSK promptly even if DMS or Hyprland IPC is unavailable.
         if not tablet:
             self.marker.unlink(missing_ok=True)
-            self.command("systemctl", "--user", "stop", "surface-tablet-osk.service")
+            self.command("systemctl", "--user", "stop", *self.config["tabletServices"])
 
         option = json.loads(self.command("hyprctl", "-j", "getoption", "general:layout"))
         current = option["str"]
@@ -85,7 +85,7 @@ class Session:
         if tablet:
             self.marker.parent.mkdir(parents=True, exist_ok=True)
             self.marker.touch()
-            self.command("systemctl", "--user", "start", "surface-tablet-osk.service")
+            self.command("systemctl", "--user", "start", *self.config["tabletServices"])
         if self.previous != tablet:
             LOG.info("Applied %s mode", "tablet" if tablet else "laptop")
         self.previous = tablet

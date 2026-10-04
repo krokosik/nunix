@@ -56,6 +56,10 @@ in
         dms = getExe osConfig.programs.dank-material-shell.package;
         systemctl = getExe' pkgs.systemd "systemctl";
         normalLayout = config.wayland.windowManager.hyprland.settings.config.general.layout or "dwindle";
+        tabletServices = [
+          "surface-tablet-osk.service"
+          "surface-tablet-rotation.service"
+        ];
       };
     in
     {

@@ -48,9 +48,10 @@ callbacks, so focus handoff cannot leave a stale hide request. Heights are
 300 logical pixels in landscape and 360 in portrait, configured through the
 service environment.
 
-Hardware discovery and `Session.apply` are separate. Future touchscreen gesture
-services can follow that session policy without adding hardware detection to
-Hyprland Lua. No gestures are configured yet.
+Hardware discovery and `Session.apply` are separate. The same policy controls
+`surface-tablet-rotation.service`, which runs a pinned Lua-compatible
+iio-hyprland in tablet mode. It rotates `eDP-1` and touchscreen/stylus input;
+stopping it restores landscape without modifying synchronized monitor files.
 
 Inspect operation with:
 

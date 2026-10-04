@@ -9,6 +9,7 @@
     ./disko-config.nix
     ./surface.nix
     ./tablet-mode.nix
+    ./tablet-plugins.nix
     inputs.nixos-hardware.nixosModules.microsoft-surface-pro-intel
     ../../modules/boot-limine.nix
     ../../modules/desktop
