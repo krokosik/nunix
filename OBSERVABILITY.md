@@ -34,6 +34,29 @@ VictoriaLogs via the packaged datasource plugin, and Alertmanager for inspecting
 silences. Its SQLite database holds UI state, but alert detection and
 notification routing are declared in Nix.
 
+## Private web UIs
+
+The following routes run on `osiris`. New forward-auth routes require both a
+tailnet/loopback source address and membership in Authentik's `admins` group.
+Their Authentik tiles appear under **Infrastructure**; Grafana retains its
+existing OIDC integration.
+
+| App | URL |
+| --- | --- |
+| Alertmanager | `https://alertmanager.${config.privateDomain}/` |
+| VictoriaMetrics | `https://victoriametrics.${config.privateDomain}/vmui/` |
+| VictoriaLogs | `https://victorialogs.${config.privateDomain}/select/vmui/` |
+| VMAlert — Metrics | `https://vmalert-metrics.${config.privateDomain}/vmalert/` |
+| VMAlert — Logs | `https://vmalert-logs.${config.privateDomain}/vmalert/` |
+| VMAgent — Osiris | `https://vmagent.${config.privateDomain}/targets` |
+| Grafana | `https://grafana.${config.privateDomain}/` |
+
+Forward-auth applications can set `launchUrl` to a UI subpath independently of
+their authentication `host`; it defaults to `host` for existing apps. Native
+listeners, local scraping, Grafana datasource connections, and vmalert notifier
+connections use loopback. Agent ingestion uses its separate existing routes.
+The new applications reuse forward-auth and require no new credentials.
+
 ## Registering a service
 
 Declare observability beside the application and its Traefik/Authentik/DB

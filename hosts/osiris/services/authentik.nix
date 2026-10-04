@@ -153,7 +153,7 @@ let
         provider: !KeyOf prov-${name}
         group: ${app.displayGroup}
         open_in_new_tab: true
-        meta_launch_url: ${app.host}
+        meta_launch_url: ${app.launchUrl}
         meta_icon: ${app.iconUrl}
     ${lib.optionalString app.hide "    meta_hide: true"}
         policy_engine_mode: all
@@ -377,6 +377,11 @@ in
                 type = lib.types.str;
                 default = config.mkTraefikServices.${name}.fullHostname;
                 description = "External URL Traefik matches (or the domain-level authentication URL).";
+              };
+              launchUrl = lib.mkOption {
+                type = lib.types.str;
+                default = config.mkAuthentik.forwardAuthApps.${name}.host;
+                description = "URL opened from the application tile; may include a UI path without changing the authentication hostname.";
               };
               mode = lib.mkOption {
                 type = lib.types.enum [

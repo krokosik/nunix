@@ -43,6 +43,7 @@ in
         "notifier.url" =
           singleton "http://127.0.0.1:${toString config.services.prometheus.alertmanager.port}";
         "httpListenAddr" = "127.0.0.1:8880";
+        "external.url" = config.mkTraefikServices.vmalert-metrics.fullHostname;
         "remoteWrite.url" = vm;
         "remoteRead.url" = vm;
       };
@@ -55,12 +56,40 @@ in
         "notifier.url" =
           singleton "http://127.0.0.1:${toString config.services.prometheus.alertmanager.port}";
         "httpListenAddr" = "127.0.0.1:8881";
+        "external.url" = config.mkTraefikServices.vmalert-logs.fullHostname;
         "remoteWrite.url" = vm;
         "remoteRead.url" = vm;
       };
       rules.groups = logGroups;
     };
   };
+
+  mkTraefikServices = lib.genAttrs [ "vmalert-metrics" "vmalert-logs" ] (
+    name:
+    let
+      instance = lib.removePrefix "vmalert-" name;
+    in
+    {
+      host = "127.0.0.1";
+      port = lib.toInt (
+        lib.lists.last (
+          lib.splitString ":" config.services.vmalert.instances.${instance}.settings.httpListenAddr
+        )
+      );
+      chain = [
+        "chain-tailscale"
+        "chain-authentik"
+      ];
+    }
+  );
+
+  mkAuthentik.forwardAuthApps = lib.genAttrs [ "vmalert-metrics" "vmalert-logs" ] (name: {
+    displayName = "VMAlert — ${if name == "vmalert-metrics" then "Metrics" else "Logs"}";
+    launchUrl = "${config.mkTraefikServices.${name}.fullHostname}/vmalert/";
+    iconUrl = config.mkAuthentik.forwardAuthApps.victoriametrics.iconUrl;
+    accessGroup = "admins";
+    displayGroup = "Infrastructure";
+  });
 
   mkObservability.hostMetrics = {
     vmalert-metrics.url = "http://127.0.0.1:8880/metrics";

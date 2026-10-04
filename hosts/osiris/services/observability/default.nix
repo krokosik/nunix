@@ -4,6 +4,7 @@
     ./victoriametrics.nix
     ./victorialogs.nix
     ./vmalert.nix
+    ./vmagent.nix
     ./alertmanager.nix
     ./grafana.nix
     ./ingress.nix

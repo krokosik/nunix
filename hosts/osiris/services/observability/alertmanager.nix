@@ -95,7 +95,23 @@ in
     enable = true;
     listenAddress = "127.0.0.1";
     checkConfig = true;
+    webExternalUrl = config.mkTraefikServices.alertmanager.fullHostname;
     inherit configuration;
+  };
+
+  mkTraefikServices.alertmanager = {
+    host = "127.0.0.1";
+    port = config.services.prometheus.alertmanager.port;
+    chain = [
+      "chain-tailscale"
+      "chain-authentik"
+    ];
+  };
+
+  mkAuthentik.forwardAuthApps.alertmanager = {
+    displayName = "Alertmanager";
+    accessGroup = "admins";
+    displayGroup = "Infrastructure";
   };
 
   mkObservability.hostMetrics.alertmanager.url = "http://127.0.0.1:${toString config.services.prometheus.alertmanager.port}/metrics";
