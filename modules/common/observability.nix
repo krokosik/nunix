@@ -206,6 +206,44 @@ let
   monitoredUnits = lib.unique (
     cfg.monitoredUnits ++ lib.concatMap (svc: svc.units) (lib.attrValues services)
   );
+  writableFilesystems = lib.filterAttrs (
+    _: fs:
+    lib.elem fs.fsType [
+      "zfs"
+      "ext4"
+      "ext3"
+      "ext2"
+      "xfs"
+      "btrfs"
+      "vfat"
+      "f2fs"
+    ]
+    && !lib.elem "ro" fs.options
+  ) config.fileSystems;
+  expectedPools = lib.unique (
+    config.boot.zfs.extraPools
+    ++ map ({ device, ... }: lib.lists.head (lib.splitString "/" device)) (
+      lib.attrValues (lib.filterAttrs (_: fs: fs.fsType == "zfs") config.fileSystems)
+    )
+  );
+  # These declarations travel with each host's metrics, without evaluating
+  # another host or maintaining a second inventory in the central rules.
+  expectationMetrics = pkgs.writeTextDir "expectations.prom" (
+    /* prometheus */ ''
+      # HELP node_expected_filesystem_writable Configured persistent writable mountpoint.
+      # TYPE node_expected_filesystem_writable gauge
+    ''
+    + lib.concatMapStrings (mountpoint: /* prometheus */ ''
+      node_expected_filesystem_writable{mountpoint=${lib.strings.toJSON mountpoint}} 1
+    '') (lib.attrNames writableFilesystems)
+    + /* prometheus */ ''
+      # HELP node_expected_zfs_pool Configured ZFS pool.
+      # TYPE node_expected_zfs_pool gauge
+    ''
+    + lib.concatMapStrings (pool: /* prometheus */ ''
+      node_expected_zfs_pool{zpool=${lib.strings.toJSON pool}} 1
+    '') expectedPools
+  );
   remoteMetricsUrl = "https://metrics-ingest.${config.privateDomain}/api/v1/write";
   remoteLogsUrl = "https://logs-ingest.${config.privateDomain}/insert/native";
 in
@@ -313,12 +351,16 @@ in
         "processes"
         "tcpstat"
         "interrupts"
+        "textfile"
+        "zfs"
       ];
-      extraFlags =
-        singleton "--collector.systemd.enable-start-time-metrics"
-        ++ lib.optionals (monitoredUnits != [ ]) [
-          "--collector.systemd.unit-include=^(${lib.concatStringsSep "|" (map lib.escapeRegex monitoredUnits)})$"
-        ];
+      extraFlags = [
+        "--collector.systemd.enable-start-time-metrics"
+        "--collector.textfile.directory=${expectationMetrics}"
+      ]
+      ++ lib.optionals (monitoredUnits != [ ]) [
+        "--collector.systemd.unit-include=^(${lib.concatStringsSep "|" (map lib.escapeRegex monitoredUnits)})$"
+      ];
     };
 
     services.prometheus.exporters.blackbox = lib.mkIf (probes != { }) {
