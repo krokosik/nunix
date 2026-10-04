@@ -1,7 +1,25 @@
 { config, lib, ... }:
+let
+  dashboard = file: "${config.mkTraefikServices.grafana.fullHostname}/d/${(lib.importJSON file).uid}";
+  hostDashboard = "${dashboard ./dashboards/node_exporter.json}?var-host={{ $labels.host | queryEscape }}&var-job=host%2Fnode";
+  postgresDashboard = "${dashboard ./dashboards/postgresql.json}?var-host={{ $labels.host | queryEscape }}&var-instance={{ $labels.instance | queryEscape }}";
+  smartDashboard = "${dashboard ./dashboards/smart.json}?var-host={{ $labels.host | queryEscape }}&var-node={{ $labels.instance | queryEscape }}&var-disk={{ $labels.device | queryEscape }}";
+  probeDashboard = "${dashboard ./dashboards/blackbox.json}?var-host={{ $labels.host | queryEscape }}&var-ip_family={{ $labels.ip_family | queryEscape }}&var-instance={{ $labels.instance | queryEscape }}";
+  withDashboard =
+    url:
+    map (
+      rule:
+      rule
+      // {
+        annotations = rule.annotations // {
+          dashboard_url = url;
+        };
+      }
+    );
+in
 {
   mkObservability.metricRules = {
-    hosts =
+    hosts = withDashboard hostDashboard (
       map
         (host: {
           alert = "HostDown";
@@ -35,9 +53,10 @@
           labels.severity = "warning";
           annotations.summary = "Kernel killed a process due to insufficient memory on {{ $labels.host }}";
         }
-      ];
+      ]
+    );
 
-    filesystems = [
+    filesystems = withDashboard hostDashboard [
       {
         alert = "FilesystemCriticallyFull";
         expr = /* promql */ ''
@@ -67,7 +86,7 @@
       }
     ];
 
-    postgresql = [
+    postgresql = withDashboard postgresDashboard [
       {
         alert = "PostgresqlUnavailable";
         expr = ''pg_up{job="host/postgres"} == 0'';
@@ -95,7 +114,7 @@
       }
     ];
 
-    disks = [
+    disks = withDashboard smartDashboard [
       {
         alert = "SmartHealthFailed";
         expr = /* promql */ ''
@@ -125,7 +144,7 @@
       }
     ];
 
-    zfs = [
+    zfs = withDashboard hostDashboard [
       {
         alert = "ZfsPoolUnhealthy";
         expr = ''node_zfs_zpool_state{job="host/node",state!="online"} == 1'';
@@ -149,29 +168,31 @@
       }
     ];
 
-    backups = [
-      {
-        alert = "PostgresqlBackupStale";
-        expr = /* promql */ ''
-          (time() - postgresql_backup_last_success_timestamp_seconds{job="host/node"} > 36 * 3600)
-          and on (host, environment, instance) (up{job="host/node"} == 1)
-        '';
-        for = "15m";
-        labels.severity = "warning";
-        annotations.summary = "PostgreSQL backup on {{ $labels.host }} has not succeeded for more than 36 hours";
-      }
-      {
-        alert = "PostgresqlBackupSuccessMissing";
-        expr = /* promql */ ''
-          (up{job="host/node",host="${config.networking.hostName}"} == 1)
-          unless on (host, environment, instance)
-            postgresql_backup_last_success_timestamp_seconds{job="host/node",backup="cluster"}
-        '';
-        for = "15m";
-        labels.severity = "warning";
-        annotations.summary = "PostgreSQL backup on {{ $labels.host }} has no recorded successful backup";
-      }
-    ];
+    backups =
+      withDashboard "${dashboard ./dashboards/postgresql.json}?var-host={{ $labels.host | queryEscape }}"
+        [
+          {
+            alert = "PostgresqlBackupStale";
+            expr = /* promql */ ''
+              (time() - postgresql_backup_last_success_timestamp_seconds{job="host/node"} > 36 * 3600)
+              and on (host, environment, instance) (up{job="host/node"} == 1)
+            '';
+            for = "15m";
+            labels.severity = "warning";
+            annotations.summary = "PostgreSQL backup on {{ $labels.host }} has not succeeded for more than 36 hours";
+          }
+          {
+            alert = "PostgresqlBackupSuccessMissing";
+            expr = /* promql */ ''
+              (up{job="host/node",host="${config.networking.hostName}"} == 1)
+              unless on (host, environment, instance)
+                postgresql_backup_last_success_timestamp_seconds{job="host/node",backup="cluster"}
+            '';
+            for = "15m";
+            labels.severity = "warning";
+            annotations.summary = "PostgreSQL backup on {{ $labels.host }} has no recorded successful backup";
+          }
+        ];
 
     services = [
       {
@@ -181,7 +202,7 @@
         labels.severity = "critical";
         annotations = {
           summary = "{{ $labels.check }} IPv{{ $labels.ip_family }} check for {{ $labels.service }} failed from {{ $labels.vantage }}";
-          dashboard_url = "${config.mkTraefikServices.grafana.fullHostname}/d/NEzutrbMk";
+          dashboard_url = probeDashboard;
         };
       }
       {
@@ -194,6 +215,7 @@
         for = "5m";
         labels.severity = "critical";
         annotations.summary = "{{ $labels.name }} inactive on {{ $labels.host }}";
+        annotations.dashboard_url = hostDashboard;
       }
       {
         alert = "ScrapeDown";
@@ -201,6 +223,7 @@
         for = "2m";
         labels.severity = "warning";
         annotations.summary = "Metrics target {{ $labels.job }} down on {{ $labels.host }}";
+        annotations.dashboard_url = "${config.mkTraefikServices.grafana.fullHostname}/dashboards";
       }
       {
         alert = "CertificateExpiring";
@@ -208,6 +231,7 @@
         for = "1h";
         labels.severity = "warning";
         annotations.summary = "Certificate for {{ $labels.service }} expires within 14 days";
+        annotations.dashboard_url = probeDashboard;
       }
     ];
   };
@@ -224,6 +248,8 @@
       '';
       labels.severity = "warning";
       annotations.summary = "Repeated errors from {{ $labels._SYSTEMD_UNIT }} on {{ $labels._HOSTNAME }}";
+      annotations.dashboard_url = config.mkAuthentik.forwardAuthApps.victorialogs.launchUrl;
+      annotations.dashboard_label = "Logs";
     }
   );
 

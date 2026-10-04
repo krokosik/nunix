@@ -181,6 +181,18 @@ else
       elif .id == 36 then .targets[0].legendFormat = "{{short_version}}" | .options.textMode = "name"
       else . end
     else . end)
+  elif $name == "smart.json" then
+    .templating.list = [hostvar("smartctl_device";"host/smartctl")] + .templating.list |
+    query_strings(metric_scope("host=~\"$host\",job=\"host/smartctl\"")) |
+    .templating.list |= map(
+      if .name == "node" then
+        .query.query = "label_values(smartctl_device{host=~\"$host\",job=\"host/smartctl\"}, instance)" |
+        .definition = .query.query
+      elif ((.query.query? // null) | type) == "string" then
+        .query.query |= sub("label_values\\((?<metric>smartctl_version|smartctl_device),";
+          "label_values(\(.metric){host=~\"$host\",job=\"host/smartctl\"},") |
+        .definition = .query.query
+      else . end)
   elif $name == "alertmanager.json" then
     query_strings(metric_scope("job=\"host/alertmanager\"") |
       gsub("instance, cluster";"instance, host, job") |

@@ -57,6 +57,30 @@ listeners, local scraping, Grafana datasource connections, and vmalert notifier
 connections use loopback. Agent ingestion uses its separate existing routes.
 The new applications reuse forward-auth and require no new credentials.
 
+## Telegram notifications
+
+`telegram.tmpl` replaces the default label/annotation dump with a severity/status
+header, short summaries, and **Dashboard**, **Silence**, and **Alerts** links.
+Log alerts use a **Logs** link to VictoriaLogs. Resolved alerts show their target
+as recovered instead of repeating a stale failure summary; an optional
+`resolved_summary` annotation can customize this text.
+
+Silence links open Alertmanager's form with exact matchers for the alert, host,
+and relevant unit, disk, filesystem, or probe. They appear only for firing
+alerts. Set the duration and comment in the form before saving. Alertmanager and
+both vmalert instances advertise their private external URLs.
+
+Notifications show firing alerts before resolved ones, with at most five entries
+and a 2600-byte budget for the escaped entry HTML, leaving space for the header
+and links below Telegram's 4096-character limit. Omitted entries are counted and
+available through **Alerts**. Unusually long action URLs are omitted rather than
+truncated. Dynamic text and URLs are escaped before the final HTML is emitted.
+The native Telegram receiver provides clickable links, not inline buttons.
+
+Metric rules carry dashboard annotations using the provisioned dashboard UIDs
+and URL-encoded host/target variables. SMART's dashboard is also scoped by host
+so identical loopback exporter addresses cannot mix different hosts' disks.
+
 ## Registering a service
 
 Declare observability beside the application and its Traefik/Authentik/DB

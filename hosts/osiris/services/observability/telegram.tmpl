@@ -1,0 +1,83 @@
+{{/* All dynamic text and hrefs are escaped before assembling trusted HTML.
+     Budget the escaped output in bytes (stricter than Telegram's rune limit).
+     Keep firing alerts first; long groups remain accessible via Alerts. */}}
+{{ define "nunix.telegram" -}}
+{{- $name := or .CommonLabels.alertname .GroupLabels.alertname "Alerts" -}}
+{{- $host := or .CommonLabels.host .CommonLabels._HOSTNAME "" -}}
+{{- $level := "warning" -}}
+{{- range .Alerts.Firing -}}
+  {{- if eq .Labels.severity "critical" -}}{{- $level = "critical" -}}{{- end -}}
+{{- end -}}
+{{- $status := "🟠 WARNING" -}}
+{{- if eq $level "critical" -}}{{- $status = "🔴 CRITICAL" -}}{{- end -}}
+{{- if eq .Status "resolved" -}}{{- $status = "✅ RESOLVED" -}}{{- end -}}
+{{- $heading := printf "<b>%s</b>" $status -}}
+{{- if $host -}}{{- $heading = printf "%s · %s" $heading (html (printf "%.32s" $host)) -}}{{- end -}}
+{{- $heading = printf "%s\n<b>%s</b>" $heading (html (printf "%.48s" $name)) -}}
+{{- if gt (len .Alerts) 1 -}}
+  {{- $heading = printf "%s\n%d firing · %d resolved" $heading (len .Alerts.Firing) (len .Alerts.Resolved) -}}
+{{- end -}}
+{{- $body := "" -}}
+{{- $shown := "" -}}
+{{- $omitted := "" -}}
+{{- $base := reReplaceAll "/+$" "" .ExternalURL -}}
+{{- $groupFilter := "" -}}
+{{- range .CommonLabels.SortedPairs -}}
+  {{- if and .Value (match "^(alertname|host|environment|service|_HOSTNAME)$" .Name) -}}
+    {{- if $groupFilter -}}{{- $groupFilter = printf "%s," $groupFilter -}}{{- end -}}
+    {{- $groupFilter = printf "%s%s=%q" $groupFilter .Name .Value -}}
+  {{- end -}}
+{{- end -}}
+{{- $alertsURL := printf "%s/#/alerts?filter=%s" $base (urlquery (printf "{%s}" $groupFilter)) -}}
+{{- range $state := stringSlice "firing" "resolved" -}}
+  {{- range $.Alerts -}}
+    {{- if eq .Status $state -}}
+      {{- $entryHost := or .Labels.host .Labels._HOSTNAME "" -}}
+      {{- $target := or .Labels.name .Labels._SYSTEMD_UNIT .Labels.mountpoint .Labels.zpool .Labels.device .Labels.backup .Labels.service .Labels.job .Labels.instance $entryHost .Labels.alertname "Alert" -}}
+      {{- if match "^(HostDown|HostOomKill)$" .Labels.alertname -}}{{- $target = or $entryHost $target -}}{{- end -}}
+      {{- if match "^Postgresql" .Labels.alertname -}}{{- $target = "PostgreSQL" -}}{{- end -}}
+      {{- if match "^PostgresqlBackup" .Labels.alertname -}}{{- $target = "PostgreSQL backup" -}}{{- end -}}
+      {{- if .Labels.ip_family -}}{{- $target = printf "%s IPv%s %s" $target .Labels.ip_family .Labels.check -}}{{- end -}}
+      {{- if and $entryHost (ne $entryHost $host) -}}{{- $target = printf "%s on %s" $target $entryHost -}}{{- end -}}
+      {{- $summary := or .Annotations.summary $target -}}
+      {{- if eq .Status "resolved" -}}
+        {{- $summary = or .Annotations.resolved_summary (printf "%s recovered" $target) -}}
+      {{- end -}}
+      {{- $summary = reReplaceAll "[[:space:]]+" " " $summary -}}
+      {{- $entry := printf "\n\n%s" (html (printf "%.180s" $summary)) -}}
+      {{- if and (eq .Status "resolved") (eq $.Status "firing") -}}{{- $entry = printf "\n\n✅ %s" (html (printf "%.180s" $summary)) -}}{{- end -}}
+      {{- $links := "" -}}
+      {{- $dashboardLabel := or .Annotations.dashboard_label "Dashboard" -}}
+      {{- with .Annotations.dashboard_url -}}
+        {{- if and (le (len .) 600) (match "^https?://" .) -}}
+          {{- $links = printf "<a href=\"%s\">%s</a>" (html .) (html (printf "%.16s" $dashboardLabel)) -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if eq .Status "firing" -}}
+        {{- $filter := "" -}}
+        {{- range .Labels.SortedPairs -}}
+          {{- if and .Value (match "^(alertname|host|environment|service|job|instance|name|_HOSTNAME|_SYSTEMD_UNIT|device|mountpoint|zpool|backup|check|vantage|ip_family)$" .Name) -}}
+            {{- if $filter -}}{{- $filter = printf "%s," $filter -}}{{- end -}}
+            {{- $filter = printf "%s%s=%q" $filter .Name .Value -}}
+          {{- end -}}
+        {{- end -}}
+        {{- $silenceURL := printf "%s/#/silences/new?filter=%s" $base (urlquery (printf "{%s}" $filter)) -}}
+        {{- if le (len $silenceURL) 1000 -}}
+          {{- if $links -}}{{- $links = printf "%s · " $links -}}{{- end -}}
+          {{- $links = printf "%s<a href=\"%s\">Silence</a>" $links (html $silenceURL) -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if $links -}}{{- $entry = printf "%s\n%s" $entry $links -}}{{- end -}}
+      {{- if and (lt (len $shown) 5) (le (len (printf "%s%s" $body $entry)) 2600) -}}
+        {{- $body = printf "%s%s" $body $entry -}}
+        {{- $shown = printf "%s." $shown -}}
+      {{- else -}}
+        {{- $omitted = printf "%s." $omitted -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if $omitted -}}{{- $body = printf "%s\n\n… %d more — open Alerts" $body (len $omitted) -}}{{- end -}}
+{{- if gt (len $alertsURL) 800 -}}{{- $alertsURL = printf "%s/#/alerts" $base -}}{{- end -}}
+{{- printf "%s%s\n\n<a href=\"%s\">Alerts</a>" $heading $body (html $alertsURL) | safeHtml -}}
+{{- end }}

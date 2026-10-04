@@ -8,6 +8,7 @@ let
   inherit (lib.lists) singleton;
   configuration = {
     global.telegram_bot_token_file = config.sops.secrets.alertmanager_telegram_token.path;
+    templates = singleton "${./telegram.tmpl}";
     route = {
       receiver = "telegram";
       group_by = [
@@ -29,6 +30,8 @@ let
         telegram_configs = singleton {
           chat_id = 1;
           send_resolved = true;
+          parse_mode = "HTML";
+          message = ''{{ template "nunix.telegram" . }}'';
         };
       }
       {
