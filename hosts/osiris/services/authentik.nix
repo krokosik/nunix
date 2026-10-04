@@ -653,11 +653,13 @@ in
       mkObservabilityServices.authentik = {
         metrics.url = "http://127.0.0.1:9300/metrics";
         units = [
-          "authentik.service"
-          "authentik-worker.service"
+          config.systemd.services.authentik.name
+          config.systemd.services.authentik-worker.name
         ];
         probes.public.url = "${config.mkTraefikServices.authentik.fullHostname}/-/health/ready/";
       };
+
+      mkObservability.repeatedErrorUnits = lib.mkIf config.services.authentik.enable config.mkObservabilityServices.authentik.units;
 
       mkObservabilityServices.authentik-worker.metrics.url = "http://[::1]:9301/metrics";
 

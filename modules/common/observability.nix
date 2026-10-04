@@ -270,6 +270,12 @@ in
         default = [ ];
         description = "Host infrastructure units tracked by the node exporter.";
       };
+      repeatedErrorUnits = lib.mkOption {
+        type = lib.types.listOf lib.types.nonEmptyStr;
+        default = [ ];
+        apply = lib.lists.unique;
+        description = "Systemd units whose structured error-level logs are counted by the central RepeatedServiceErrors rule.";
+      };
       metricRules = lib.mkOption {
         type = lib.types.attrsOf (lib.types.listOf ruleType);
         default = { };

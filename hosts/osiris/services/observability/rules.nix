@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 {
   mkObservability.metricRules = {
     hosts =
@@ -208,14 +208,19 @@
     ];
   };
 
-  mkObservability.logRules.platform = [
-    {
+  mkObservability.logRules.platform = lib.mkIf (config.mkObservability.repeatedErrorUnits != [ ]) (
+    lib.lists.singleton {
       alert = "RepeatedServiceErrors";
       interval = "5m";
-      expr = ''_SYSTEMD_UNIT:in("traefik.service", "authentik.service") level:in("error", "crit", "alert", "emerg") | stats by (_HOSTNAME, _SYSTEMD_UNIT) count() as errors | filter errors:>20'';
+      expr = /* logsql */ ''
+        _SYSTEMD_UNIT:in(${lib.concatStringsSep ", " (map lib.strings.toJSON config.mkObservability.repeatedErrorUnits)})
+        level:in("error", "crit", "alert", "emerg")
+        | stats by (_HOSTNAME, _SYSTEMD_UNIT) count() as errors
+        | filter errors:>20
+      '';
       labels.severity = "warning";
       annotations.summary = "Repeated errors from {{ $labels._SYSTEMD_UNIT }} on {{ $labels._HOSTNAME }}";
     }
-  ];
+  );
 
 }

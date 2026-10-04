@@ -90,9 +90,11 @@ in
   config = lib.mkMerge [
     {
       mkObservabilityServices.traefik = {
-        units = [ "traefik.service" ];
+        units = lib.lists.singleton config.systemd.services.traefik.name;
         metrics.url = "http://127.0.0.1:8000/metrics";
       };
+
+      mkObservability.repeatedErrorUnits = lib.mkIf cfg.enable config.mkObservabilityServices.traefik.units;
 
       services.traefik = {
         enable = true;

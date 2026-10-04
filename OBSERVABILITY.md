@@ -79,6 +79,21 @@ rules for remote hosts must be shared as reusable Nix definitions and imported
 by the central configuration. Keep application-native event detection in the
 application when it contains richer information than metrics or logs.
 
+Services opt into `RepeatedServiceErrors` by adding systemd unit names to the
+mergeable `mkObservability.repeatedErrorUnits` list in their own modules:
+
+```nix
+mkObservability.repeatedErrorUnits = lib.lists.singleton config.systemd.services.example.name;
+```
+
+The central rule deduplicates and quotes the names for LogsQL, and is omitted
+when the list is empty. It warns when a unit emits more than 20 structured logs
+with `level` equal to `error`, `crit`, `alert`, or `emerg` in 5 minutes, grouped
+by host and unit. Traefik and Authentik's server and worker are enrolled.
+This requires a structured `level` field; plain-text errors alone do not match.
+Remote-host registrations must still be contributed explicitly to the central
+configuration, as with other rules.
+
 ## Host and storage alerts
 
 The central metric rules cover PostgreSQL availability (2 minutes) and use of
