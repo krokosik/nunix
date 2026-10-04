@@ -6,5 +6,7 @@
     uv
     ruff
     nodejs
+    rustup
+    stdenv.cc
   ];
 }
