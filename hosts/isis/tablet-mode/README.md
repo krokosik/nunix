@@ -64,7 +64,6 @@ them after compositor config reloads or plugin startup.
 
 | Gesture | Action |
 | --- | --- |
-| Three-finger horizontal swipe | Smooth scrolling-layout navigation, snapping to a column on release |
 | Four-finger horizontal swipe | Change workspace |
 | Three-finger swipe up | Toggle layout-aware fullscreen |
 | Four-finger swipe down | Close the focused window normally |
@@ -79,6 +78,10 @@ pixels in tablet mode; a narrow hyprgrass build patch restricts border resizing
 to floating windows. Center holds and floating drags are guarded against the
 wrong layout/window type. Ordinary one-finger holds inside applications and
 two-finger pinches remain available to applications.
+
+Scrolling-layout navigation uses direct touch rather than a compositor swipe.
+Workspace swipes use the recommended 0.15 cancellation ratio. Laptop mode
+restores the ordinary border grab area and removes the native gesture actions.
 
 Right-edge volume and left-edge brightness gestures are deferred until NixOS
 26.11, when the upstream Lua extras/live-gesture API can be revisited. No edge

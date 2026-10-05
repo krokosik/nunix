@@ -3,6 +3,8 @@
 surfaceTabletGestures = { enabled = nil, registered = false }
 local state = surfaceTabletGestures
 local normalGrabArea = hl.get_config("general.extend_border_grab_area")
+local normalSwipeTouch = hl.get_config("gestures.workspace_swipe_touch")
+local normalCancelRatio = hl.get_config("gestures.workspace_swipe_cancel_ratio")
 
 local function tabletAction(action)
     return function()
@@ -25,7 +27,6 @@ local function fullscreen()
 end
 
 local continuous = {
-    { pattern = { kind = "swipe", fingers = 3, direction = "horizontal" }, action = "scroll_move" },
     { pattern = { kind = "swipe", fingers = 4, direction = "horizontal" }, action = "workspace" },
     { pattern = { kind = "swipe", fingers = 3, direction = "up" }, action = tabletAction(fullscreen) },
     { pattern = { kind = "swipe", fingers = 4, direction = "down" }, action = "close" },
@@ -82,7 +83,8 @@ function state.set_enabled(enabled)
     hl.config({
         general = { extend_border_grab_area = enabled and 24 or normalGrabArea },
         gestures = {
-            scrolling = { move_snap_to_grid = true, move_snap_cursor = false },
+            workspace_swipe_touch = enabled and true or normalSwipeTouch,
+            workspace_swipe_cancel_ratio = enabled and 0.15 or normalCancelRatio,
         },
         plugin = {
             hyprgrass = {
