@@ -169,6 +169,7 @@ let
           "%autoreload 2"
         ];
         "python.analysis.supportRestructuredText" = true;
+        "jupyter.interactiveWindow.creationMode" = "perFile";
       };
     };
 
