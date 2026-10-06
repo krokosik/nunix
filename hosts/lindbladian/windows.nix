@@ -1,24 +1,20 @@
-{ pkgs, ... }:
+let
+  mountPath = "/mnt/c";
+in
 {
-  fonts.fontconfig.enable = true;
+  fonts.fontconfig = {
+    enable = true;
 
-  systemd.services.windows-fonts = {
-    description = "Install Windows fonts from the mounted Windows drive";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "mnt-c.mount" ];
-    wants = [ "mnt-c.mount" ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-    };
-    script = /* bash */ ''
-      install -d -m 0755 /usr/local/share/fonts
-      ln -sfn /mnt/c/Windows/Fonts /usr/local/share/fonts/WindowsFonts
-      ${pkgs.fontconfig}/bin/fc-cache --force /usr/local/share/fonts/WindowsFonts
+    localConf = ''
+      <?xml version="1.0"?>
+      <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+      <fontconfig>
+        <dir>${mountPath}/Windows/Fonts</dir>
+      </fontconfig>
     '';
   };
 
-  fileSystems."/mnt/c" = {
+  fileSystems.${mountPath} = {
     device = "/dev/disk/by-uuid/40A886D1A886C53E";
     fsType = "ntfs3";
     options = [
