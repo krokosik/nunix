@@ -1,5 +1,6 @@
 {
   imports = [
+    ./aptos.nix
     ../common
     ./bluetooth.nix
     ./dms.nix
