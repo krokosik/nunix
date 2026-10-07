@@ -30,6 +30,7 @@ let
     eamodio.gitlens
     jnoortheen.nix-ide
     mkhl.direnv
+    arrterian.nix-env-selector
     ms-azuretools.vscode-docker
     ms-vscode-remote.vscode-remote-extensionpack
     redhat.vscode-yaml
