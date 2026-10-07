@@ -104,6 +104,8 @@ let
       "editor.defaultFormatter" = "charliermarsh.ruff";
       "editor.formatOnSave" = true;
     };
+    "redhat.telemetry.enabled" = false;
+    "gitlens.graph.details.location" = "auto";
   };
 
   pythonExtensions = with vscode-extensions; [
@@ -170,6 +172,7 @@ let
         ];
         "python.analysis.supportRestructuredText" = true;
         "jupyter.interactiveWindow.creationMode" = "perFile";
+        "python.terminal.activateEnvironment" = true;
       };
     };
 
