@@ -1,6 +1,7 @@
 {
   imports = [
     ./base.nix
+    ./dev.nix
     ./fastfetch.nix
     ./fish.nix
     ./git.nix

@@ -8,7 +8,7 @@ let
   vscode-extensions-universal = pkgs.nix-vscode-extensions.vscode-marketplace-universal;
 
   # trick to not clutter $HOME
-  vscodiumPatched = pkgs.vscodium.overrideAttrs (oldAttrs: {
+  vscodium = pkgs.vscodium.overrideAttrs (oldAttrs: {
     postPatch = (oldAttrs.postPatch or "") + /* bash */ ''
       substituteInPlace resources/app/product.json \
         --replace-fail '"dataFolderName": ".vscode-oss"' \
@@ -19,10 +19,6 @@ let
         'dataFolderName:".local/share/codium"'
     '';
   });
-
-  # for extensions shipping prebuilt binaries that require linking to .so files
-  # the fhs attr is a wrapper around the package itself, so we take it after patching
-  vscodium = vscodiumPatched.fhs;
 
   commonExtensions = with vscode-extensions; [
     aaron-bond.better-comments
