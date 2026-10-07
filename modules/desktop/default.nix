@@ -12,6 +12,7 @@
     ./peripherals.nix
     ./pipewire.nix
     ./plymouth.nix
+    ./samba-mounts.nix
     ./sunshine.nix
     ./tailscale.nix
     ./theme.nix

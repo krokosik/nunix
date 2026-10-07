@@ -22,6 +22,8 @@
   role = "desktop";
   extraUsers = [ "lab" ];
 
+  desktop.sambaMounts.allUsers = true;
+
   boot.initrd.kernelModules = [
     "nvidia"
     "nvidia_modeset"

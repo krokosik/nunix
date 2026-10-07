@@ -50,6 +50,38 @@ cat /tmp/nixos-anywhere-extra/etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age
    troubleshoot the new install.
 9. Once the host boots, get its `~/.ssh/id_ed25519.pub` file and it to the `nunix-secrets` deploy keys as well as `ssh-keys.nix`
         
+### Desktop Samba shares
+
+All desktops automount `//qotex.qot.internal/data` and
+`//qotex.qot.internal/assets` at `/mnt/data` and `/mnt/assets`. Only the primary
+user gets `~/data` and `~/assets` symlinks. Local read/write access is restricted
+to that user by default; `lindbladian` sets `desktop.sambaMounts.allUsers = true`
+to allow every normal user (members of the `users` group) access through `/mnt`.
+All local users accessing a share use the same Samba identity.
+
+Add this **system secret** to `horus/secrets.yaml`, `isis/secrets.yaml`, and
+`lindbladian/secrets.yaml` in `nunix-secrets`, using SOPS:
+
+```yaml
+samba:
+  credentials: |
+    username=YOUR_SAMBA_USERNAME
+    password=YOUR_SAMBA_PASSWORD
+    domain=YOUR_DOMAIN
+```
+
+Omit `domain` if it is not needed. The credential file is decrypted as root-only
+`/run/secrets/samba_credentials`; it is not a Home Manager secret. Commit and
+push the secrets changes, then run `nix flake update my-secrets` here before
+deploying so the locked secrets input includes the new key.
+
+Mounts are triggered by directory access, with a 10-second mount timeout, and
+released after two idle minutes. On `isis` and `horus`, first connect the VPN
+(including DNS/routing for `qot.internal`), then open either directory. If an
+offline access fails, connect the VPN and try again. Boot does not depend on
+the shares being reachable. Disconnecting the VPN while files are in use can
+still interrupt or stall I/O; close files before disconnecting.
+
 ### PostgreSQL major-version upgrades
 
 `services.postgresql.package` is pinned to a specific major
