@@ -5,6 +5,7 @@
 }:
 let
   vscode-extensions = pkgs.nix-vscode-extensions.vscode-marketplace;
+  open-vsx = pkgs.nix-vscode-extensions.open-vsx;
   vscode-extensions-universal = pkgs.nix-vscode-extensions.vscode-marketplace-universal;
 
   # trick to not clutter $HOME
@@ -20,21 +21,25 @@ let
     '';
   });
 
-  commonExtensions = with vscode-extensions; [
-    aaron-bond.better-comments
-    christian-kohler.path-intellisense
-    eamodio.gitlens
-    jnoortheen.nix-ide
-    mkhl.direnv
-    arrterian.nix-env-selector
-    ms-azuretools.vscode-docker
-    ms-vscode-remote.vscode-remote-extensionpack
-    redhat.vscode-yaml
-    tamasfe.even-better-toml
-    vscode-icons-team.vscode-icons
-    yellpika.latex-input
-    sst-dev.opencode
-  ];
+  commonExtensions =
+    with vscode-extensions;
+    with open-vsx;
+    [
+      aaron-bond.better-comments
+      christian-kohler.path-intellisense
+      eamodio.gitlens
+      jnoortheen.nix-ide
+      mkhl.direnv
+      arrterian.nix-env-selector
+      ms-azuretools.vscode-docker
+      ms-vscode-remote.vscode-remote-extensionpack
+      redhat.vscode-yaml
+      tamasfe.even-better-toml
+      vscode-icons-team.vscode-icons
+      yellpika.latex-input
+      sst-dev.opencode
+      jeanp413.open-remote-ssh
+    ];
 
   baseSettings = {
     "update.mode" = "none";
@@ -84,6 +89,12 @@ let
     "remote.SSH.enableX11Forwarding" = false;
     "remote.SSH.useExecServer" = false;
     "remote.SSH.useLocalServer" = false;
+
+    "remote.SSH.serverBinaryName" = "codium-server";
+    "remote.SSH.serverDownloadUrlTemplate" =
+      "https://github.com/VSCodium/vscodium/releases/download/\${version}\${release}/vscodium-reh-\${os}-\${arch}-\${version}\${release}.tar.gz";
+    "remote.SSH.serverVersion" = "latest";
+    "remote.SSH.serverValidation" = "force";
 
     "[yaml]" = {
       "editor.defaultFormatter" = "redhat.vscode-yaml";
