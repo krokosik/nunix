@@ -60,6 +60,7 @@ in
         AUTHENTIK_SECRET=${config.sops.placeholder.${oidc.credentials.clientSecret.secretName}}
         WEB_PUSH_PUBLIC_KEY=${config.sops.placeholder.webpush_public_key}
         WEB_PUSH_PRIVATE_KEY=${config.sops.placeholder.webpush_private_key}
+        WEB_PUSH_EMAIL=${config.sops.placeholder.webpush_email}
       '';
 
       owner = containerUser;
