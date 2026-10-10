@@ -49,6 +49,7 @@ in
       nextauth_secret.key = "splitpro/nextauth_secret";
       webpush_public_key.key = "splitpro/webpush_public_key";
       webpush_private_key.key = "splitpro/webpush_private_key";
+      webpush_email.key = "splitpro/webpush_email";
     };
     templates."splitpro.env" = {
       content = ''
