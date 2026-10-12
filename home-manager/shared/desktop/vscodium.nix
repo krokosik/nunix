@@ -114,6 +114,7 @@ let
     };
     "redhat.telemetry.enabled" = false;
     "gitlens.graph.details.location" = "auto";
+    "gitlens.advanced.skipOnboarding" = true;
   };
 
   pythonExtensions = with vscode-extensions; [

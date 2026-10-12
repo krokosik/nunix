@@ -46,7 +46,16 @@ in
 
   programs.opencode = {
     enable = true;
-    package = inputs.opencode-flake.packages.${pkgs.stdenv.hostPlatform.system}.opencode;
+    package =
+      (inputs.opencode-flake.packages.${pkgs.stdenv.hostPlatform.system}.opencode2-avx).overrideAttrs
+        (old: {
+          postInstall = (old.postInstall or "") + ''
+            ln -s opencode2 $out/bin/opencode
+          '';
+          meta = old.meta // {
+            mainProgram = "opencode";
+          };
+        });
     extraPackages = with pkgs; [
       uv
       nixd
