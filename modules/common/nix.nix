@@ -71,6 +71,8 @@ in
       elem (getName pkg) [
         "beeper"
         "parsec-bin"
+        "Wolfram_15.0.1.sh"
+        "mathematica"
         "nvidia-x11"
         "nvidia-settings"
         "nvidia-kernel-modules"

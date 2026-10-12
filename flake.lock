@@ -540,11 +540,11 @@
     "my-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1790260459,
-        "narHash": "sha256-LD3ms+FY7j7rJoVIeFh3RgdEEFsAUNIo6Jd7zRffO/c=",
+        "lastModified": 1791628095,
+        "narHash": "sha256-6s49BffMNqrjoOvck3M+2eEevja90m9Y1S2aS3lREcM=",
         "ref": "refs/heads/main",
-        "rev": "ae08f70ce9e15e42358d8d8043880b462741b755",
-        "revCount": 54,
+        "rev": "69b57427c4d53b8ae78a6603d2313ea126aea34f",
+        "revCount": 66,
         "type": "git",
         "url": "ssh://git@github-secrets/krokosik/nunix-secrets.git"
       },
@@ -848,11 +848,11 @@
         "nixpkgs": "nixpkgs_6"
       },
       "locked": {
-        "lastModified": 1790622104,
-        "narHash": "sha256-cl1geuQxRMHiCmpytcuPFlP5wctFFu+MVCW7kIZE098=",
+        "lastModified": 1791517935,
+        "narHash": "sha256-9y9TAx9+pS1uXxIDeYTVFpZeHymkyOtDiLjF/MXh7x0=",
         "owner": "noblepayne",
         "repo": "opencode-flake",
-        "rev": "62b992433fe280debf75eff7cc983c699866d8de",
+        "rev": "88b4a81c6aac7176f257b14c2a0e93134ddc6027",
         "type": "github"
       },
       "original": {

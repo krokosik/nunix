@@ -14,6 +14,7 @@
     inputs.nixos-hardware.nixosModules.common-pc-ssd
     ../../modules/boot-limine.nix
     ../../modules/desktop
+    ../../modules/mathematica.nix
   ];
 
   # Generated on lindbladian with `run0 nix run github:numtide/nixos-facter`.

@@ -60,6 +60,7 @@ in
 
     # Mathematica
     WOLFRAM_USERBASE = "${configHome}/Wolfram";
+    WOLFRAM_LOCALBASE = "${configHome}/Wolfram/Objects";
 
     # mypy
     MYPY_CACHE_DIR = "${cacheHome}/mypy";
