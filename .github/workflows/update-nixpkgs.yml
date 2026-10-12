@@ -1,0 +1,38 @@
+name: Update stable nixpkgs
+
+on:
+  schedule:
+    - cron: "0 4 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-nixpkgs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Update stable nixpkgs
+        run: nix flake update nixpkgs
+
+      - name: Commit lockfile update
+        run: |
+          if git diff --quiet -- flake.lock; then
+            echo "Stable nixpkgs is already up to date."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add flake.lock
+          git commit -m "Update stable nixpkgs"
+          git push
