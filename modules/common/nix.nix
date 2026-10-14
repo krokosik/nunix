@@ -77,6 +77,7 @@ in
         "nvidia-settings"
         "nvidia-kernel-modules"
         "obsidian"
+        "vscode-extension-fill-labs-dependi"
         "vscode-extension-ms-vscode-remote-vscode-remote-extensionpack"
       ];
     packageOverrides = pkgs: {

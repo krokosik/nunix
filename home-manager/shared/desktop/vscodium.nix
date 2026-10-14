@@ -134,6 +134,7 @@ let
   rustExtensions = with vscode-extensions-universal; [
     rust-lang.rust-analyzer
     vadimcn.vscode-lldb
+    fill-labs.dependi
   ];
 
   latexExtensions = with vscode-extensions; [
@@ -206,6 +207,7 @@ let
           esbenp.prettier-vscode
           oxc.oxc-vscode
           orta.vscode-jest
+          fill-labs.dependi
         ]);
       userSettings = baseSettings // {
         "[css]" = {
