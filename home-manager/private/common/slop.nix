@@ -67,6 +67,7 @@ in
     enableMcpIntegration = config.programs.mcp.enable;
     settings = {
       autoupdate = false;
+      small_model = "openai/gpt-6-luna";
       enabled_providers = [
         # "opencode-go"
         "openai"
