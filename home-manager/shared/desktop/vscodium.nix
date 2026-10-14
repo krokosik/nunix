@@ -4,9 +4,9 @@
   ...
 }:
 let
-  vscode-extensions = pkgs.nix-vscode-extensions.vscode-marketplace;
-  open-vsx = pkgs.nix-vscode-extensions.open-vsx;
-  vscode-extensions-universal = pkgs.nix-vscode-extensions.vscode-marketplace-universal;
+  vscode-extensions = pkgs.nix-vscode-extensions.vscode-marketplace-release;
+  open-vsx = pkgs.nix-vscode-extensions.open-vsx-release;
+  vscode-extensions-universal = pkgs.nix-vscode-extensions.vscode-marketplace-release-universal;
 
   # trick to not clutter $HOME
   vscodium = pkgs.vscodium.overrideAttrs (oldAttrs: {
@@ -200,7 +200,12 @@ let
     };
 
     Web = {
-      extensions = commonExtensions ++ [ vscode-extensions.esbenp.prettier-vscode ];
+      extensions =
+        commonExtensions
+        ++ (with vscode-extensions; [
+          esbenp.prettier-vscode
+          oxc.oxc-vscode
+        ]);
       userSettings = baseSettings // {
         "[css]" = {
           "editor.defaultFormatter" = "esbenp.prettier-vscode";
