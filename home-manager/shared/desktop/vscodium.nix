@@ -205,6 +205,7 @@ let
         ++ (with vscode-extensions; [
           esbenp.prettier-vscode
           oxc.oxc-vscode
+          orta.vscode-jest
         ]);
       userSettings = baseSettings // {
         "[css]" = {
