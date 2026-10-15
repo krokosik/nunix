@@ -6,6 +6,7 @@
     ./dms.nix
     ./extra-users.nix
     ./file-manager.nix
+    ./flatpak.nix
     ./hyprland.nix
     ./greeter.nix
     ./network-manager.nix

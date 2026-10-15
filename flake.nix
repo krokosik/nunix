@@ -22,6 +22,8 @@
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
+    nix-flatpak.url = "github:gmodena/nix-flatpak/v0.8.0";
+
     nix-index-database = {
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";

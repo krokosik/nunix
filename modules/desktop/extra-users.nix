@@ -113,8 +113,6 @@ in
     };
   });
 
-  services.flatpak.enable = config.extraUsers != [ ];
-
   system.activationScripts.seedExtraUserDms = {
     deps = [ "users" ];
     text = /* bash */ ''

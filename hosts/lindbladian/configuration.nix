@@ -2,7 +2,6 @@
   config,
   inputs,
   lib,
-  pkgs,
   ...
 }:
 {
@@ -14,6 +13,7 @@
     inputs.nixos-hardware.nixosModules.common-pc-ssd
     ../../modules/boot-limine.nix
     ../../modules/desktop
+    ../../modules/desktop/cad.nix
     ../../modules/mathematica.nix
   ];
 
@@ -53,10 +53,6 @@
   home-manager.users.${config.username} = {
     imports = [
       ../../home-manager/private/desktop
-    ];
-
-    home.packages = with pkgs; [
-      freecad
     ];
   };
 

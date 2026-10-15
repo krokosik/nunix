@@ -1,7 +1,6 @@
 {
   config,
   inputs,
-  pkgs,
   ...
 }:
 {
@@ -12,6 +11,7 @@
     inputs.nixos-hardware.nixosModules.lenovo-legion-15ach6h-nvidia
     ../../modules/boot-limine.nix
     ../../modules/desktop
+    ../../modules/desktop/cad.nix
     ../../modules/hibernation.nix
   ];
 
@@ -40,10 +40,6 @@
     imports = [
       ../../home-manager/private/desktop
       ./apps
-    ];
-
-    home.packages = with pkgs; [
-      freecad
     ];
   };
 
