@@ -115,6 +115,7 @@ let
     "redhat.telemetry.enabled" = false;
     "gitlens.graph.details.location" = "auto";
     "gitlens.advanced.skipOnboarding" = true;
+    "dependi.extras.silenceUpdateMessages" = true;
   };
 
   pythonExtensions = with vscode-extensions; [
