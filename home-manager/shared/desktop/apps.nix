@@ -4,7 +4,6 @@
     brave
     imv
     mpv
-    inkscape
     libreoffice
     localsend
     mattermost-desktop
