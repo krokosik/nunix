@@ -31,7 +31,7 @@ let
       )
 
       if [[ -n "$windowAddress" ]]; then
-        hyprctl dispatch focuswindow "address:$windowAddress"
+        hyprctl dispatch "hl.dsp.focus({ window = \"address:$windowAddress\" })"
         exit 0
       fi
 

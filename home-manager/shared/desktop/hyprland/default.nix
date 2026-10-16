@@ -40,6 +40,13 @@
           bezier = "default";
         }
         {
+          leaf = "specialWorkspace";
+          enabled = true;
+          speed = 5;
+          bezier = "default";
+          style = "slidevert";
+        }
+        {
           leaf = "windowsMove";
           enabled = true;
           speed = 4;
@@ -58,11 +65,6 @@
           bezier = "default";
         }
       ];
-
-      workspace_rule = lib.lists.singleton {
-        workspace = "special:scratchpad";
-        animation = "slidevert";
-      };
 
       layer_rule = [
         {
