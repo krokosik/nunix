@@ -12,6 +12,7 @@
     ../../modules/boot-limine.nix
     ../../modules/desktop
     ../../modules/desktop/cad.nix
+    ../../modules/oci-containers.nix
     ../../modules/hibernation.nix
   ];
 
