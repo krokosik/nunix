@@ -19,6 +19,7 @@
 
     opencode-flake.url = "github:noblepayne/opencode-flake";
     codex-cli-nix.url = "github:sadjow/codex-cli-nix";
+    rea-flake.url = "github:Fractal-Tess/rea-flake";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
