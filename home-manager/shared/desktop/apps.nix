@@ -9,7 +9,6 @@
     mattermost-desktop
     moonlight-qt
     obsidian
-    parsec-bin
     pinta
     proton-vpn
     zotero
