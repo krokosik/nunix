@@ -11,5 +11,9 @@ in
       "org.inkscape.Inkscape"
     ];
 
+    update.auto = {
+      enable = true;
+      onCalendar = "weekly";
+    };
   };
 }

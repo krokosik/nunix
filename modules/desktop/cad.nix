@@ -16,10 +16,5 @@ in
       Context.sockets = singleton "wayland";
       Environment.QT_QPA_PLATFORM = "wayland";
     };
-
-    update.auto = {
-      enable = true;
-      onCalendar = "weekly";
-    };
   };
 }
