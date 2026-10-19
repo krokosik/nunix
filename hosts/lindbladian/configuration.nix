@@ -55,10 +55,14 @@
       ../../home-manager/private/desktop
       ../../home-manager/rea.nix
       ../../home-manager/computer-use.nix
+      ../../home-manager/agent-workspace.nix
     ];
   };
 
   services.sunshine.enable = true;
+
+  # COMPUTER USE ACCESSIBILITY
+  services.gnome.at-spi2-core.enable = true;
 
   system.stateVersion = "26.05";
 }
