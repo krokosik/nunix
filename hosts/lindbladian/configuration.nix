@@ -54,6 +54,7 @@
     imports = [
       ../../home-manager/private/desktop
       ../../home-manager/rea.nix
+      ../../home-manager/computer-use.nix
     ];
   };
 
