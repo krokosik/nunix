@@ -15,9 +15,30 @@ let
         --replace-fail '"dataFolderName": ".vscode-oss"' \
         '"dataFolderName": ".local/share/codium"'
 
-      substituteInPlace resources/app/out/cli.js \
-        --replace-fail 'dataFolderName:".vscode-oss"' \
-        'dataFolderName:".local/share/codium"'
+      # Each bundle embeds its own product configuration, including GUI helpers.
+      for bundle in \
+        out/cli.js \
+        out/main.js \
+        out/vs/code/node/cliProcessMain.js \
+        out/vs/code/electron-utility/sharedProcess/sharedProcessMain.js \
+        out/vs/platform/agentHost/node/agentHostMain.js \
+        out/vs/platform/terminal/node/ptyHostMain.js \
+        out/vs/sessions/sessions.desktop.main.js \
+        out/vs/workbench/api/node/extensionHostProcess.js \
+        out/vs/workbench/api/worker/extensionHostWorkerMain.js \
+        out/vs/workbench/contrib/debug/node/telemetryApp.js \
+        out/vs/workbench/workbench.desktop.main.js
+      do
+        substituteInPlace "resources/app/$bundle" \
+          --replace-fail 'dataFolderName:".vscode-oss"' \
+          'dataFolderName:".local/share/codium"'
+      done
+    '';
+
+    postFixup = (oldAttrs.postFixup or "") + /* bash */ ''
+      # The Rust CLI has its own compiled-in default, independent of product.json.
+      wrapProgram "$out/lib/vscode/bin/codium-tunnel" \
+        --run 'export VSCODE_CLI_DATA_DIR="''${VSCODE_CLI_DATA_DIR:-$HOME/.local/share/codium/cli}"'
     '';
   });
 
