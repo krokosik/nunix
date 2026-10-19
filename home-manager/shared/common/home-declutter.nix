@@ -1,5 +1,12 @@
-{ config, ... }:
+{
+  config,
+  lib,
+  ...
+}:
 let
+  inherit (lib.lists) singleton;
+  inherit (lib.strings) escapeShellArg;
+
   inherit (config.xdg)
     cacheHome
     configHome
@@ -38,6 +45,9 @@ in
 
     # GDB
     GDBHISTFILE = "${stateHome}/gdb/history";
+
+    # PostgreSQL
+    PSQL_HISTORY = "${stateHome}/psql/history";
 
     # GnuPG
     GNUPGHOME = "${dataHome}/gnupg";
@@ -99,6 +109,13 @@ in
     # Wine
     WINEPREFIX = "${dataHome}/wineprefixes/default";
   };
+
+  home.activation.createPsqlHistoryDirectory =
+    config.lib.dag.entryAfter (singleton "writeBoundary")
+      /* bash */ ''
+        run mkdir --parents ${escapeShellArg "${stateHome}/psql"}
+        run chmod 0700 ${escapeShellArg "${stateHome}/psql"}
+      '';
 
   programs.bash = {
     # Moves ~/.bash_history to ~/.local/state/bash/history
