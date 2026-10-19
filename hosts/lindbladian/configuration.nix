@@ -53,6 +53,7 @@
   home-manager.users.${config.username} = {
     imports = [
       ../../home-manager/private/desktop
+      ../../home-manager/rea.nix
     ];
   };
 
