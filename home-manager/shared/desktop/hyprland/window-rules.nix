@@ -233,20 +233,53 @@
 
       # WINE APPLICATION FLOATING BEHAVIOR
       {
-        match.class = "(.*\\.exe)$";
-        tag = "+wine-window";
-      }
-
-      # AUTODESK INVENTOR UNDER WINE
-      {
-        match.class = "inventor.exe";
-        tag = "-wine-window";
-        no_follow_mouse = true;
+        match = {
+          class = "(.*\\.exe)$";
+          xwayland = false;
+        };
+        tag = "+wine-wayland-window";
       }
       {
-        match.tag = "wine-window";
+        match.tag = "wine-wayland-window";
         float = true;
         center = true;
+      }
+
+      {
+        name = "inventor-plain";
+        match.class = "^(inventor\\.exe|adsklicensingagent\\.exe|adskidentitymanager\\.exe)$";
+
+        decorate = false;
+        no_anim = true;
+        no_blur = true;
+        no_dim = true;
+        opaque = true;
+        no_shadow = true;
+        border_size = 0;
+        rounding = 0;
+        no_follow_mouse = true;
+
+        # Prevent fullscreen requests from Inventor's marking-menu overlay.
+        suppress_event = "fullscreen maximize fullscreenoutput";
+      }
+
+      # Float dialogs and tool panels.
+      {
+        name = "inventor-float";
+        match.class = "^(inventor\\.exe|adsklicensingagent\\.exe|adskidentitymanager\\.exe)$";
+
+        float = true;
+      }
+
+      # Tile the main Inventor window.
+      {
+        name = "inventor-main";
+        match = {
+          class = "^inventor\\.exe$";
+          title = "^Autodesk Inventor.*";
+        };
+
+        tile = true;
       }
 
       # ZOTERO POPUP AND MAIN-WINDOW TAGGING
