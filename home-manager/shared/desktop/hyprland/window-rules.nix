@@ -233,13 +233,20 @@
 
       # WINE APPLICATION FLOATING BEHAVIOR
       {
+        match.class = "(.*\\.exe)$";
+        tag = "+wine-window";
+      }
+
+      # AUTODESK INVENTOR UNDER WINE
+      {
+        match.class = "inventor.exe";
+        tag = "-wine-window";
+        no_follow_mouse = true;
+      }
+      {
         match.tag = "wine-window";
         float = true;
         center = true;
-      }
-      {
-        match.class = "(.*\\.exe)$";
-        tag = "+wine-window";
       }
 
       # ZOTERO POPUP AND MAIN-WINDOW TAGGING
