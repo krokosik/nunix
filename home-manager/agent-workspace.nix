@@ -135,27 +135,22 @@ in
   home.packages = singleton agentWorkspace;
 
   programs.mcp.servers.agent-workspace = {
+    enabled = false;
     command = getExe agentWorkspace;
     args = singleton "mcp";
+    env_vars = [
+      "DBUS_SESSION_BUS_ADDRESS"
+      "DISPLAY"
+      "WAYLAND_DISPLAY"
+      "XAUTHORITY"
+      "XDG_RUNTIME_DIR"
+      "XDG_CURRENT_DESKTOP"
+      "XDG_CONFIG_HOME"
+      "XDG_DATA_HOME"
+      "XDG_STATE_HOME"
+      "AGENT_WORKSPACE_PERMISSIONS"
+    ];
   };
-
-  programs.codex.settings.mcp_servers.agent-workspace =
-    mkIf (config.programs.codex.enable && config.programs.codex.enableMcpIntegration)
-      {
-        inherit (config.programs.mcp.servers.agent-workspace) command args;
-        env_vars = [
-          "DBUS_SESSION_BUS_ADDRESS"
-          "DISPLAY"
-          "WAYLAND_DISPLAY"
-          "XAUTHORITY"
-          "XDG_RUNTIME_DIR"
-          "XDG_CURRENT_DESKTOP"
-          "XDG_CONFIG_HOME"
-          "XDG_DATA_HOME"
-          "XDG_STATE_HOME"
-          "AGENT_WORKSPACE_PERMISSIONS"
-        ];
-      };
 
   home.file."${config.home.sessionVariables.CODEX_HOME}/skills/agent-workspace-linux".source =
     "${agentWorkspace}/share/agent-workspace-linux/skill";

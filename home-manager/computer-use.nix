@@ -101,6 +101,7 @@ in
   };
 
   programs.mcp.servers.computer-use = {
+    enabled = false;
     command = getExe computerUse;
     args = singleton "mcp";
     env_vars = [

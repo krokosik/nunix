@@ -41,6 +41,7 @@ in
         '';
 
     programs.mcp.servers.Wolfram = {
+      enabled = false;
       command = "${mathematica}/libexec/Mathematica/Executables/wolfram";
       args = [
         "-run"

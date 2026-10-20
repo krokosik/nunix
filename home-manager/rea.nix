@@ -33,6 +33,7 @@ in
   programs.mcp.servers.rea = {
     command = lib.getExe rea;
     args = lib.lists.singleton "mcp";
+    enabled = false;
   };
 
   home.file."${codexConfigDir}/skills/reverse-engineer-anything".source = reaSkill;
