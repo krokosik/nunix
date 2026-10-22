@@ -91,6 +91,8 @@ in
       "image/svg+xml" = vectorEditor;
       "inode/directory" = fileManager;
       "x-scheme-handler/mailto" = mailClient;
+
+      "x-scheme-handler/adskidmgr" = "autodesk-inventor.desktop";
     };
     associations.added = {
       "x-scheme-handler/http" = [ browser ];

@@ -1,4 +1,5 @@
 {
+  config,
   inputs,
   lib,
   pkgs,
@@ -7,11 +8,45 @@
 {
   imports = [ inputs.stylix.nixosModules.stylix ];
 
-  home-manager.sharedModules = lib.lists.singleton {
-    # Prevent Home Manager and Stylix from creating ~/.icons and ~/.themes.
-    home.pointerCursor.dotIcons.enable = false;
-    stylix.targets.gtk.flatpakSupport.enable = true;
-  };
+  home-manager.sharedModules = lib.lists.singleton (
+    { config, osConfig, ... }:
+    {
+      home.pointerCursor.dotIcons.enable = false;
+
+      stylix.targets.gtk.flatpakSupport.enable = true;
+
+      # Reuse Stylix's flattened theme without creating a symlink in the user's home.
+      home.file.".themes/${config.gtk.theme.name}".enable = false;
+
+      # Some Flatpaks persist their sandbox home; home-relative theme symlinks become stale
+      # across Home Manager generations and collide with Flatpak's filesystem setup.
+      xdg.dataFile."flatpak/overrides/global".text = lib.mkForce /* ini */ ''
+        [Context]
+        filesystems=${osConfig.environment.etc."stylix/${config.home.username}".source}:ro;
+
+        [Environment]
+        GTK_THEME=${config.gtk.theme.name}
+        GTK_DATA_PREFIX=${osConfig.environment.etc."stylix/${config.home.username}".source}
+      '';
+    }
+  );
+
+  environment.etc = lib.attrsets.mapAttrs' (
+    name: home:
+    lib.attrsets.nameValuePair "stylix/${name}" {
+      # Expose this store directory directly to Flatpak (/etc is reserved).
+      # Keep it self-contained so no additional store permissions are needed.
+      source = pkgs.callPackage (
+        { runCommandLocal }:
+        runCommandLocal "flatpak-gtk-theme-${name}" { } /* bash */ ''
+          mkdir --parents "$out/share/themes"
+          cp --recursive --dereference \
+            ${home.home.file.".themes/${home.gtk.theme.name}".source} \
+            "$out/share/themes/${home.gtk.theme.name}"
+        ''
+      ) { };
+    }
+  ) config.home-manager.users;
 
   fonts.packages = with pkgs; [
     inter

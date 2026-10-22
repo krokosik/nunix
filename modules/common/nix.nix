@@ -79,6 +79,8 @@ in
         "obsidian"
         "vscode-extension-fill-labs-dependi"
         "vscode-extension-ms-vscode-remote-vscode-remote-extensionpack"
+        "inventor"
+        "inventor-overlay"
       ];
     packageOverrides = pkgs: {
       stable = import inputs.nixpkgs {

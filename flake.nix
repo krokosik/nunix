@@ -101,6 +101,8 @@
 
     lazyvim.url = "github:pfassina/lazyvim-nix";
 
+    inventor.url = "github:Harvi654/Autodesk-Inventor-for-Linux/v0.3.1";
+
     # Native NixOS module for authentik (server, worker, outposts).
     # Upstream warns against overriding nixpkgs via follows because
     # python deps in the lockfile are pinned together; let it use its

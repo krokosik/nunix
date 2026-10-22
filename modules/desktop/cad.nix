@@ -1,20 +1,22 @@
-{ lib, ... }:
-let
-  inherit (lib.lists) singleton;
-in
+{ inputs, pkgs, ... }:
 {
+  environment.systemPackages = with pkgs; [
+    freecad
+    # The repository's `stable` overlay otherwise shadows KiCad's boolean argument.
+    (kicad.override { stable = true; })
+  ];
+
+  imports = [ inputs.inventor.nixosModules.default ];
+
+  programs.autodesk-inventor = {
+    enable = true;
+    versions = [ "2027" ];
+  };
+
   services.flatpak = {
     packages = [
       "com.orcaslicer.OrcaSlicer"
       "com.prusa3d.PrusaSlicer"
-      "org.freecad.FreeCAD"
-      "org.kicad.KiCad"
     ];
-
-    # FreeCAD's default XWayland window does not map in Hyprland.
-    overrides.settings."org.freecad.FreeCAD" = {
-      Context.sockets = singleton "wayland";
-      Environment.QT_QPA_PLATFORM = "wayland";
-    };
   };
 }
