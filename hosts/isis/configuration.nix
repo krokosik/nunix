@@ -14,6 +14,7 @@
     ../../modules/boot-limine.nix
     ../../modules/desktop
     ../../modules/hibernation.nix
+    ../../modules/media-share.nix
   ];
 
   # Generated on this Surface Pro 8 with run0 nix run github:numtide/nixos-facter.

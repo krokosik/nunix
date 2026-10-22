@@ -14,6 +14,7 @@
     ../../modules/desktop/cad.nix
     ../../modules/oci-containers.nix
     ../../modules/hibernation.nix
+    ../../modules/media-share.nix
   ];
 
   # Add the report generated with `run0 nix run github:numtide/nixos-facter --
