@@ -2,7 +2,7 @@ name: Update stable nixpkgs
 
 on:
   schedule:
-    - cron: "0 4 * * 0"
+    - cron: "0 4 * * *"
   workflow_dispatch:
 
 permissions:
@@ -21,13 +21,20 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
 
-      - name: Update stable nixpkgs
-        run: nix flake update nixpkgs
+      - name: Update stable nixpkgs and others
+        run: >
+          nix flake update
+          nixpkgs
+          codex-cli-nix
+          rea-flake
+          opencode-flake
+          nix-vscode-extensions
+
 
       - name: Commit lockfile update
         run: |
           if git diff --quiet -- flake.lock; then
-            echo "Stable nixpkgs is already up to date."
+            echo "Everything already up to date."
             exit 0
           fi
 
