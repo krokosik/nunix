@@ -5,11 +5,20 @@ in
   fonts.fontconfig = {
     enable = true;
 
-    localConf = ''
+    localConf = /* xml */ ''
       <?xml version="1.0"?>
       <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
       <fontconfig>
         <dir>${mountPath}/Windows/Fonts</dir>
+        <selectfont>
+          <rejectfont>
+            <pattern>
+              <patelt name="family">
+                <string>8514fix</string>
+              </patelt>
+            </pattern>
+          </rejectfont>
+        </selectfont>
       </fontconfig>
     '';
   };
