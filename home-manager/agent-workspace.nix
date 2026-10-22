@@ -7,7 +7,6 @@
 let
   inherit (lib.lists) singleton;
   inherit (lib.meta) getExe;
-  inherit (lib.modules) mkIf;
 
   agentWorkspace = pkgs.callPackage (
     {
