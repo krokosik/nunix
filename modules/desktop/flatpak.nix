@@ -11,6 +11,7 @@ in
       # Keep Flathub's --persist=. and isolated home for Parsec's hardcoded state paths.
       "com.parsecgaming.parsec"
       "org.inkscape.Inkscape"
+      "com.github.tchx84.Flatseal"
     ];
     update.auto = {
       enable = true;
