@@ -84,8 +84,7 @@
     };
 
     nixflix = {
-      # Switch to v3.2.0 once released; this commit fixes the missing allowedHosts API field.
-      url = "github:kiriwalawren/nixflix/11774fcba6cf3533756891e86df3a9c414951e21";
+      url = "github:kiriwalawren/nixflix/v3.2.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

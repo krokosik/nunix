@@ -827,17 +827,17 @@
         "vpn-confinement": "vpn-confinement"
       },
       "locked": {
-        "lastModified": 1790347110,
-        "narHash": "sha256-IFaJjzkAEBXazrFF9iBOk5BQ8huVRhO4YHh0x/BLG5s=",
+        "lastModified": 1791209874,
+        "narHash": "sha256-3nNHjIqE1cqnmp/Po/wxoKbr9q0ElscTKyviuZ/buQs=",
         "owner": "kiriwalawren",
         "repo": "nixflix",
-        "rev": "11774fcba6cf3533756891e86df3a9c414951e21",
+        "rev": "a1fa2f9f8ebfd8636ae1bc046c8a41f5390bdf14",
         "type": "github"
       },
       "original": {
         "owner": "kiriwalawren",
+        "ref": "v3.2.0",
         "repo": "nixflix",
-        "rev": "11774fcba6cf3533756891e86df3a9c414951e21",
         "type": "github"
       }
     },
