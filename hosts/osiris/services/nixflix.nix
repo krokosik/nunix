@@ -23,6 +23,7 @@
   nixflix = {
     enable = true;
     mediaDir = "/srv/media";
+    downloadsDir = "${config.nixflix.mediaDir}/downloads";
     mediaUsers = [ config.username ];
 
     theme = {
