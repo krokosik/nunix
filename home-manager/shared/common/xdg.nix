@@ -10,7 +10,7 @@ let
   imageViewer = "imv.desktop";
   mailClient = "HEY.desktop";
   vectorEditor = "org.inkscape.Inkscape.desktop";
-  videoPlayer = "mpv.desktop";
+  videoPlayer = "vlc.desktop";
 in
 {
   xdg.enable = true;
