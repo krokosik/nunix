@@ -1,10 +1,12 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 let
   inherit (lib) mkIf;
+  inherit (lib.meta) getExe';
   inherit (lib.lists) singleton;
 in
 {
@@ -35,6 +37,12 @@ in
   };
 
   systemd.services.nfs-server.unitConfig.RequiresMountsFor = singleton config.nixflix.mediaDir;
+
+  # mountd starts before nfs-server runs exportfs, which creates etab.
+  # Ensure the export table exists on the first start without truncating it.
+  systemd.services.nfs-mountd.preStart = /* bash */ ''
+    ${getExe' pkgs.coreutils "touch"} /var/lib/nfs/etab
+  '';
 
   networking.firewall.extraInputRules = mkIf config.services.nfs.server.enable /* nftables */ ''
     ip saddr 192.168.1.0/24 tcp dport 2049 accept comment "NFS media LAN"

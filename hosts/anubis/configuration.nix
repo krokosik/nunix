@@ -8,6 +8,7 @@
     ./disko-config.nix
     ./services
     ../../modules/server
+    ../../modules/server/ingress-wireguard.nix
     ../../modules/boot.nix
     ../../modules/zfs.nix
     ../../home-manager/home-manager.nix
@@ -35,6 +36,12 @@
 
   networking.hostId = "98165cf2"; # head -c4 /dev/urandom | od -A none -t x4
   networking.useNetworkd = true;
+
+  mkIngressWireguard = {
+    enable = true;
+    role = "edge";
+    peerPublicKey = "luBECxE+b9Wuck66WXQdwzfRzUvlHqu8/goArANV+HU=";
+  };
 
   # Swap (zram)
   zramSwap.enable = true;

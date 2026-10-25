@@ -120,7 +120,10 @@ in
                 "10.0.0.0/8"
                 "100.64.0.0/10"
               ]; # Local & Tailscale
-              proxyProtocol.trustedIPs = [ config.vpsPrivateIp ]; # VPS TS IP
+              proxyProtocol.trustedIPs = [
+                config.vpsPrivateIp
+                config.mkIngressWireguard.edgeIPv4
+              ];
             };
             websecure = {
               address = ":443";
@@ -129,7 +132,10 @@ in
                 "10.0.0.0/8"
                 "100.64.0.0/10"
               ];
-              proxyProtocol.trustedIPs = [ config.vpsPrivateIp ];
+              proxyProtocol.trustedIPs = [
+                config.vpsPrivateIp
+                config.mkIngressWireguard.edgeIPv4
+              ];
               http.tls = {
                 certResolver = "cfResolver";
                 domains = [

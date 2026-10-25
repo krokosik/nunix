@@ -10,6 +10,7 @@
     ./storage-disko.nix
     ./services
     ../../modules/server
+    ../../modules/server/ingress-wireguard.nix
     ../../modules/boot.nix
     ../../modules/disable-deep-sleep.nix
     ../../modules/oci-containers.nix
@@ -52,6 +53,12 @@
 
   networking.hostId = "aec20762"; # head -c4 /dev/urandom | od -A none -t x4
   networking.useNetworkd = true;
+
+  mkIngressWireguard = {
+    enable = true;
+    role = "origin";
+    peerPublicKey = "W2u4RPtVhqDZVuEKUwr5ogPneM/5BLSwNeU96kiFuDM=";
+  };
 
   boot.zfs.extraPools = lib.lists.singleton "tank";
 

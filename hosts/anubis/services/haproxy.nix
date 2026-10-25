@@ -37,7 +37,7 @@
 
       backend http-backend
         balance roundrobin
-        server localserver ${config.homeserverPrivateIp}:80 check send-proxy-v2
+        server localserver ${config.mkIngressWireguard.originIPv4}:80 check send-proxy-v2
 
       # --- HTTPS (Port 443) Frontend ---
       frontend https-frontend
@@ -56,7 +56,7 @@
 
       backend https-backend
         balance roundrobin
-        server localserver ${config.homeserverPrivateIp}:443 check send-proxy-v2
+        server localserver ${config.mkIngressWireguard.originIPv4}:443 check send-proxy-v2
 
       # METRICS
       frontend metrics
