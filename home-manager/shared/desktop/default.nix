@@ -2,6 +2,7 @@
   imports = [
     ../common
     ./apps.nix
+    ./bluetooth.nix
     ./ghostty.nix
     ./hyprland
     ./neovim.nix

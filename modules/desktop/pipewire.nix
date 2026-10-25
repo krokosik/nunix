@@ -1,4 +1,7 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
+let
+  inherit (lib.lists) singleton;
+in
 {
   # as per https://wiki.nixos.org/wiki/PipeWire
   security.rtkit.enable = true;
@@ -8,6 +11,11 @@
     alsa.support32Bit = true;
     pulse.enable = true;
     wireplumber.enable = true;
+
+    # Keep Bluetooth headsets on stereo playback without call-profile negotiation.
+    wireplumber.extraConfig."90-playback-only" = {
+      "monitor.bluez.properties"."bluez5.roles" = singleton "a2dp_source";
+    };
 
     extraLadspaPackages = with pkgs; [
       rnnoise-plugin.ladspa
