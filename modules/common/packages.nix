@@ -9,6 +9,7 @@
     curl
     dust
     direnv
+    exfatprogs
     eza
     fastfetch
     fd
