@@ -38,6 +38,9 @@ let
       xwayland,
       dbus,
       wl-clipboard,
+      hyprland,
+      grim,
+      wtype,
       libxcb,
       libxkbcommon,
       wayland,
@@ -70,6 +73,9 @@ let
         xwayland
         dbus
         wl-clipboard
+        hyprland
+        grim
+        wtype
       ];
       # Upstream's restricted mount namespace assumes an FHS system.
       workspaceBubblewrap = writeShellScriptBin "bwrap" /* bash */ ''
@@ -81,17 +87,17 @@ let
     in
     stdenv.mkDerivation (finalAttrs: {
       pname = "agent-workspace-linux";
-      version = "0.4.0";
+      version = "0.5.1";
 
       src = fetchurl {
         url = "https://github.com/agent-sh/agent-workspace-linux/releases/download/v${finalAttrs.version}/agent-workspace-linux-x86_64-unknown-linux-gnu";
-        hash = "sha256-o1EmfFOTgVdvngSqsnBVnDHiBUHZVVda6ThxaqidU4I=";
+        hash = "sha256-EMRNkmGTz8vrGBjl2m7O/rMKtga6HJ6LrBbDEmCXCAI=";
       };
 
       skillSrc = fetchzip {
         url = "https://codeload.github.com/agent-sh/agent-workspace-linux/tar.gz/refs/tags/v${finalAttrs.version}";
         extension = "tar.gz";
-        hash = "sha256-ZuN+YDR5F2Vyg3hYRNV9/7zl1X3VM6xV6AeI8ucB7nI=";
+        hash = "sha256-NaaUTwcbi7LbD9RferiXdxWwt0BgvibcrPuVgI8OnLc=";
       };
 
       nativeBuildInputs = [
@@ -111,10 +117,12 @@ let
       installPhase = /* bash */ ''
         runHook preInstall
 
-        install -D --mode=755 "$src" "$out/bin/agent-workspace-linux"
+        # KWin's NixOS patch strips .name-wrapped when authorizing desktop entries.
+        # Upstream authorizes its current executable, so keep that path unchanged.
+        install -D --mode=755 "$src" "$out/bin/.agent-workspace-linux-unwrapped"
         mkdir --parents "$out/share/agent-workspace-linux"
         cp --recursive "$skillSrc/skills/agent-workspace-linux" "$out/share/agent-workspace-linux/skill"
-        wrapProgram "$out/bin/agent-workspace-linux" \
+        makeWrapper "$out/bin/.agent-workspace-linux-unwrapped" "$out/bin/agent-workspace-linux" \
           --prefix PATH : "${lib.makeBinPath (singleton workspaceBubblewrap)}:${runtimePath}" \
           --prefix LD_LIBRARY_PATH : ${
             lib.makeLibraryPath [
