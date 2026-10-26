@@ -43,21 +43,24 @@ in
     skills = skillsPath;
     enableMcpIntegration = config.programs.mcp.enable;
     settings = {
-      approval_reviewer = "auto_review";
-      status_line = [
-        "model-with-reasoning"
-        "current-dir"
-        "context-usage"
-        "used-tokens"
-        "weekly-limit"
-      ];
-      terminal_title = [
-        "project"
-        "git-branch"
-        "status"
-        "thread"
-        "task-progress"
-      ];
+      approvals_reviewer = "auto_review";
+
+      tui = {
+        status_line = [
+          "model-with-reasoning"
+          "current-dir"
+          "context-usage"
+          "used-tokens"
+          "weekly-limit"
+        ];
+        terminal_title = [
+          "project"
+          "git-branch"
+          "status"
+          "thread"
+          "task-progress"
+        ];
+      };
     };
   };
 
