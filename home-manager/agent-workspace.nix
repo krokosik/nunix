@@ -34,6 +34,10 @@ let
       xterm,
       tmux,
       xdg-utils,
+      kdePackages,
+      xwayland,
+      dbus,
+      wl-clipboard,
       libxcb,
       libxkbcommon,
       wayland,
@@ -60,6 +64,12 @@ let
         xterm
         tmux
         xdg-utils
+        kdePackages.kwin
+        kdePackages.kservice
+        kdePackages.libkscreen
+        xwayland
+        dbus
+        wl-clipboard
       ];
       # Upstream's restricted mount namespace assumes an FHS system.
       workspaceBubblewrap = writeShellScriptBin "bwrap" /* bash */ ''
@@ -71,17 +81,17 @@ let
     in
     stdenv.mkDerivation (finalAttrs: {
       pname = "agent-workspace-linux";
-      version = "0.3.3";
+      version = "0.4.0";
 
       src = fetchurl {
         url = "https://github.com/agent-sh/agent-workspace-linux/releases/download/v${finalAttrs.version}/agent-workspace-linux-x86_64-unknown-linux-gnu";
-        hash = "sha256-0oNDqZnTGl2G5SMdh6VwFz4IWTNbgKYJOeul+ODlC4g=";
+        hash = "sha256-o1EmfFOTgVdvngSqsnBVnDHiBUHZVVda6ThxaqidU4I=";
       };
 
       skillSrc = fetchzip {
         url = "https://codeload.github.com/agent-sh/agent-workspace-linux/tar.gz/refs/tags/v${finalAttrs.version}";
         extension = "tar.gz";
-        hash = "sha256-vhvMmrxOEpjZOdVN83tng1aBwmfotuiuw6OWH9jPcNE=";
+        hash = "sha256-ZuN+YDR5F2Vyg3hYRNV9/7zl1X3VM6xV6AeI8ucB7nI=";
       };
 
       nativeBuildInputs = [
