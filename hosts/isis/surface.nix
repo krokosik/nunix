@@ -8,11 +8,12 @@
 let
   inherit (lib.lists) singleton;
   inherit (lib.meta) getExe getExe';
-  inherit (lib.modules) mkAfter;
 
   rdmsr = getExe' pkgs.msr-tools "rdmsr";
 in
 {
+  imports = singleton ./cameras.nix;
+
   # INPUT
   services.iptsd = {
     enable = true;
@@ -42,23 +43,6 @@ in
     "usbhid"
     "xhci_pci"
   ];
-
-  # CAMERAS
-  # Use the in-tree ISYS driver and libcamera's software ISP. Facter's generic
-  # IPU6 module installs a different proprietary HAL/relay stack.
-  hardware.facter.detected.camera.ipu6.enable = false;
-
-  boot.kernelPatches = mkAfter (singleton {
-    name = "surface-pro-8-ov5693-clock-gate";
-    patch = ./patches/ov5693-surface-pro-8-clock-gate.patch;
-    structuredExtraConfig = {
-      VIDEO_INTEL_IPU6 = lib.kernel.module;
-    };
-  });
-
-  services.pipewire.wireplumber.extraConfig."10-surface-camera" = {
-    "wireplumber.profiles".main."monitor.libcamera" = "wanted";
-  };
 
   # The default also includes --firmware-builtin
   boot.loader.limine.secureBoot.autoEnrollKeys.extraArgs = singleton "--microsoft";

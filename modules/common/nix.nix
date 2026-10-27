@@ -81,6 +81,7 @@ in
         "vscode-extension-ms-vscode-remote-vscode-remote-extensionpack"
         "inventor"
         "inventor-overlay"
+        "surface-pro-8-camera-tuning"
       ];
     packageOverrides = pkgs: {
       stable = import inputs.nixpkgs {

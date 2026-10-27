@@ -1,0 +1,31 @@
+Subject: [PATCH] media: ov13858: match the Surface software ISP black level
+
+Port the BLC target override from fildunsky/linux-surface-pro8-cameras
+6fe8974fba84d7abbe4f1df6c23e6f5edfd4699c. Its factory-tuning.py emits
+blackLevel: 0 for OV13858 and assumes the driver zeros the sensor target.
+Apply after each mode table and propagate I2C failures.
+
+--- a/drivers/media/i2c/ov13858.c
++++ b/drivers/media/i2c/ov13858.c
+@@ -45,6 +45,8 @@
+ /* Chip ID */
+ #define OV13858_REG_CHIP_ID		0x300a
+ #define OV13858_CHIP_ID			0x00d855
++
++#define OV13858_REG_BLC_TARGET		0x4002
+ 
+ /* V_TIMING internal */
+ #define OV13858_REG_VTS			0x380e
+@@ -1635,6 +1637,12 @@
+ 		return ret;
+ 	}
+ 
++	/* Match the zero-pedestal factory-derived software ISP tuning. */
++	ret = ov13858_write_reg(ov13858, OV13858_REG_BLC_TARGET,
++				OV13858_REG_VALUE_16BIT, 0);
++	if (ret)
++		return ret;
++
+ 	/* Apply customized values from user */
+ 	ret =  __v4l2_ctrl_handler_setup(ov13858->sd.ctrl_handler);
+ 	if (ret)
