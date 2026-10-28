@@ -15,6 +15,7 @@ in
     enable = true;
     engine = "whisper";
     package = if useVulkan then voxtypePackages.voxtype-vulkan else voxtypePackages.voxtype-onnx;
+    model.name = if useVulkan then "large-v3-turbo" else "medium.en";
     service.enable = true;
 
     settings = {
@@ -32,7 +33,6 @@ in
       };
       whisper = {
         language = "en";
-        model = if useVulkan then "large-v3-turbo" else "medium.en";
         translate = false;
       };
       output = {
