@@ -91,6 +91,10 @@ in
     (mkBind "SUPER + period" "hl.dsp.exec_cmd(${luaValue "${voxtype} record stop"})" {
       description = "Finish dictation";
       release = true;
+      # Stop even when Super is released before period.
+      ignore_mods = true;
+      # Let ordinary period key events reach the focused application.
+      non_consuming = true;
     })
   ]
   ++ workspaceBindings;
