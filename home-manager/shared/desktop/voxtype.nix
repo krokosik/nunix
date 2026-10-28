@@ -21,15 +21,11 @@ in
     settings = {
       state_file = "auto";
 
-      # Use notifications and audio feedback without a separate OSD frontend.
+      # DMS owns the waveform OSD.
       osd.enabled = false;
 
-      hotkey = {
-        enabled = true;
-        key = "SCROLLLOCK";
-        mode = "push_to_talk";
-        modifiers = [ ];
-      };
+      hotkey.enabled = false;
+
       audio = {
         device = "default";
         max_duration_secs = 60;
@@ -45,12 +41,13 @@ in
         mode = "type";
         type_delay_ms = 0;
         notification = {
-          on_recording_start = true;
-          on_recording_stop = true;
+          on_recording_start = false;
+          on_recording_stop = false;
           on_transcription = false;
           on_no_speech = true;
         };
       };
     };
   };
+
 }

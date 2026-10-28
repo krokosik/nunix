@@ -1,22 +1,24 @@
-{ lib, ... }:
+{ config, lib, ... }:
 let
   inherit (lib.generators) mkLuaInline toLua;
   inherit (lib.lists) genList;
+  inherit (lib.meta) getExe;
 
+  voxtype = getExe config.programs.voxtype.package;
   browser = "zen-twilight";
   editor = "codium";
   lua = mkLuaInline;
   luaValue = toLua { multiline = false; };
-  mkBind = keys: dispatcher: description: {
+  mkBind = keys: dispatcher: options: {
     _args = [
       keys
       (lua dispatcher)
-      (lua "{ description = ${luaValue description} }")
+      (lua (luaValue options))
     ];
   };
   mkExecBind =
     keys: command: description:
-    mkBind keys "hl.dsp.exec_cmd(${luaValue command})" description;
+    mkBind keys "hl.dsp.exec_cmd(${luaValue command})" { inherit description; };
   workspaceBindings = genList (
     index:
     let
@@ -25,7 +27,7 @@ let
     in
     mkBind "SUPER + SHIFT + ALT + code:${keycode}"
       "hl.dsp.window.move({ workspace = ${workspace}, follow = false })"
-      "Move window silently to workspace ${workspace}"
+      { description = "Move window silently to workspace ${workspace}"; }
   ) 10;
 in
 {
@@ -50,12 +52,16 @@ in
     (mkExecBind "SUPER + CTRL + B" "dms ipc call widget toggle controlCenterButton" "Bluetooth")
 
     # WORKSPACE MANAGEMENT
-    (mkBind "SUPER + S" ''hl.dsp.workspace.toggle_special("scratchpad")'' "Toggle scratchpad")
+    (mkBind "SUPER + S" ''hl.dsp.workspace.toggle_special("scratchpad")'' {
+      description = "Toggle scratchpad";
+    })
     (mkBind "SUPER + ALT + S"
       ''hl.dsp.window.move({ workspace = "special:scratchpad", follow = false })''
-      "Move window to scratchpad"
+      { description = "Move window to scratchpad"; }
     )
-    (mkBind "SUPER + CTRL + TAB" ''hl.dsp.focus({ workspace = "previous" })'' "Former workspace")
+    (mkBind "SUPER + CTRL + TAB" ''hl.dsp.focus({ workspace = "previous" })'' {
+      description = "Former workspace";
+    })
     (mkExecBind "SUPER + SHIFT + ALT + LEFT" "hyprctl dispatch movecurrentworkspacetomonitor l"
       "Move workspace to left monitor"
     )
@@ -68,15 +74,25 @@ in
     (mkExecBind "SUPER + SHIFT + ALT + DOWN" "hyprctl dispatch movecurrentworkspacetomonitor d"
       "Move workspace to down monitor"
     )
-    (mkBind "SUPER + SHIFT + code:20" "hl.dsp.window.resize({ x = 0, y = -100, relative = true })"
-      "Shrink window up"
-    )
-    (mkBind "SUPER + SHIFT + code:21" "hl.dsp.window.resize({ x = 0, y = 100, relative = true })"
-      "Expand window down"
-    )
-    (mkBind "SUPER + BACKSPACE" ''hl.dsp.window.set_prop({ prop = "opaque", value = "toggle" })''
-      "Toggle window transparency"
-    )
+    (mkBind "SUPER + SHIFT + code:20" "hl.dsp.window.resize({ x = 0, y = -100, relative = true })" {
+      description = "Shrink window up";
+    })
+    (mkBind "SUPER + SHIFT + code:21" "hl.dsp.window.resize({ x = 0, y = 100, relative = true })" {
+      description = "Expand window down";
+    })
+    (mkBind "SUPER + BACKSPACE" ''hl.dsp.window.set_prop({ prop = "opaque", value = "toggle" })'' {
+      description = "Toggle window transparency";
+    })
+
+    # DICTATION
+    (mkBind "SUPER + period" "hl.dsp.exec_cmd(${luaValue "${voxtype} record start"})" {
+      description = "Start dictation";
+    })
+    (mkBind "SUPER + period" "hl.dsp.exec_cmd(${luaValue "${voxtype} record stop"})" {
+      description = "Finish dictation";
+      release = true;
+    })
   ]
   ++ workspaceBindings;
+
 }

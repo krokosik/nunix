@@ -19,6 +19,8 @@
     };
 
     plugins.quickCapture.enable = true;
+
+    plugins.voxTypeOsd.enable = true;
   };
 
   # plugin deps
