@@ -70,7 +70,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    voxtype.url = "github:peteonrails/voxtype/v0.7.1";
+    voxtype.url = "github:peteonrails/voxtype/v1.1.1";
 
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
