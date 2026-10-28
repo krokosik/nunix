@@ -29,8 +29,8 @@ let
     ''
   ) { };
   legacyDmsFiles = [
-    "DankMaterialShell/settings.json"
-    "DankMaterialShell/zen.css"
+    "dms/settings.json"
+    "dms/zen.css"
     "hypr/dms/binds.conf"
     "hypr/dms/colors.conf"
     "hypr/dms/cursor.conf"
@@ -74,7 +74,7 @@ let
       --owner=${username} \
       --group=${username} \
       --mode=0700 \
-      "/home/${username}/.config/DankMaterialShell" \
+      "/home/${username}/.config/dms" \
       "/home/${username}/.config/hypr/dms"
 
     ${chown} --no-dereference ${username}:${username} \
@@ -120,6 +120,18 @@ in
         local source="$1"
         local destination="$2"
         local owner="$3"
+
+        # Preserve each user's existing pre-2.0 preferences until DMS migrates
+        # them. The primary user may not have started the new shell yet either.
+        if [[ "$destination" == */.config/dms/* ]]; then
+          local legacy_destination="''${destination/\/.config\/dms\//\/.config\/DankMaterialShell\/}"
+          if [[ -f "$legacy_destination" ]]; then
+            return
+          fi
+          if [[ ! -f "$source" ]]; then
+            source="''${source/\/.config\/dms\//\/.config\/DankMaterialShell\/}"
+          fi
+        fi
 
         if [[ -f "$source" && ! -e "$destination" ]]; then
           ${install} \

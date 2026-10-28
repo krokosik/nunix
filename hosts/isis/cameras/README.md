@@ -3,7 +3,15 @@
 `../cameras.nix` keeps the native IPU6 ISYS driver and libcamera software ISP.
 It adds OV5693 analogue binning, OV13858 rotation/flip controls, and the
 software ISP processing fixes from the pinned camera repository. IR is omitted.
-The host-wide libcamera overlay also reaches PipeWire and its SPA plugin.
+The patched libcamera is installed for camera tools and passed explicitly to
+`services.pipewire.package`, which builds its camera SPA plugin against it.
+WirePlumber uses that same service package. The global package set keeps the
+standard libcamera and PipeWire, so GTK, Ghostty, FFmpeg and other applications
+do not rebuild merely because of the camera patches.
+
+Applications using cameras through PipeWire receive the tuned stream. Direct
+libcamera consumers must use the patched package explicitly; installing the
+`cam` tool alone would not tune PipeWire's camera capture.
 
 ## Calibration
 

@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   ...
@@ -6,13 +7,33 @@
 let
   inherit (lib.lists) singleton;
   inherit (lib.modules) mkAfter;
+
+  cameraSource = pkgs.callPackage ./cameras/source.nix { };
+  tuning = pkgs.callPackage ./cameras/tuning.nix {
+    inherit cameraSource;
+  };
+  surfaceLibcamera = pkgs.libcamera.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [
+      "${cameraSource}/patches/libcamera/softisp-agc-proportional.patch"
+      "${cameraSource}/patches/libcamera/softisp-fix-black-level-order.patch"
+      "${cameraSource}/patches/libcamera/softisp-split-awb-from-ccm.patch"
+      "${cameraSource}/patches/libcamera/softisp-awb-use-libipa-bayes.patch"
+      "${cameraSource}/patches/libcamera/softisp-stats-sums-to-8bit.patch"
+      "${cameraSource}/patches/libcamera/softisp-agc-gain-floor.patch"
+    ];
+    postInstall = (old.postInstall or "") + /* bash */ ''
+      install --mode=0644 ${tuning}/*.yaml "$out/share/libcamera/ipa/simple/"
+    '';
+  });
 in
 {
   # Keep mainline ISYS and libcamera's software ISP instead of Facter's HAL stack.
   hardware.facter.detected.camera.ipu6.enable = false;
 
   # Preserve the original calibration alongside the generated libcamera YAML.
-  environment.etc."libcamera/surface-pro-8/aiqb".source = pkgs.libcamera.surfaceCameraTuning.blobs;
+  environment.etc."libcamera/surface-pro-8/aiqb".source = tuning.blobs;
+
+  environment.systemPackages = singleton surfaceLibcamera;
 
   boot.kernelPatches = mkAfter [
     {
@@ -36,38 +57,13 @@ in
     }
   ];
 
-  # The overlay also rebuilds PipeWire's libcamera SPA plugin against this build.
-  # Installing only a separate cam executable would leave applications untuned.
-  nixpkgs.overlays = singleton (
-    _final: prev:
-    let
-      cameraSource = prev.callPackage ./cameras/source.nix { };
-      tuning = prev.callPackage ./cameras/tuning.nix {
-        inherit cameraSource;
-        # PipeWire's 32-bit compatibility build also evaluates this overlay.
-        # nixpkgs' default assembler is unavailable on i686.
-        _7zz = prev._7zz.override { useAsmc = prev.stdenv.hostPlatform.isx86_64; };
-      };
-    in
-    {
-      libcamera = prev.libcamera.overrideAttrs (old: {
-        patches = (old.patches or [ ]) ++ [
-          "${cameraSource}/patches/libcamera/softisp-agc-proportional.patch"
-          "${cameraSource}/patches/libcamera/softisp-fix-black-level-order.patch"
-          "${cameraSource}/patches/libcamera/softisp-split-awb-from-ccm.patch"
-          "${cameraSource}/patches/libcamera/softisp-awb-use-libipa-bayes.patch"
-          "${cameraSource}/patches/libcamera/softisp-stats-sums-to-8bit.patch"
-          "${cameraSource}/patches/libcamera/softisp-agc-gain-floor.patch"
-        ];
-        postInstall = (old.postInstall or "") + /* bash */ ''
-          install --mode=0644 ${tuning}/*.yaml "$out/share/libcamera/ipa/simple/"
-        '';
-        passthru = (old.passthru or { }) // {
-          surfaceCameraTuning = tuning;
-        };
-      });
-    }
-  );
+  # Scope the tuned camera stack to the services. Overriding pkgs.libcamera
+  # globally also changes application libraries through PipeWire and GStreamer.
+  services.pipewire.package = pkgs.pipewire.override { libcamera = surfaceLibcamera; };
+
+  services.pipewire.wireplumber.package = pkgs.wireplumber.override {
+    pipewire = config.services.pipewire.package;
+  };
 
   services.pipewire.wireplumber.extraConfig."10-surface-camera" = {
     "wireplumber.profiles".main."monitor.libcamera" = "wanted";

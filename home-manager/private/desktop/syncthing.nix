@@ -32,7 +32,7 @@ let
     };
 
     dms = {
-      path = "${config.xdg.configHome}/DankMaterialShell";
+      path = "${config.xdg.configHome}/dms";
       inherit devices;
       id = "e3hvo-mqvsu";
     };

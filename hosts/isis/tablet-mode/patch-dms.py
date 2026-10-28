@@ -16,24 +16,36 @@ def replace(path, old, new, count=1):
     file.write_text(source.replace(old, new))
 
 
-# SettingsStore serializes only SettingsSpec keys. These runtime properties
-# are intentionally absent from that spec, and are not reset on settings reload.
-replace("Common/SettingsData.qml", "    property bool showDock: false", """    property bool tabletModeEnabled: false
-    readonly property bool effectiveShowDock: tabletModeEnabled || showDock
-    readonly property bool effectiveDockAutoHide: !tabletModeEnabled && dockAutoHide
-    readonly property bool effectiveDockSmartAutoHide: !tabletModeEnabled && dockSmartAutoHide
+# SettingsStore serializes only SettingsSpec keys. Keep runtime overrides out
+# of dockConfigs and barConfigs so saving or syncing settings cannot persist them.
+replace("Common/SettingsData.qml", "    property var dockConfigs: Spec.SPEC.dockConfigs.def", """    property bool tabletModeEnabled: false
     readonly property real effectiveFrameBarSize: tabletModeEnabled ? Math.max(64, frameBarSize) : frameBarSize
+    readonly property var effectiveDockConfigs: dockConfigs.map(config => effectiveDockConfig(config))
+
+    function effectiveDockConfig(config) {
+        if (!tabletModeEnabled || !config)
+            return config;
+        return Object.assign({}, config, {enabled: true, autoHide: false, smartAutoHide: false});
+    }
 
     function effectiveBarPadding(padding) {
-        return tabletModeEnabled ? Math.max(20, padding ?? 4) : (padding ?? 4);
+        return tabletModeEnabled ? Math.max(20, padding ?? 2) : (padding ?? 2);
     }
 
-    property bool showDock: false""")
-
-replace("DMSShellIPC.qml", '        target: "dock"\n    }', '''        target: "dock"
+    function effectiveIslandSettings(bc) {
+        const settings = islandSettings(bc);
+        if (!tabletModeEnabled)
+            return settings;
+        const defaults = islandDefaultsFor(bc);
+        return Object.assign({}, settings, {
+            islandCompactThickness: Math.max(32, settings.islandCompactThickness ?? defaults.islandCompactThickness),
+            islandReserveThickness: Math.max(40, settings.islandReserveThickness ?? defaults.islandReserveThickness)
+        });
     }
 
-    IpcHandler {
+    property var dockConfigs: Spec.SPEC.dockConfigs.def""")
+
+replace("DMSShellIPC.qml", '    IpcHandler {\n        target: "dock"', '''    IpcHandler {
         target: "surfaceTablet"
 
         function set(enabled: string): string {
@@ -46,44 +58,31 @@ replace("DMSShellIPC.qml", '        target: "dock"\n    }', '''        target: "
         function status(): string {
             return SettingsData.tabletModeEnabled ? "true" : "false";
         }
-    }''')
+    }
 
-# Patch render/geometry consumers, not settings editors or persistent IPC.
-for path, count in {
-    "Modules/Dock/Dock.qml": 2,
-    "Modules/Dock/DockBody.qml": 2,
-    "Widgets/DankOSD.qml": 2,
-    "Modals/Common/DankModalConnected.qml": 1,
-    "Modals/DankLauncherV2/DankLauncherV2ModalConnected.qml": 2,
-    "Modules/Frame/FrameWindow.qml": 1,
-}.items():
-    replace(path, "SettingsData.showDock", "SettingsData.effectiveShowDock", count)
+    IpcHandler {
+        target: "dock"''')
 
-for path, auto, smart in [
-    ("Modules/Dock/DockBody.qml", 1, 3),
-    ("Widgets/DankOSD.qml", 1, 1),
-]:
-    replace(path, "SettingsData.dockAutoHide", "SettingsData.effectiveDockAutoHide", auto)
-    replace(path, "SettingsData.dockSmartAutoHide", "SettingsData.effectiveDockSmartAutoHide", smart)
+# Resolve screen assignments and space reservations from runtime dock copies.
+# Persistent getters/setters and the settings editors still use the saved values.
+replace("Common/SettingsData.qml", "DockConfig.resolveAll(dockConfigs, screen,", "DockConfig.resolveAll(effectiveDockConfigs, screen,")
+replace("Modules/Dock/Dock.qml", "SettingsData.getDockConfig(identity[1])", "SettingsData.effectiveDockConfig(SettingsData.getDockConfig(identity[1]))")
 
 # Shared sizing helpers cover bar windows, popups and edge reservations.
-replace("Common/Theme.qml", "    function barWidgetThickness(innerPadding, dpr) {", """    function barWidgetThickness(innerPadding, dpr) {
-        innerPadding = SettingsData.effectiveBarPadding(innerPadding);""")
-replace("Common/Theme.qml", "    function barThickness(innerPadding, dpr) {", """    function barThickness(innerPadding, dpr) {
-        innerPadding = SettingsData.effectiveBarPadding(innerPadding);""")
-replace("Modules/DankBar/DankBarContent.qml", "barConfig?.innerPadding ?? 4", "SettingsData.effectiveBarPadding(barConfig?.innerPadding)")
-
-# The synchronized configuration currently renders its bar as a DankIsland.
-# Override its compact and reserved thickness too, without changing barConfigs.
-replace("Common/SettingsData.qml", """        const value = bc?.[key];
-        return value === undefined || value === null ? islandDefaults[key] : value;""", """        const value = bc?.[key] ?? islandDefaults[key];
-        if (tabletModeEnabled && key === "islandCompactThickness")
-            return Math.max(32, value);
-        if (tabletModeEnabled && key === "islandReserveThickness")
-            return Math.max(40, value);
-        return value;""")
-
+for function in ["barWidgetThickness", "barThickness"]:
+    old = f"    function {function}(innerPadding, dpr) {{"
+    replace("Common/Theme.qml", old, old + "\n        innerPadding = SettingsData.effectiveBarPadding(innerPadding);")
+replace("Modules/DBar/DBarContent.qml", "readonly property real innerPadding: barConfig?.innerPadding ?? 2", "readonly property real innerPadding: SettingsData.effectiveBarPadding(barConfig?.innerPadding)")
 for path, count in {
-    "Modules/DankBar/DankBarBody.qml": 1,
+    "Common/ShellLayout.qml": 1,
+    "Modules/DBar/DBarBody.qml": 1,
+    "Modules/DBar/DBarContent.qml": 1,
 }.items():
     replace(path, "SettingsData.frameBarSize", "SettingsData.effectiveFrameBarSize", count)
+
+# Island rendering and the layout resolver must agree about reserved thickness.
+replace("Common/SettingsData.qml", "const value = islandSettings(bc)[key];", "const value = effectiveIslandSettings(bc)[key];")
+for function in ["islandThickness", "islandReserve"]:
+    replace("Common/SettingsData.qml", f"LayoutResolver.{function}(islandSettings(bc),", f"LayoutResolver.{function}(effectiveIslandSettings(bc),")
+    replace("Common/ShellLayout.qml", f"Resolver.{function}(SettingsData.islandSettings(config),", f"Resolver.{function}(SettingsData.effectiveIslandSettings(config),")
+replace("Modules/DIsland/IslandBarHost.qml", "Resolver.islandMetrics(SettingsData.islandSettings(root.barConfig),", "Resolver.islandMetrics(SettingsData.effectiveIslandSettings(root.barConfig),")

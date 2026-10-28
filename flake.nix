@@ -56,17 +56,17 @@
     };
 
     dms = {
-      url = "github:AvengeMedia/DankMaterialShell/v1.6.2";
+      url = "github:duxlabs-dev/dux-shell/v2.0.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     dms-plugin-registry = {
-      url = "github:AvengeMedia/dms-plugin-registry";
+      url = "github:duxlabs-dev/dux-plugin-registry";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     dank-greeter = {
-      url = "github:AvengeMedia/dank-greeter/v1.6.2";
+      url = "github:duxlabs-dev/dux-greeter/v2.0.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

@@ -153,7 +153,6 @@ in
   environment.systemPackages = [
     pkgs.surface-control
     pkgs.iptsd
-    pkgs.libcamera
     pkgs.v4l-utils
   ];
 }

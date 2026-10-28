@@ -25,12 +25,17 @@ dms ipc call surfaceTablet status
 
 Tablet mode forces dock visibility, disables dock auto-hide and sets bar inner
 padding to at least 20 (roughly a 62-pixel bar with the current theme). For the
-current DankIsland bar, compact/reserved thickness is at least 56/64 pixels. Saved
+current island bar, compact/reserved thickness is at least 32/40 pixels. Saved
 preferences remain the underlying laptop-mode values. Runtime properties are
 absent from `SettingsSpec`, so neither an unrelated settings save nor settings
 reload serializes them. No tablet-specific state or plugin is installed in the
 Syncthing folders. An upstream QML change that invalidates the patch fails the
 build rather than silently omitting an override.
+
+The DMS 2.0 patch projects each saved dock into a runtime configuration before
+screen assignment, rendering and space reservation. Settings editors and IPC
+setters still access the original dock configurations. Island rendering and the
+shared layout resolver use the same runtime sizing, including frame bars.
 
 ## KEYBOARD AND FUTURE GESTURES
 
