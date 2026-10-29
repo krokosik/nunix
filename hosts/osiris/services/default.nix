@@ -2,6 +2,7 @@
   imports = [
     ./actualbudget.nix
     ./authentik.nix
+    ./authentik-flows.nix
     ./bentopdf.nix
     ./convertx.nix
     ./crowdsec.nix

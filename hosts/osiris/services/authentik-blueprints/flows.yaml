@@ -1,0 +1,1406 @@
+# Curated from blueprint.yaml; runtime users, credentials, devices, and apps are excluded.
+# Entries are ordered before their !KeyOf consumers. Google owns identification.sources.
+version: 1
+metadata:
+  name: Default - Authentication flow
+entries:
+- model: authentik_blueprints.metaapplyblueprint
+  attrs:
+    identifiers:
+      name: groups-baseline
+    required: true
+- model: authentik_flows.flow
+  id: flow-public-enrollment
+  identifiers:
+    slug: public-enrollment
+  attrs:
+    authentication: none
+    background: ''
+    compatibility_mode: true
+    denied_action: message_continue
+    designation: enrollment
+    layout: stacked
+    name: public-enrollment
+    policy_engine_mode: any
+    title: Register Account
+- model: authentik_flows.flow
+  id: flow-default-enrollment-flow
+  identifiers:
+    slug: default-enrollment-flow
+  attrs:
+    authentication: require_unauthenticated
+    background: ''
+    compatibility_mode: true
+    denied_action: message_continue
+    designation: enrollment
+    layout: stacked
+    name: Default enrollment Flow
+    policy_engine_mode: any
+    title: Welcome to authentik!
+- model: authentik_flows.flow
+  id: flow-default-source-enrollment
+  identifiers:
+    slug: default-source-enrollment
+  attrs:
+    authentication: none
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: enrollment
+    layout: stacked
+    name: Welcome to authentik! Please select a username.
+    policy_engine_mode: any
+    title: Welcome to authentik! Please select a username.
+- model: authentik_flows.flow
+  id: flow-initial-setup
+  identifiers:
+    slug: initial-setup
+  attrs:
+    authentication: require_superuser
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: stage_configuration
+    layout: stacked
+    name: default-oobe-setup
+    policy_engine_mode: any
+    title: Welcome to authentik!
+- model: authentik_flows.flow
+  id: flow-default-authenticator-static-setup
+  identifiers:
+    slug: default-authenticator-static-setup
+  attrs:
+    authentication: require_authenticated
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: stage_configuration
+    layout: stacked
+    name: default-authenticator-static-setup
+    policy_engine_mode: any
+    title: Setup Static OTP Tokens
+- model: authentik_flows.flow
+  id: flow-default-provider-invalidation-flow
+  identifiers:
+    slug: default-provider-invalidation-flow
+  attrs:
+    authentication: none
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: invalidation
+    layout: stacked
+    name: Logged out of application
+    policy_engine_mode: any
+    title: You've logged out of %(app)s.
+- model: authentik_flows.flow
+  id: flow-default-authenticator-totp-setup
+  identifiers:
+    slug: default-authenticator-totp-setup
+  attrs:
+    authentication: require_authenticated
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: stage_configuration
+    layout: stacked
+    name: default-authenticator-totp-setup
+    policy_engine_mode: any
+    title: Set up Two-Factor authentication
+- model: authentik_flows.flow
+  id: flow-default-authenticator-webauthn-setup
+  identifiers:
+    slug: default-authenticator-webauthn-setup
+  attrs:
+    authentication: require_authenticated
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: stage_configuration
+    layout: stacked
+    name: default-authenticator-webauthn-setup
+    policy_engine_mode: any
+    title: Setup WebAuthn
+- model: authentik_flows.flow
+  id: flow-default-password-change
+  identifiers:
+    slug: default-password-change
+  attrs:
+    authentication: require_authenticated
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: stage_configuration
+    layout: stacked
+    name: Change Password
+    policy_engine_mode: any
+    title: Change password
+- model: authentik_flows.flow
+  id: flow-default-source-pre-authentication
+  identifiers:
+    slug: default-source-pre-authentication
+  attrs:
+    authentication: none
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: stage_configuration
+    layout: stacked
+    name: Pre-Authentication
+    policy_engine_mode: any
+    title: Pre-authentication
+- model: authentik_flows.flow
+  id: flow-default-authentication-flow
+  identifiers:
+    slug: default-authentication-flow
+  attrs:
+    authentication: none
+    background: ''
+    compatibility_mode: true
+    denied_action: message_continue
+    designation: authentication
+    layout: stacked
+    name: Welcome to authentik!
+    policy_engine_mode: any
+    title: Welcome to authentik!
+- model: authentik_flows.flow
+  id: flow-webauth-passkey
+  identifiers:
+    slug: webauth-passkey
+  attrs:
+    authentication: none
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: authentication
+    layout: stacked
+    name: webauth-passkey
+    policy_engine_mode: any
+    title: Webauth Login
+- model: authentik_flows.flow
+  id: flow-default-provider-authorization-explicit-consent
+  identifiers:
+    slug: default-provider-authorization-explicit-consent
+  attrs:
+    authentication: require_authenticated
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: authorization
+    layout: stacked
+    name: Authorize Application
+    policy_engine_mode: any
+    title: Redirecting to %(app)s
+- model: authentik_flows.flow
+  id: flow-default-provider-authorization-implicit-consent
+  identifiers:
+    slug: default-provider-authorization-implicit-consent
+  attrs:
+    authentication: require_authenticated
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: authorization
+    layout: stacked
+    name: Authorize Application
+    policy_engine_mode: any
+    title: Redirecting to %(app)s
+- model: authentik_flows.flow
+  id: flow-default-invalidation-flow
+  identifiers:
+    slug: default-invalidation-flow
+  attrs:
+    authentication: none
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: invalidation
+    layout: stacked
+    name: Logout
+    policy_engine_mode: any
+    title: Default Invalidation Flow
+- model: authentik_flows.flow
+  id: flow-default-user-settings-flow
+  identifiers:
+    slug: default-user-settings-flow
+  attrs:
+    authentication: require_authenticated
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: stage_configuration
+    layout: stacked
+    name: User settings
+    policy_engine_mode: any
+    title: Update your info
+- model: authentik_flows.flow
+  id: flow-default-source-authentication
+  identifiers:
+    slug: default-source-authentication
+  attrs:
+    authentication: require_unauthenticated
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: authentication
+    layout: stacked
+    name: Welcome to authentik!
+    policy_engine_mode: any
+    title: Welcome to authentik!
+- model: authentik_policies_expression.expressionpolicy
+  id: expressionpolicy-ensure-unique-email
+  identifiers:
+    name: ensure-unique-email
+  attrs:
+    execution_logging: false
+    expression: |-
+      # Ensure this matches the *Field Key* value of the prompt
+      field_name = "email"
+      email = request.context["prompt_data"][field_name]
+      pending_user = request.context.get("pending_user")
+
+      from authentik.core.models import User
+      query = User.objects.filter(email__iexact=email)
+      if pending_user:
+          query = query.exclude(pk=pending_user.pk)
+
+      if query.exists():
+          ak_message("Email address in use")
+          return False
+
+      return True
+- model: authentik_policies_expression.expressionpolicy
+  id: expressionpolicy-default-authentication-flow-password-stage
+  identifiers:
+    name: default-authentication-flow-password-stage
+  attrs:
+    execution_logging: false
+    expression: |-
+      flow_plan = request.context.get("flow_plan")
+      if not flow_plan:
+          return True
+      # If the user does not have a backend attached to it, they haven't
+      # been authenticated yet and we need the password stage
+      return not hasattr(flow_plan.context.get("pending_user"), "backend")
+- model: authentik_policies_expression.expressionpolicy
+  id: expressionpolicy-default-authentication-flow-authenticator-validate-stage
+  identifiers:
+    name: default-authentication-flow-authenticator-validate-stage
+  attrs:
+    execution_logging: false
+    expression: |-
+      flow_plan = request.context.get("flow_plan")
+      if not flow_plan:
+          return True
+      # if the authentication method is webauthn (passwordless), then we skip the authenticator
+      # validation stage by returning false (true will execute the stage)
+      return not (flow_plan.context.get("auth_method") == "auth_webauthn_pwl")
+- model: authentik_policies_expression.expressionpolicy
+  id: expressionpolicy-default-source-authentication-if-sso
+  identifiers:
+    name: default-source-authentication-if-sso
+  attrs:
+    execution_logging: false
+    expression: |-
+      # This policy ensures that this flow can only be used when the user
+      # is in a SSO Flow (meaning they come from an external IdP)
+      return ak_is_sso_flow
+- model: authentik_policies_expression.expressionpolicy
+  id: expressionpolicy-default-oobe-prefill-user
+  identifiers:
+    name: default-oobe-prefill-user
+  attrs:
+    execution_logging: false
+    expression: |-
+      # This policy sets the user for the currently running flow
+      # by injecting "pending_user"
+      akadmin = ak_user_by(username="akadmin")
+      context["flow_plan"].context["pending_user"] = akadmin
+      return True
+- model: authentik_policies_expression.expressionpolicy
+  id: expressionpolicy-default-source-enrollment-if-username
+  identifiers:
+    name: default-source-enrollment-if-username
+  attrs:
+    execution_logging: false
+    expression: |-
+      # Check if we''ve not been given a username by the external IdP
+      # and trigger the enrollment flow
+      return 'username' not in context.get('prompt_data', {})
+- model: authentik_policies_expression.expressionpolicy
+  id: expressionpolicy-default-source-enrollment-if-sso
+  identifiers:
+    name: default-source-enrollment-if-sso
+  attrs:
+    execution_logging: false
+    expression: |-
+      # This policy ensures that this flow can only be used when the user
+      # is in a SSO Flow (meaning they come from an external IdP)
+      return ak_is_sso_flow
+- model: authentik_policies_expression.expressionpolicy
+  id: expressionpolicy-default-oobe-password-usable
+  identifiers:
+    name: default-oobe-password-usable
+  attrs:
+    execution_logging: false
+    expression: |-
+      # This policy ensures that the setup flow can only be
+      # executed when the admin user doesn't have a password set
+      akadmin = ak_user_by(username="akadmin")
+      # Ensure flow was started correctly
+      started_by = context.get("goauthentik.io/core/setup/started-by")
+      if started_by != "setup":
+          setup_url = request.http_request.build_absolute_uri("/")
+          ak_message(f"Access the authentik setup by navigating to {setup_url}")
+          return False
+      return akadmin is None or not akadmin.has_usable_password()
+- model: authentik_policies_expression.expressionpolicy
+  id: expressionpolicy-default-user-settings-authorization
+  identifiers:
+    name: default-user-settings-authorization
+  attrs:
+    execution_logging: false
+    expression: |-
+      from authentik.core.models import (
+          USER_ATTRIBUTE_CHANGE_EMAIL,
+          USER_ATTRIBUTE_CHANGE_NAME,
+          USER_ATTRIBUTE_CHANGE_USERNAME
+      )
+      prompt_data = request.context.get("prompt_data")
+
+      if not request.user.group_attributes(request.http_request).get(
+          USER_ATTRIBUTE_CHANGE_EMAIL, request.http_request.tenant.default_user_change_email
+      ):
+          if prompt_data.get("email") != request.user.email:
+              ak_message("Not allowed to change email address.")
+              return False
+
+      if not request.user.group_attributes(request.http_request).get(
+          USER_ATTRIBUTE_CHANGE_NAME, request.http_request.tenant.default_user_change_name
+      ):
+          if prompt_data.get("name") != request.user.name:
+              ak_message("Not allowed to change name.")
+              return False
+
+      if not request.user.group_attributes(request.http_request).get(
+          USER_ATTRIBUTE_CHANGE_USERNAME, request.http_request.tenant.default_user_change_username
+      ):
+          if prompt_data.get("username") != request.user.username:
+              ak_message("Not allowed to change username.")
+              return False
+
+      return True
+- model: authentik_policies_password.passwordpolicy
+  id: passwordpolicy-default-password-change-password-policy
+  identifiers:
+    name: default-password-change-password-policy
+  attrs:
+    amount_digits: 0
+    amount_lowercase: 0
+    amount_symbols: 0
+    amount_uppercase: 0
+    check_have_i_been_pwned: false
+    check_static_rules: true
+    check_zxcvbn: true
+    error_message: Password needs to be 8 characters or longer.
+    execution_logging: false
+    hibp_allowed_count: 0
+    length_min: 8
+    password_field: password
+    symbol_charset: '!\"#$%&''()*+,-./:;<=>?@[\]^_`{|}~ '
+    zxcvbn_score_threshold: 2
+- model: authentik_stages_authenticator_validate.authenticatorvalidatestage
+  id: authenticatorvalidatestage-default-authentication-webauthn
+  identifiers:
+    name: default-authentication-webauthn
+  attrs:
+    configuration_stages: []
+    device_classes:
+    - webauthn
+    email_otp_throttling_factor: 1.0
+    last_auth_threshold: seconds=0
+    not_configured_action: deny
+    sms_otp_throttling_factor: 1.0
+    static_otp_throttling_factor: 1.0
+    totp_otp_throttling_factor: 1.0
+    webauthn_allowed_device_types: []
+    webauthn_hints: []
+    webauthn_user_verification: preferred
+- model: authentik_stages_authenticator_validate.authenticatorvalidatestage
+  id: authenticatorvalidatestage-default-authentication-mfa-validation
+  identifiers:
+    name: default-authentication-mfa-validation
+  attrs:
+    configuration_stages: []
+    device_classes:
+    - totp
+    - webauthn
+    - email
+    email_otp_throttling_factor: 1.0
+    last_auth_threshold: seconds=0
+    not_configured_action: skip
+    sms_otp_throttling_factor: 1.0
+    static_otp_throttling_factor: 1.0
+    totp_otp_throttling_factor: 1.0
+    webauthn_allowed_device_types: []
+    webauthn_hints: []
+    webauthn_user_verification: preferred
+- model: authentik_stages_consent.consentstage
+  id: consentstage-default-provider-authorization-consent
+  identifiers:
+    name: default-provider-authorization-consent
+  attrs:
+    consent_expire_in: weeks=4
+    mode: expiring
+- model: authentik_stages_invitation.invitationstage
+  id: invitationstage-default-invitation
+  identifiers:
+    name: default-invitation
+  attrs:
+    continue_flow_without_invitation: false
+- model: authentik_stages_prompt.prompt
+  id: prompt-default-password-change-field-password
+  identifiers:
+    name: default-password-change-field-password
+  attrs:
+    field_key: password
+    initial_value: ''
+    initial_value_expression: false
+    label: Password
+    order: 300
+    placeholder: Password
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: password
+- model: authentik_stages_prompt.prompt
+  id: prompt-default-password-change-field-password-repeat
+  identifiers:
+    name: default-password-change-field-password-repeat
+  attrs:
+    field_key: password_repeat
+    initial_value: ''
+    initial_value_expression: false
+    label: Password (repeat)
+    order: 301
+    placeholder: Password (repeat)
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: password
+- model: authentik_stages_prompt.prompt
+  id: prompt-initial-setup-field-header
+  identifiers:
+    name: initial-setup-field-header
+  attrs:
+    field_key: oobe-header-text
+    initial_value: Welcome to authentik! Please set a password and email address for the default admin
+      user, akadmin.
+    initial_value_expression: false
+    label: oobe-header-text
+    order: 100
+    placeholder: ''
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: static
+- model: authentik_stages_prompt.prompt
+  id: prompt-initial-setup-field-email
+  identifiers:
+    name: initial-setup-field-email
+  attrs:
+    field_key: email
+    initial_value: ''
+    initial_value_expression: false
+    label: Email
+    order: 101
+    placeholder: Admin email
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: email
+- model: authentik_stages_prompt.prompt
+  id: prompt-default-user-settings-field-username
+  identifiers:
+    name: default-user-settings-field-username
+  attrs:
+    field_key: username
+    initial_value: |-
+      try:
+          return user.username
+      except:
+          return ''
+    initial_value_expression: true
+    label: Username
+    order: 200
+    placeholder: Username
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: username
+- model: authentik_stages_prompt.prompt
+  id: prompt-default-user-settings-field-name
+  identifiers:
+    name: default-user-settings-field-name
+  attrs:
+    field_key: name
+    initial_value: |-
+      try:
+          return user.name
+      except:
+          return ''
+    initial_value_expression: true
+    label: Name
+    order: 201
+    placeholder: Name
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: text
+- model: authentik_stages_prompt.prompt
+  id: prompt-default-source-enrollment-field-username
+  identifiers:
+    name: default-source-enrollment-field-username
+  attrs:
+    field_key: username
+    initial_value: ''
+    initial_value_expression: false
+    label: Username
+    order: 100
+    placeholder: Username
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: username
+- model: authentik_stages_prompt.prompt
+  id: prompt-default-user-settings-field-email
+  identifiers:
+    name: default-user-settings-field-email
+  attrs:
+    field_key: email
+    initial_value: |-
+      try:
+          return user.email
+      except:
+          return ''
+    initial_value_expression: true
+    label: Email
+    order: 202
+    placeholder: Email
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: email
+- model: authentik_stages_prompt.prompt
+  id: prompt-default-user-settings-field-locale
+  identifiers:
+    name: default-user-settings-field-locale
+  attrs:
+    field_key: attributes.settings.locale
+    initial_value: |-
+      try:
+          return user.attributes.get("settings", {}).get("locale", "")
+      except:
+          return ''
+    initial_value_expression: true
+    label: Locale
+    order: 203
+    placeholder: Locale
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: ak-locale
+- model: authentik_stages_prompt.prompt
+  id: prompt-initial-setup-field-password
+  identifiers:
+    name: initial-setup-field-password
+  attrs:
+    field_key: password
+    initial_value: ''
+    initial_value_expression: false
+    label: Password
+    order: 300
+    placeholder: Password
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: password
+- model: authentik_stages_prompt.prompt
+  id: prompt-initial-setup-field-password-repeat
+  identifiers:
+    name: initial-setup-field-password-repeat
+  attrs:
+    field_key: password_repeat
+    initial_value: ''
+    initial_value_expression: false
+    label: Password (repeat)
+    order: 301
+    placeholder: Password (repeat)
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: password
+- model: authentik_stages_prompt.prompt
+  id: prompt-default-enrollment-field-username
+  identifiers:
+    name: default-enrollment-field-username
+  attrs:
+    field_key: username
+    initial_value: ''
+    initial_value_expression: false
+    label: Username
+    order: 0
+    placeholder: Username
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: username
+- model: authentik_stages_prompt.prompt
+  id: prompt-default-enrollment-field-password
+  identifiers:
+    name: default-enrollment-field-password
+  attrs:
+    field_key: password
+    initial_value: ''
+    initial_value_expression: false
+    label: Password
+    order: 0
+    placeholder: Password
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: password
+- model: authentik_stages_prompt.prompt
+  id: prompt-default-enrollment-field-password-repeat
+  identifiers:
+    name: default-enrollment-field-password-repeat
+  attrs:
+    field_key: password_repeat
+    initial_value: ''
+    initial_value_expression: false
+    label: Password (repeat)
+    order: 1
+    placeholder: Password (repeat)
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: password
+- model: authentik_stages_prompt.prompt
+  id: prompt-default-enrollment-field-name
+  identifiers:
+    name: default-enrollment-field-name
+  attrs:
+    field_key: name
+    initial_value: ''
+    initial_value_expression: false
+    label: Name
+    order: 0
+    placeholder: Name
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: text
+- model: authentik_stages_prompt.prompt
+  id: prompt-default-enrollment-field-email
+  identifiers:
+    name: default-enrollment-field-email
+  attrs:
+    field_key: email
+    initial_value: ''
+    initial_value_expression: false
+    label: Email
+    order: 1
+    placeholder: Email
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: email
+- model: authentik_stages_user_login.userloginstage
+  id: userloginstage-default-authentication-login
+  identifiers:
+    name: default-authentication-login
+  attrs:
+    geoip_binding: no_binding
+    network_binding: no_binding
+    remember_device: days=30
+    remember_me_offset: seconds=0
+    session_duration: seconds=0
+    terminate_other_sessions: false
+- model: authentik_stages_user_login.userloginstage
+  id: userloginstage-default-enrollment-user-login
+  identifiers:
+    name: default-enrollment-user-login
+  attrs:
+    geoip_binding: no_binding
+    network_binding: no_binding
+    remember_device: days=30
+    remember_me_offset: seconds=0
+    session_duration: seconds=0
+    terminate_other_sessions: false
+- model: authentik_stages_user_login.userloginstage
+  id: userloginstage-default-source-authentication-login
+  identifiers:
+    name: default-source-authentication-login
+  attrs:
+    geoip_binding: no_binding
+    network_binding: no_binding
+    remember_device: days=30
+    remember_me_offset: seconds=0
+    session_duration: seconds=0
+    terminate_other_sessions: false
+- model: authentik_stages_user_login.userloginstage
+  id: userloginstage-default-source-enrollment-login
+  identifiers:
+    name: default-source-enrollment-login
+  attrs:
+    geoip_binding: no_binding
+    network_binding: no_binding
+    remember_device: days=30
+    remember_me_offset: seconds=0
+    session_duration: seconds=0
+    terminate_other_sessions: false
+- model: authentik_stages_user_logout.userlogoutstage
+  id: userlogoutstage-default-invalidation-logout
+  identifiers:
+    name: default-invalidation-logout
+  attrs: {}
+- model: authentik_stages_user_write.userwritestage
+  id: userwritestage-default-password-change-write
+  identifiers:
+    name: default-password-change-write
+  attrs:
+    create_users_as_inactive: false
+    create_users_group: null
+    user_creation_mode: never_create
+    user_path_template: ''
+    user_type: external
+- model: authentik_stages_user_write.userwritestage
+  id: userwritestage-default-user-settings-write
+  identifiers:
+    name: default-user-settings-write
+  attrs:
+    create_users_as_inactive: false
+    create_users_group: null
+    user_creation_mode: never_create
+    user_path_template: ''
+    user_type: external
+- model: authentik_stages_user_write.userwritestage
+  id: userwritestage-default-source-enrollment-write
+  identifiers:
+    name: default-source-enrollment-write
+  attrs:
+    create_users_as_inactive: false
+    create_users_group: !Find [authentik_core.group, [name, users]]
+    user_creation_mode: always_create
+    user_path_template: ''
+    user_type: internal
+- model: authentik_stages_user_write.userwritestage
+  id: userwritestage-default-enrollment-user-write
+  identifiers:
+    name: default-enrollment-user-write
+  attrs:
+    create_users_as_inactive: false
+    create_users_group: !Find [authentik_core.group, [name, users]]
+    user_creation_mode: always_create
+    user_path_template: ''
+    user_type: internal
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-password-change-1-userwritestage-default-password-change-write
+  identifiers:
+    target: !KeyOf 'flow-default-password-change'
+    stage: !KeyOf 'userwritestage-default-password-change-write'
+    order: 1
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-source-enrollment-1-userwritestage-default-source-enrollment-write
+  identifiers:
+    target: !KeyOf 'flow-default-source-enrollment'
+    stage: !KeyOf 'userwritestage-default-source-enrollment-write'
+    order: 1
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-source-enrollment-2-userloginstage-default-source-enrollment-login
+  identifiers:
+    target: !KeyOf 'flow-default-source-enrollment'
+    stage: !KeyOf 'userloginstage-default-source-enrollment-login'
+    order: 2
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-enrollment-flow-0-invitationstage-default-invitation
+  identifiers:
+    target: !KeyOf 'flow-default-enrollment-flow'
+    stage: !KeyOf 'invitationstage-default-invitation'
+    order: 0
+  attrs:
+    evaluate_on_plan: true
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-enrollment-flow-20-userwritestage-default-enrollment-user-write
+  identifiers:
+    target: !KeyOf 'flow-default-enrollment-flow'
+    stage: !KeyOf 'userwritestage-default-enrollment-user-write'
+    order: 20
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-enrollment-flow-100-userloginstage-default-enrollment-user-login
+  identifiers:
+    target: !KeyOf 'flow-default-enrollment-flow'
+    stage: !KeyOf 'userloginstage-default-enrollment-user-login'
+    order: 100
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-invalidation-flow-0-userlogoutstage-default-invalidation-logout
+  identifiers:
+    target: !KeyOf 'flow-default-invalidation-flow'
+    stage: !KeyOf 'userlogoutstage-default-invalidation-logout'
+    order: 0
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-provider-authorization-explicit-consent-0-consentstage-default-provider-authorization-consent
+  identifiers:
+    target: !KeyOf 'flow-default-provider-authorization-explicit-consent'
+    stage: !KeyOf 'consentstage-default-provider-authorization-consent'
+    order: 0
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-public-enrollment-30-userwritestage-default-enrollment-user-write
+  identifiers:
+    target: !KeyOf 'flow-public-enrollment'
+    stage: !KeyOf 'userwritestage-default-enrollment-user-write'
+    order: 30
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-public-enrollment-40-userloginstage-default-enrollment-user-login
+  identifiers:
+    target: !KeyOf 'flow-public-enrollment'
+    stage: !KeyOf 'userloginstage-default-enrollment-user-login'
+    order: 40
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-webauth-passkey-0-authenticatorvalidatestage-default-authentication-webauthn
+  identifiers:
+    target: !KeyOf 'flow-webauth-passkey'
+    stage: !KeyOf 'authenticatorvalidatestage-default-authentication-webauthn'
+    order: 0
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-webauth-passkey-10-userloginstage-default-authentication-login
+  identifiers:
+    target: !KeyOf 'flow-webauth-passkey'
+    stage: !KeyOf 'userloginstage-default-authentication-login'
+    order: 10
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: restart
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-initial-setup-20-userwritestage-default-password-change-write
+  identifiers:
+    target: !KeyOf 'flow-initial-setup'
+    stage: !KeyOf 'userwritestage-default-password-change-write'
+    order: 20
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-initial-setup-100-userloginstage-default-authentication-login
+  identifiers:
+    target: !KeyOf 'flow-initial-setup'
+    stage: !KeyOf 'userloginstage-default-authentication-login'
+    order: 100
+  attrs:
+    evaluate_on_plan: true
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: false
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-authentication-flow-30-authenticatorvalidatestage-default-authentication-mfa-validation
+  identifiers:
+    target: !KeyOf 'flow-default-authentication-flow'
+    stage: !KeyOf 'authenticatorvalidatestage-default-authentication-mfa-validation'
+    order: 30
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-authentication-flow-100-userloginstage-default-authentication-login
+  identifiers:
+    target: !KeyOf 'flow-default-authentication-flow'
+    stage: !KeyOf 'userloginstage-default-authentication-login'
+    order: 100
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-user-settings-flow-100-userwritestage-default-user-settings-write
+  identifiers:
+    target: !KeyOf 'flow-default-user-settings-flow'
+    stage: !KeyOf 'userwritestage-default-user-settings-write'
+    order: 100
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-source-authentication-0-userloginstage-default-source-authentication-login
+  identifiers:
+    target: !KeyOf 'flow-default-source-authentication'
+    stage: !KeyOf 'userloginstage-default-source-authentication-login'
+    order: 0
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_policies.policybinding
+  id: policy-binding-flow-default-source-authentication-0
+  identifiers:
+    target: !KeyOf 'flow-default-source-authentication'
+    policy: !KeyOf 'expressionpolicy-default-source-authentication-if-sso'
+    order: 0
+  attrs:
+    enabled: true
+    failure_result: false
+    group: null
+    negate: false
+    timeout: 30
+    user: null
+- model: authentik_policies.policybinding
+  id: policy-binding-flow-default-source-enrollment-0
+  identifiers:
+    target: !KeyOf 'flow-default-source-enrollment'
+    policy: !KeyOf 'expressionpolicy-default-source-enrollment-if-sso'
+    order: 0
+  attrs:
+    enabled: true
+    failure_result: false
+    group: null
+    negate: false
+    timeout: 30
+    user: null
+- model: authentik_policies.policybinding
+  id: policy-binding-flow-initial-setup-0
+  identifiers:
+    target: !KeyOf 'flow-initial-setup'
+    policy: !KeyOf 'expressionpolicy-default-oobe-password-usable'
+    order: 0
+  attrs:
+    enabled: true
+    failure_result: false
+    group: null
+    negate: false
+    timeout: 30
+    user: null
+- model: authentik_stages_authenticator_static.authenticatorstaticstage
+  id: authenticatorstaticstage-default-authenticator-static-setup
+  identifiers:
+    name: default-authenticator-static-setup
+  attrs:
+    configure_flow: !KeyOf 'flow-default-authenticator-static-setup'
+    friendly_name: Static tokens
+    token_count: 6
+    token_length: 12
+- model: authentik_stages_authenticator_totp.authenticatortotpstage
+  id: authenticatortotpstage-default-authenticator-totp-setup
+  identifiers:
+    name: default-authenticator-totp-setup
+  attrs:
+    configure_flow: !KeyOf 'flow-default-authenticator-totp-setup'
+    digits: '6'
+    friendly_name: TOTP Device
+- model: authentik_stages_authenticator_webauthn.authenticatorwebauthnstage
+  id: authenticatorwebauthnstage-default-authenticator-webauthn-setup
+  identifiers:
+    name: default-authenticator-webauthn-setup
+  attrs:
+    authenticator_attachment: null
+    configure_flow: !KeyOf 'flow-default-authenticator-webauthn-setup'
+    device_type_restrictions: []
+    friendly_name: WebAuthn device
+    hints: []
+    max_attempts: 0
+    prevent_duplicate_devices: false
+    resident_key_requirement: preferred
+    user_verification: preferred
+- model: authentik_stages_password.passwordstage
+  id: passwordstage-default-authentication-password
+  identifiers:
+    name: default-authentication-password
+  attrs:
+    allow_show_password: false
+    backends:
+    - authentik.core.auth.InbuiltBackend
+    - authentik.sources.kerberos.auth.KerberosBackend
+    - authentik.sources.ldap.auth.LDAPBackend
+    - authentik.core.auth.TokenBackend
+    configure_flow: !KeyOf 'flow-default-password-change'
+    failed_attempts_before_cancel: 5
+- model: authentik_stages_prompt.promptstage
+  id: promptstage-stage-default-oobe-password
+  identifiers:
+    name: stage-default-oobe-password
+  attrs:
+    fields:
+    - !KeyOf 'prompt-initial-setup-field-header'
+    - !KeyOf 'prompt-initial-setup-field-email'
+    - !KeyOf 'prompt-initial-setup-field-password'
+    - !KeyOf 'prompt-initial-setup-field-password-repeat'
+    validation_policies: []
+- model: authentik_stages_prompt.promptstage
+  id: promptstage-default-user-settings
+  identifiers:
+    name: default-user-settings
+  attrs:
+    fields:
+    - !KeyOf 'prompt-default-user-settings-field-username'
+    - !KeyOf 'prompt-default-user-settings-field-name'
+    - !KeyOf 'prompt-default-user-settings-field-email'
+    - !KeyOf 'prompt-default-user-settings-field-locale'
+    validation_policies:
+    - !KeyOf 'expressionpolicy-default-user-settings-authorization'
+- model: authentik_stages_prompt.promptstage
+  id: promptstage-default-enrollment-prompt-first
+  identifiers:
+    name: default-enrollment-prompt-first
+  attrs:
+    fields:
+    - !KeyOf 'prompt-default-enrollment-field-username'
+    - !KeyOf 'prompt-default-enrollment-field-password'
+    - !KeyOf 'prompt-default-enrollment-field-password-repeat'
+    validation_policies: []
+- model: authentik_stages_prompt.promptstage
+  id: promptstage-default-source-enrollment-prompt
+  identifiers:
+    name: default-source-enrollment-prompt
+  attrs:
+    fields:
+    - !KeyOf 'prompt-default-source-enrollment-field-username'
+    validation_policies: []
+- model: authentik_stages_prompt.promptstage
+  id: promptstage-default-enrollment-prompt-second
+  identifiers:
+    name: default-enrollment-prompt-second
+  attrs:
+    fields:
+    - !KeyOf 'prompt-default-enrollment-field-name'
+    - !KeyOf 'prompt-default-enrollment-field-email'
+    validation_policies:
+    - !KeyOf 'expressionpolicy-ensure-unique-email'
+- model: authentik_stages_prompt.promptstage
+  id: promptstage-default-password-change-prompt
+  identifiers:
+    name: default-password-change-prompt
+  attrs:
+    fields:
+    - !KeyOf 'prompt-default-password-change-field-password'
+    - !KeyOf 'prompt-default-password-change-field-password-repeat'
+    validation_policies:
+    - !KeyOf 'passwordpolicy-default-password-change-password-policy'
+- model: authentik_brands.brand
+  id: brand-authentik-default
+  identifiers:
+    domain: authentik-default
+  attrs:
+    attributes: {}
+    branding_custom_css: ''
+    branding_default_flow_background: /static/dist/assets/images/flow_background.jpg
+    branding_favicon: /static/dist/assets/icons/icon.png
+    branding_logo: /static/dist/assets/icons/icon_left_brand.svg
+    branding_title: authentik
+    client_certificates: []
+    default: false
+    default_application: null
+    flow_authentication: !KeyOf 'flow-default-authentication-flow'
+    flow_device_code: null
+    flow_invalidation: !KeyOf 'flow-default-invalidation-flow'
+    flow_lockdown: null
+    flow_recovery: null
+    flow_unenrollment: null
+    flow_user_settings: !KeyOf 'flow-default-user-settings-flow'
+    web_certificate: null
+- model: authentik_brands.brand
+  id: brand-authentik-krokosik-com
+  identifiers:
+    domain: authentik.krokosik.com
+  attrs:
+    attributes: {}
+    branding_custom_css: ''
+    branding_default_flow_background: backgrounds/snow.jpg
+    branding_favicon: /static/dist/assets/icons/icon.png
+    branding_logo: /static/dist/assets/icons/icon_left_brand.svg
+    branding_title: KWS
+    client_certificates: []
+    default: true
+    default_application: null
+    flow_authentication: !KeyOf 'flow-default-authentication-flow'
+    flow_device_code: null
+    flow_invalidation: !KeyOf 'flow-default-invalidation-flow'
+    flow_lockdown: null
+    flow_recovery: null
+    flow_unenrollment: null
+    flow_user_settings: !KeyOf 'flow-default-user-settings-flow'
+    web_certificate: null
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-password-change-0-promptstage-default-password-change-prompt
+  identifiers:
+    target: !KeyOf 'flow-default-password-change'
+    stage: !KeyOf 'promptstage-default-password-change-prompt'
+    order: 0
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-authenticator-static-setup-0-authenticatorstaticstage-default-authenticator-static-setup
+  identifiers:
+    target: !KeyOf 'flow-default-authenticator-static-setup'
+    stage: !KeyOf 'authenticatorstaticstage-default-authenticator-static-setup'
+    order: 0
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-source-enrollment-0-promptstage-default-source-enrollment-prompt
+  identifiers:
+    target: !KeyOf 'flow-default-source-enrollment'
+    stage: !KeyOf 'promptstage-default-source-enrollment-prompt'
+    order: 0
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-enrollment-flow-10-promptstage-default-enrollment-prompt-first
+  identifiers:
+    target: !KeyOf 'flow-default-enrollment-flow'
+    stage: !KeyOf 'promptstage-default-enrollment-prompt-first'
+    order: 10
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-enrollment-flow-11-promptstage-default-enrollment-prompt-second
+  identifiers:
+    target: !KeyOf 'flow-default-enrollment-flow'
+    stage: !KeyOf 'promptstage-default-enrollment-prompt-second'
+    order: 11
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-public-enrollment-10-promptstage-default-enrollment-prompt-first
+  identifiers:
+    target: !KeyOf 'flow-public-enrollment'
+    stage: !KeyOf 'promptstage-default-enrollment-prompt-first'
+    order: 10
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-public-enrollment-20-promptstage-default-enrollment-prompt-second
+  identifiers:
+    target: !KeyOf 'flow-public-enrollment'
+    stage: !KeyOf 'promptstage-default-enrollment-prompt-second'
+    order: 20
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-initial-setup-10-promptstage-stage-default-oobe-password
+  identifiers:
+    target: !KeyOf 'flow-initial-setup'
+    stage: !KeyOf 'promptstage-stage-default-oobe-password'
+    order: 10
+  attrs:
+    evaluate_on_plan: true
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: false
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-authentication-flow-20-passwordstage-default-authentication-password
+  identifiers:
+    target: !KeyOf 'flow-default-authentication-flow'
+    stage: !KeyOf 'passwordstage-default-authentication-password'
+    order: 20
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-user-settings-flow-20-promptstage-default-user-settings
+  identifiers:
+    target: !KeyOf 'flow-default-user-settings-flow'
+    stage: !KeyOf 'promptstage-default-user-settings'
+    order: 20
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-authenticator-totp-setup-0-authenticatortotpstage-default-authenticator-totp-setup
+  identifiers:
+    target: !KeyOf 'flow-default-authenticator-totp-setup'
+    stage: !KeyOf 'authenticatortotpstage-default-authenticator-totp-setup'
+    order: 0
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-authenticator-webauthn-setup-0-authenticatorwebauthnstage-default-authenticator-webauthn-setup
+  identifiers:
+    target: !KeyOf 'flow-default-authenticator-webauthn-setup'
+    stage: !KeyOf 'authenticatorwebauthnstage-default-authenticator-webauthn-setup'
+    order: 0
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_policies.policybinding
+  id: policy-binding-binding-flow-default-authentication-flow-30-authenticatorvalidatestage-default-authentication-mfa-validation-10
+  identifiers:
+    target: !KeyOf 'binding-flow-default-authentication-flow-30-authenticatorvalidatestage-default-authentication-mfa-validation'
+    policy: !KeyOf 'expressionpolicy-default-authentication-flow-authenticator-validate-stage'
+    order: 10
+  attrs:
+    enabled: true
+    failure_result: true
+    group: null
+    negate: false
+    timeout: 30
+    user: null
+- model: authentik_policies.policybinding
+  id: policy-binding-binding-flow-initial-setup-20-userwritestage-default-password-change-write-0
+  identifiers:
+    target: !KeyOf 'binding-flow-initial-setup-20-userwritestage-default-password-change-write'
+    policy: !KeyOf 'expressionpolicy-default-oobe-prefill-user'
+    order: 0
+  attrs:
+    enabled: true
+    failure_result: false
+    group: null
+    negate: false
+    timeout: 30
+    user: null
+- model: authentik_stages_identification.identificationstage
+  id: identificationstage-default-authentication-identification
+  identifiers:
+    name: default-authentication-identification
+  attrs:
+    captcha_stage: null
+    case_insensitive_matching: true
+    enable_remember_me: false
+    enrollment_flow: !KeyOf 'flow-public-enrollment'
+    password_stage: !KeyOf 'passwordstage-default-authentication-password'
+    passwordless_flow: !KeyOf 'flow-webauth-passkey'
+    pretend_user_exists: true
+    recovery_flow: null
+    show_matched_user: true
+    show_source_labels: false
+    user_fields:
+    - email
+    - username
+    webauthn_stage: null
+- model: authentik_flows.flowstagebinding
+  id: binding-flow-default-authentication-flow-10-identificationstage-default-authentication-identification
+  identifiers:
+    target: !KeyOf 'flow-default-authentication-flow'
+    stage: !KeyOf 'identificationstage-default-authentication-identification'
+    order: 10
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_policies.policybinding
+  id: policy-binding-binding-flow-default-source-enrollment-0-promptstage-default-source-enrollment-prompt-0
+  identifiers:
+    target: !KeyOf 'binding-flow-default-source-enrollment-0-promptstage-default-source-enrollment-prompt'
+    policy: !KeyOf 'expressionpolicy-default-source-enrollment-if-username'
+    order: 0
+  attrs:
+    enabled: true
+    failure_result: false
+    group: null
+    negate: false
+    timeout: 30
+    user: null
+- model: authentik_policies.policybinding
+  id: policy-binding-binding-flow-default-authentication-flow-20-passwordstage-default-authentication-password-10
+  identifiers:
+    target: !KeyOf 'binding-flow-default-authentication-flow-20-passwordstage-default-authentication-password'
+    policy: !KeyOf 'expressionpolicy-default-authentication-flow-password-stage'
+    order: 10
+  attrs:
+    enabled: true
+    failure_result: true
+    group: null
+    negate: false
+    timeout: 30
+    user: null
