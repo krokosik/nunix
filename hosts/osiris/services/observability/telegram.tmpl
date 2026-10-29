@@ -4,11 +4,13 @@
 {{ define "nunix.telegram" -}}
 {{- $name := or .CommonLabels.alertname .GroupLabels.alertname "Alerts" -}}
 {{- $host := or .CommonLabels.host .CommonLabels._HOSTNAME "" -}}
-{{- $level := "warning" -}}
+{{- $level := "info" -}}
 {{- range .Alerts.Firing -}}
+  {{- if and (eq .Labels.severity "warning") (ne $level "critical") -}}{{- $level = "warning" -}}{{- end -}}
   {{- if eq .Labels.severity "critical" -}}{{- $level = "critical" -}}{{- end -}}
 {{- end -}}
-{{- $status := "🟠 WARNING" -}}
+{{- $status := "ℹ️ INFO" -}}
+{{- if eq $level "warning" -}}{{- $status = "🟠 WARNING" -}}{{- end -}}
 {{- if eq $level "critical" -}}{{- $status = "🔴 CRITICAL" -}}{{- end -}}
 {{- if eq .Status "resolved" -}}{{- $status = "✅ RESOLVED" -}}{{- end -}}
 {{- $heading := printf "<b>%s</b>" $status -}}

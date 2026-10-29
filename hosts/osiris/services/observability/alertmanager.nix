@@ -19,12 +19,35 @@ let
       group_wait = "30s";
       group_interval = "5m";
       repeat_interval = "4h";
-      routes = singleton {
-        receiver = "email";
-        matchers = singleton ''channel="email"'';
-      };
+      routes = [
+        {
+          receiver = "telegram-signups";
+          matchers = singleton ''alertname="AuthentikUserSignup"'';
+          group_by = [
+            "alertname"
+            "_HOSTNAME"
+            "username"
+          ];
+          group_wait = "0s";
+          group_interval = "30s";
+          repeat_interval = "24h";
+        }
+        {
+          receiver = "email";
+          matchers = singleton ''channel="email"'';
+        }
+      ];
     };
     receivers = [
+      {
+        name = "telegram-signups";
+        telegram_configs = singleton {
+          chat_id = 1;
+          send_resolved = false;
+          parse_mode = "HTML";
+          message = ''{{ template "nunix.telegram" . }}'';
+        };
+      }
       {
         name = "telegram";
         telegram_configs = singleton {
@@ -72,7 +95,7 @@ in
       set -euo pipefail
       chat_id="$(<"$CREDENTIALS_DIRECTORY/telegram_chat_id")"
       [[ "$chat_id" =~ ^-?[0-9]+$ ]] || { echo "Invalid Telegram chat ID" >&2; exit 1; }
-      ${lib.getExe' pkgs.gnused "sed"} "s/\"chat_id\":1/\"chat_id\":$chat_id/" /tmp/alert-manager-substituted.yaml > /tmp/alert-manager-ready.yaml
+      ${lib.getExe' pkgs.gnused "sed"} "s/\"chat_id\":1/\"chat_id\":$chat_id/g" /tmp/alert-manager-substituted.yaml > /tmp/alert-manager-ready.yaml
       ${lib.getExe' pkgs.coreutils "mv"} /tmp/alert-manager-ready.yaml /tmp/alert-manager-substituted.yaml
     '';
     serviceConfig.LoadCredential = [

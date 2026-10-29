@@ -662,6 +662,29 @@ in
           config.systemd.services.authentik-worker.name
         ];
         probes.public.url = "${config.mkTraefikServices.authentik.fullHostname}/-/health/ready/";
+        logAlerts = lib.lists.singleton {
+          alert = "AuthentikUserSignup";
+          interval = "30s";
+          # Overlap evaluations to tolerate ingestion delays. Group by username
+          # so each signup has its own Alertmanager notification identity.
+          expr = /* logsql */ ''
+            _time:5m _SYSTEMD_UNIT:in("authentik.service", "authentik-worker.service")
+            | unpack_json
+            | filter event:="Created Event" action:="user_write" context.created:="true"
+            | rename context.username as username
+            | stats by (_HOSTNAME, username) count() as signups
+            | filter signups:>0
+          '';
+          labels = {
+            severity = "info";
+            service = "authentik";
+          };
+          annotations = {
+            summary = "New Authentik signup: {{ $labels.username }}";
+            dashboard_url = "${config.mkTraefikServices.authentik.fullHostname}/if/admin/#/identity/users";
+            dashboard_label = "Users";
+          };
+        };
       };
 
       mkObservability.repeatedErrorUnits = lib.mkIf config.services.authentik.enable config.mkObservabilityServices.authentik.units;
