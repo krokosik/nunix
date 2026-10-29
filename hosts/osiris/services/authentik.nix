@@ -326,11 +326,14 @@ let
   # rejects anything that resolves outside `blueprints_dir`, so
   # `symlinkJoin` (top-level entries are symlinks back to source store
   # paths) makes every apply fail with "Invalid blueprint path".
-  mergedBlueprints = pkgs.runCommandLocal "authentik-blueprints-merged" { } ''
-    mkdir -p $out
-    cp -rL ${config.services.authentik.authentikComponents.staticWorkdirDeps}/blueprints/. $out/
-    ${lib.concatMapStringsSep "\n" (p: "cp -rL ${p}/. $out/") config.mkAuthentik.extraBlueprints}
-    chmod -R u+w $out
+  mergedBlueprints = pkgs.runCommandLocal "authentik-blueprints-merged" { } /* bash */ ''
+    mkdir --parents "$out"
+    cp --recursive --dereference ${config.services.authentik.authentikComponents.staticWorkdirDeps}/blueprints/. "$out/"
+    chmod --recursive u+w "$out"
+    ${lib.concatMapStringsSep "\n" (p: /* bash */ ''
+      cp --recursive --dereference ${p}/. "$out/"
+      chmod --recursive u+w "$out"
+    '') config.mkAuthentik.extraBlueprints}
   '';
 in
 {
