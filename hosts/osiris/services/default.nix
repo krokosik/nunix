@@ -3,6 +3,7 @@
     ./actualbudget.nix
     ./authentik.nix
     ./authentik-flows.nix
+    ./authentik-google.nix
     ./bentopdf.nix
     ./convertx.nix
     ./crowdsec.nix

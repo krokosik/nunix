@@ -34,6 +34,8 @@
 
   role = "server"; # Set role of the machine (desktop/server)
 
+  mkAuthentik.google.enable = true;
+
   mkObservability = {
     enable = true;
     central = true;

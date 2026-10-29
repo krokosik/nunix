@@ -1,0 +1,34 @@
+version: 1
+metadata:
+  name: Google sign-in
+entries:
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: Default - Authentication flow
+      required: true
+
+  - model: authentik_sources_oauth.oauthsource
+    id: google-source
+    identifiers:
+      slug: google
+    attrs:
+      name: Google
+      provider_type: google
+      enabled: true
+      promoted: true
+      consumer_key: !Env AUTHENTIK_GOOGLE_CLIENT_ID
+      consumer_secret: !Env AUTHENTIK_GOOGLE_CLIENT_SECRET
+      additional_scopes: ""
+      authentication_flow: !Find [authentik_flows.flow, [slug, default-source-authentication]]
+      enrollment_flow: !Find [authentik_flows.flow, [slug, default-source-enrollment]]
+      # Allow new accounts, but require existing users to link Google explicitly
+      # instead of automatically trusting an email match.
+      user_matching_mode: email_deny
+
+  - model: authentik_stages_identification.identificationstage
+    identifiers:
+      name: default-authentication-identification
+    attrs:
+      sources:
+        - !KeyOf google-source
