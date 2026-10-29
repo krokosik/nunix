@@ -6,6 +6,7 @@
     ./convertx.nix
     ./crowdsec.nix
     ./garage.nix
+    ./homepage.nix
     ./immich.nix
     ./ip2location.nix
     ./livesync.nix

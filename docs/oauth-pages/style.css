@@ -1,0 +1,7 @@
+:root { color-scheme: light dark; font-family: system-ui, sans-serif; line-height: 1.65; }
+body { margin: 0; }
+main { max-width: 44rem; margin: 0 auto; padding: 3rem 1.25rem; }
+h1, h2 { line-height: 1.25; }
+h2 { margin-top: 2rem; font-size: 1.2rem; }
+a { color: light-dark(#1859a9, #9ecaff); text-underline-offset: .2em; }
+nav { margin-top: 2rem; }
