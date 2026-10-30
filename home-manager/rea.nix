@@ -23,6 +23,7 @@ in
       postBuild = /* bash */ ''
         for program in rea rea-agents; do
           wrapProgram "$out/bin/$program" \
+            --set-default REA_TSHARK_PRLIMIT_COMMAND ${lib.getExe' pkgs.util-linux "prlimit"} \
             --prefix PATH : ${
               lib.makeBinPath [
                 pkgs.procps

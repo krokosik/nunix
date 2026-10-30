@@ -61,6 +61,8 @@ in
     script = /* bash */ ''
       set -euo pipefail
       export XDG_CACHE_HOME="$CACHE_DIRECTORY"
+      export XDG_STATE_HOME="$STATE_DIRECTORY"
+      export XDG_DATA_HOME="$STATE_DIRECTORY/data"
       checkout="$STATE_DIRECTORY/checkout"
       mkdir --parents "$STATE_DIRECTORY/results"
 
