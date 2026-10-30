@@ -10,6 +10,10 @@ configs live in `hosts/<name>/`; shared modules under `modules/common`,
 The user is new to NixOS but an experienced sysadmin (Proxmox VMs, Docker).
 - Always back design choices with a brief rationale; propose alternatives.
 - Check the current hostname with the shell command
+- `lindbladian` is the designated build host for all flake hosts, including
+  `anubis` via aarch64 emulation. Run full builds there; builds do not authorize
+  deployment. Its `nunix-build-all.timer` fetches `main` into a separate checkout
+  and attempts every host daily at 04:00 local time, retaining successful outputs.
 - Ask for confirmation before non-trivial system config changes.
 - Security is a primary concern; prefer least-privilege defaults
   (firewall on, role-gated services, immutable users).
