@@ -70,6 +70,8 @@ in
       pkg:
       elem (getName pkg) [
         "beeper"
+        # RTK 1.x includes BSL-licensed components.
+        "rtk"
         "parsec-bin"
         "Wolfram_15.0.1.sh"
         "mathematica"

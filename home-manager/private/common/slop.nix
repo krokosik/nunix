@@ -66,16 +66,17 @@ in
 
   programs.opencode = {
     enable = true;
-    package = inputs.opencode-flake.packages.${pkgs.stdenv.hostPlatform.system}.opencode;
-    # (inputs.opencode-flake.packages.${pkgs.stdenv.hostPlatform.system}.opencode2-avx).overrideAttrs
-    #   (old: {
-    #     postInstall = (old.postInstall or "") + ''
-    #       ln -s opencode2 $out/bin/opencode
-    #     '';
-    #     meta = old.meta // {
-    #       mainProgram = "opencode";
-    #     };
-    #   });
+    # Home Manager and shell aliases expect the unversioned executable.
+    package =
+      (inputs.opencode-flake.packages.${pkgs.stdenv.hostPlatform.system}.opencode2-avx).overrideAttrs
+        (old: {
+          postInstall = (old.postInstall or "") + /* bash */ ''
+            ln --symbolic opencode2 "$out/bin/opencode"
+          '';
+          meta = old.meta // {
+            mainProgram = "opencode";
+          };
+        });
     extraPackages = with pkgs; [
       uv
       nixd
@@ -87,6 +88,14 @@ in
     enableMcpIntegration = config.programs.mcp.enable;
     settings = {
       autoupdate = false;
+
+      # Preserve V1's prompt before accessing paths outside the project.
+      permissions = lib.lists.singleton {
+        action = "external_directory";
+        resource = "*";
+        effect = "ask";
+      };
+
       small_model = "openai/gpt-6-luna";
       enabled_providers = [
         # "opencode-go"

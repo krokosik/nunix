@@ -7,27 +7,21 @@
 let
   inherit (lib.lists) singleton;
   inherit (config.home-manager.users.${config.username}.home) sessionVariables;
-  version = "15.0.1";
-  mathematica = pkgs.unstable.mathematica;
+  mathematica = pkgs.unstable.mathematica.override {
+    source = pkgs.requireFile {
+      name = "Wolfram_${pkgs.unstable.mathematica.version}.sh";
+      sha256 = "sha256:0nq3mb0s797xdf4yi8fca3yybw1p1cxp9pqh9zjfzg627h60588l";
+      message = /* bash */ ''
+        Add the Mathematica installer to the Nix store:
+        nix store add --mode nar --name Wolfram_${pkgs.unstable.mathematica.version}.sh ~/downloads/Wolfram_${pkgs.unstable.mathematica.version}.sh
+      '';
+      hashMode = "recursive";
+    };
+  };
 in
 {
-  nixpkgs.overlays = [
-    (_self: super: {
-      mathematica = super.mathematica.override {
-        source = pkgs.requireFile {
-          name = "Wolfram_${version}.sh";
-          sha256 = "sha256:0nq3mb0s797xdf4yi8fca3yybw1p1cxp9pqh9zjfzg627h60588l";
-          message = ''
-            Your override for Mathematica includes a different src for the installer,
-            and it is missing. To add the installer to store, run:
-            nix-store --query --hash \
-            $(nix store add-path Wolfram_${version}.sh --name 'Wolfram_${version}.sh')
-          '';
-          hashMode = "recursive";
-        };
-      };
-    })
-  ];
+  # Keep the installer reachable from system generations after the build finishes.
+  system.extraDependencies = singleton mathematica.src;
 
   home-manager.users.${config.username} = {
     home.packages = singleton mathematica;
