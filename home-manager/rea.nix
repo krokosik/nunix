@@ -15,15 +15,20 @@ in
 
   programs.rea = {
     enable = true;
-    # REA needs procps for child-process ownership checks, including under MCP.
+    # Provide child-process ownership checks and packet analysis, including under MCP.
     package = pkgs.symlinkJoin {
-      name = "rea-with-procps";
+      name = "rea-with-tools";
       paths = lib.lists.singleton inputs.rea-flake.packages.${pkgs.stdenv.hostPlatform.system}.rea;
       nativeBuildInputs = lib.lists.singleton pkgs.makeWrapper;
       postBuild = /* bash */ ''
         for program in rea rea-agents; do
           wrapProgram "$out/bin/$program" \
-            --prefix PATH : ${lib.makeBinPath (lib.lists.singleton pkgs.procps)}
+            --prefix PATH : ${
+              lib.makeBinPath [
+                pkgs.procps
+                pkgs.tshark
+              ]
+            }
         done
       '';
       meta.mainProgram = "rea";
@@ -32,7 +37,7 @@ in
 
   programs.mcp.servers.rea = {
     command = lib.getExe rea;
-    args = lib.lists.singleton "mcp";
+    args = lib.lists.singleton "--mcp";
     enabled = false;
   };
 
