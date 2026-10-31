@@ -45,6 +45,9 @@ in
     settings = {
       approvals_reviewer = "auto_review";
 
+      hooks.state."${codexConfigDir}/hooks.json:pre_tool_use:0:0".trusted_hash =
+        "sha256:be6c6fcb2978ea348dd05101efed0afcf00efcbfb5d7e78949108142c875a77d";
+
       tui = {
         status_line = [
           "model-with-reasoning"
