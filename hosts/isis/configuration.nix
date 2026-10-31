@@ -25,6 +25,9 @@
 
   hardware.microsoft-surface.kernelVersion = "stable";
 
+  # Suspend on a short press, like a tablet lock button.
+  services.logind.settings.Login.HandlePowerKey = "suspend";
+
   # Keep kernel builds within the tablet's memory budget.
   nix.settings = {
     max-jobs = 1;
