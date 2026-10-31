@@ -19,6 +19,16 @@ let
   mkExecBind =
     keys: command: description:
     mkBind keys "hl.dsp.exec_cmd(${luaValue command})" { inherit description; };
+  mkMoveWorkspaceBind =
+    key: direction: description:
+    mkBind "SUPER + SHIFT + ALT + ${key}" /* lua */ ''
+      function()
+        hl.dispatch(hl.dsp.workspace.move({
+          workspace = hl.get_active_workspace().id,
+          monitor = ${luaValue direction},
+        }))
+      end
+    '' { inherit description; };
   workspaceBindings = genList (
     index:
     let
@@ -62,18 +72,10 @@ in
     (mkBind "SUPER + CTRL + TAB" ''hl.dsp.focus({ workspace = "previous" })'' {
       description = "Former workspace";
     })
-    (mkExecBind "SUPER + SHIFT + ALT + LEFT" "hyprctl dispatch movecurrentworkspacetomonitor l"
-      "Move workspace to left monitor"
-    )
-    (mkExecBind "SUPER + SHIFT + ALT + RIGHT" "hyprctl dispatch movecurrentworkspacetomonitor r"
-      "Move workspace to right monitor"
-    )
-    (mkExecBind "SUPER + SHIFT + ALT + UP" "hyprctl dispatch movecurrentworkspacetomonitor u"
-      "Move workspace to up monitor"
-    )
-    (mkExecBind "SUPER + SHIFT + ALT + DOWN" "hyprctl dispatch movecurrentworkspacetomonitor d"
-      "Move workspace to down monitor"
-    )
+    (mkMoveWorkspaceBind "LEFT" "l" "Move workspace to left monitor")
+    (mkMoveWorkspaceBind "RIGHT" "r" "Move workspace to right monitor")
+    (mkMoveWorkspaceBind "UP" "u" "Move workspace to up monitor")
+    (mkMoveWorkspaceBind "DOWN" "d" "Move workspace to down monitor")
     (mkBind "SUPER + SHIFT + code:20" "hl.dsp.window.resize({ x = 0, y = -100, relative = true })" {
       description = "Shrink window up";
     })
