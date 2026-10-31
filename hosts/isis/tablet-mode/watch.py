@@ -70,11 +70,18 @@ class Session:
             self.initialized = True
         desired = "scrolling" if tablet else self.normal_layout
         if current != desired:
-            response = self.command(
-                "hyprctl", "eval", f"hl.config({{general = {{layout = {json.dumps(desired)}}}}})"
-            )
-            if response != "ok":
-                raise RuntimeError(f"Hyprland layout: {response}")
+            clients = json.loads(self.command("hyprctl", "-j", "clients"))
+            # Layout changes can unset fullscreen. Reconciliation retries with
+            # the latest tablet state once fullscreen/maximized windows exit.
+            if not any(
+                client["fullscreen"] or client.get("fullscreenClient", 0)
+                for client in clients
+            ):
+                response = self.command(
+                    "hyprctl", "eval", f"hl.config({{general = {{layout = {json.dumps(desired)}}}}})"
+                )
+                if response != "ok":
+                    raise RuntimeError(f"Hyprland layout: {response}")
 
         value = "true" if tablet else "false"
         response = self.command(

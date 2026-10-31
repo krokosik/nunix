@@ -12,6 +12,13 @@ the synchronized `hypr/dms` directory. The normal layout is captured from the
 running configuration; the declarative layout (or `dwindle`) is the fallback if
 the watcher starts while a previous scrolling override is still active.
 
+Layout changes wait while any window is fullscreen or maximized, including on
+other workspaces, so attaching or detaching the Type Cover does not interrupt
+fullscreen playback through a layout switch. Other tablet overrides and services
+still follow the switch immediately. The two-second reconciliation applies the
+layout for the latest switch state once no fullscreen/maximized windows remain;
+intermediate mode changes are not queued.
+
 ## DMS RUNTIME OVERRIDE
 
 `patch-dms.py` strictly patches the pinned DMS QML at package-build time. The
