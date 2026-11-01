@@ -56,6 +56,17 @@
   networking.hostId = "aec20762"; # head -c4 /dev/urandom | od -A none -t x4
   networking.useNetworkd = true;
 
+  # CrowdSec's hub setup and the VPN endpoint check need a usable uplink.
+  # Ignore Wi-Fi and virtual interfaces when determining network readiness.
+  systemd.network.wait-online = {
+    enable = lib.mkForce true;
+    extraArgs = [
+      "--interface=enp2s0:routable"
+      "--ipv4"
+      "--dns"
+    ];
+  };
+
   mkIngressWireguard = {
     enable = true;
     role = "origin";
