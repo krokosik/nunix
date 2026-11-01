@@ -1,10 +1,13 @@
 {
+  config,
   inputs,
+  lib,
   osConfig,
   pkgs,
   ...
 }:
 let
+  inherit (lib.lists) singleton;
   voxtypePackages = inputs.voxtype.packages.${pkgs.stdenv.hostPlatform.system};
 in
 {
@@ -53,4 +56,7 @@ in
     };
   };
 
+  # Restart the daemon when its generated configuration changes.
+  config.systemd.user.services.voxtype.Unit.X-Restart-Triggers =
+    singleton "${config.xdg.configFile."voxtype/config.toml".source}";
 }

@@ -9,8 +9,10 @@ export PATH="$workspace:$PATH"
 cat > "$workspace/curl" <<'MOCK'
 #!/usr/bin/env bash
 case "$TEST_CASE" in
-  success) printf '{"text":"Zażółć gęślą jaźń"}' ;;
-  empty) printf '{"text":""}' ;;
+  success) printf '%s' '{"segments":[{"text":"Zażółć gęślą jaźń"}]}' ;;
+  split) printf '%s' '{"text":"Zażółć gę\nślą\n jaźń\n","segments":[{"text":"Zażółć gę"},{"text":"ślą"},{"text":" jaźń"}]}' ;;
+  empty) printf '%s' '{"segments":[]}' ;;
+  bad_segment) printf '%s' '{"segments":[{"text":42}]}' ;;
   malformed) printf '{"error":"not ready"}' ;;
   invalid) printf 'not json' ;;
   offline) exit 7 ;;
@@ -23,17 +25,17 @@ printf '%s\n' "$@" > "$TEST_WORKSPACE/local-args"
 exit "${TEST_LOCAL_STATUS:-0}"
 MOCK
 chmod +x "$workspace/curl" "$workspace/local-cli"
-for TEST_CASE in success empty malformed invalid offline timeout; do
+for TEST_CASE in success split empty bad_segment malformed invalid offline timeout; do
   export TEST_CASE
   rm --force "$workspace/local-args" "$workspace/result.json"
   bash hosts/isis/voxtype-fallback.sh \
     --model '/model with spaces.bin' --file "$workspace/audio file.wav" \
     --output-json --output-file "$workspace/result" --threads 4 --no-prints
   case "$TEST_CASE" in
-    success|empty)
+    success|split|empty)
       test ! -e "$workspace/local-args"
       jq --exit-status '.transcription[0].text | type == "string"' "$workspace/result.json" > /dev/null
-      if [[ "$TEST_CASE" == success ]]; then
+      if [[ "$TEST_CASE" != empty ]]; then
         jq --exit-status '.transcription[0].text == "Zażółć gęślą jaźń"' "$workspace/result.json" > /dev/null
       else
         jq --exit-status '.transcription[0].text == ""' "$workspace/result.json" > /dev/null

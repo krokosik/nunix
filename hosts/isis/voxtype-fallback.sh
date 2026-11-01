@@ -19,13 +19,17 @@ if [[ -z "$audio_file" || -z "$output_file" ]]; then
 fi
 
 # Only publish valid JSON. An empty transcription is a successful result.
+# Join raw segments without separators: boundaries can fall inside words.
+# The server's top-level text adds a newline after every segment.
 if response=$(curl --silent --show-error --fail --noproxy '*' \
   --connect-timeout 2 --max-time 30 \
   --form "file=@$audio_file" \
-  --form 'response_format=json' --form 'language=auto' \
+  --form 'response_format=verbose_json' --form 'language=auto' \
   "$VOXTYPE_REMOTE_ENDPOINT/inference") && \
   result=$(jq --compact-output --exit-status \
-    'if (.text | type) == "string" then {transcription: [{text: .text}]} else error("Invalid transcription") end' \
+    'if (.segments | type) == "array" and all(.segments[]; (.text | type) == "string")
+     then {transcription: [{text: ([.segments[].text] | join(""))}]}
+     else error("Invalid transcription") end' \
     <<< "$response"); then
   printf '%s\n' "$result" > "$output_file.json"
 else

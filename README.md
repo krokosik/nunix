@@ -101,8 +101,10 @@ Tailscale encrypts and authenticates the connection. Update
 If the remote connection fails (2-second connection timeout), the response is
 invalid, or the request exceeds 30 seconds, the same recording is transcribed
 locally with Vulkan and `medium`. The next recording tries Lindbladian again.
-Both paths detect the language automatically for English and Polish. The local
-CLI loads the model for each fallback recording, so offline processing remains
+Both paths detect the language automatically for English and Polish. The
+remote response uses structured segments concatenated without added separators,
+preserving words split across segment boundaries and their original spaces.
+The local CLI loads the model for each fallback recording, so offline processing remains
 slow. Hotkeys, OSD, and text insertion still belong to VoxType.
 
 Deploy Lindbladian first, then Isis. To verify fallback, dictate once with
