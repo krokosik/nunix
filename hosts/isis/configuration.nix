@@ -37,6 +37,7 @@
   home-manager.users.${config.username} = {
     imports = [
       ../../home-manager/private/desktop
+      ./voxtype-remote.nix
     ];
   };
 

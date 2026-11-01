@@ -89,6 +89,27 @@ modules use `config.tailscaleAddresses.<machine>.ipv4` or `.ipv6`; Home Manager
 modules use `osConfig.tailscaleAddresses.<machine>.ipv4` or `.ipv6`. This shared
 inventory also supplies ingress rules and Grafana device labels.
 
+### Surface dictation
+
+Isis uses VoxType's CLI backend with a per-recording remote-first wrapper.
+Lindbladian keeps Whisper `large-v3-turbo` loaded on its GPU and listens only
+on its Tailscale IPv4 address, port 18080. The service permits only Isis's
+Tailscale IPv4 address through systemd's IP filter. No API secret is required;
+Tailscale encrypts and authenticates the connection. Update
+`modules/common/tailscale-addresses.nix` if either machine's address changes.
+
+If the remote connection fails (2-second connection timeout), the response is
+invalid, or the request exceeds 30 seconds, the same recording is transcribed
+locally with Vulkan and `medium`. The next recording tries Lindbladian again.
+Both paths detect the language automatically for English and Polish. The local
+CLI loads the model for each fallback recording, so offline processing remains
+slow. Hotkeys, OSD, and text insertion still belong to VoxType.
+
+Deploy Lindbladian first, then Isis. To verify fallback, dictate once with
+Lindbladian's `whisper-server.service` running, once with it stopped, and once
+after restarting it. Inspect the server journal and Isis's user VoxType journal
+to confirm the chosen path. Wrapper tests run with `bash tests/voxtype-fallback.sh`.
+
 ### PostgreSQL major-version upgrades
 
 `services.postgresql.package` is pinned to a specific major

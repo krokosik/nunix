@@ -7,6 +7,7 @@
 {
   imports = [
     ./build-host.nix
+    ./whisper-server.nix
     ./disko-config.nix
     ./windows.nix
     inputs.nixos-hardware.nixosModules.common-cpu-intel-cpu-only
