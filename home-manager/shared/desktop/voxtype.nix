@@ -5,7 +5,6 @@
   ...
 }:
 let
-  useVulkan = osConfig.hardware.nvidia.enabled;
   voxtypePackages = inputs.voxtype.packages.${pkgs.stdenv.hostPlatform.system};
 in
 {
@@ -14,8 +13,9 @@ in
   config.programs.voxtype = {
     enable = true;
     engine = "whisper";
-    package = if useVulkan then voxtypePackages.vulkan else voxtypePackages.default;
-    model.name = if useVulkan then "large-v3-turbo" else "medium";
+    package =
+      if osConfig.hardware.graphics.enable then voxtypePackages.vulkan else voxtypePackages.default;
+    model.name = if osConfig.hardware.nvidia.enabled then "large-v3-turbo" else "medium";
     service.enable = true;
 
     settings = {
