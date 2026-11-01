@@ -12,6 +12,7 @@
     ./tablet-plugins.nix
     inputs.nixos-hardware.nixosModules.microsoft-surface-pro-intel
     ../../modules/boot-limine.nix
+    ../../modules/btop-intel-gpu.nix
     ../../modules/desktop
     ../../modules/hibernation.nix
     ../../modules/media-share.nix

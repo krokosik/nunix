@@ -5,7 +5,6 @@
 {
   # General systemwide packages
   environment.systemPackages = with pkgs; [
-    btop
     curl
     dust
     direnv

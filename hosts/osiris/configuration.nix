@@ -12,6 +12,7 @@
     ../../modules/server
     ../../modules/server/ingress-wireguard.nix
     ../../modules/boot.nix
+    ../../modules/btop-intel-gpu.nix
     ../../modules/disable-deep-sleep.nix
     ../../modules/oci-containers.nix
     ../../modules/intel-gpu.nix
