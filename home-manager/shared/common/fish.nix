@@ -229,24 +229,20 @@ in
 
   programs.zoxide = {
     enable = true;
-    enableFishIntegration = true;
   };
 
   programs.fzf = {
     enable = true;
-    enableFishIntegration = true;
   };
 
   programs.eza = {
     enable = true;
     icons = "auto";
     git = true;
-    enableFishIntegration = true;
   };
 
   programs.lazygit = {
     enable = true;
-    enableFishIntegration = true;
   };
 
   programs.fd.enable = true;

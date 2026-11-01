@@ -7,31 +7,18 @@
   environment.systemPackages = with pkgs; [
     curl
     dust
-    direnv
     exfatprogs
-    eza
-    fastfetch
-    fd
-    fzf
-    gitFull
-    git-credential-oauth
-    git-lfs
     ghostty.terminfo
     hwinfo
     jq
-    lazydocker
-    lazygit
     libsecret
     nix-tree
     nixfmt
     nixd
     pciutils
     python3
-    ripgrep
     rsync
-    starship
     wget
     usbutils
-    zoxide
   ];
 }

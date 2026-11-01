@@ -46,6 +46,8 @@ in
   # Enable git
   programs.git = {
     enable = true;
+    package = pkgs.gitFull;
+
     config = {
       safe."directory" = flakePath;
     };

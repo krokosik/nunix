@@ -40,10 +40,6 @@
   };
 
   environment = {
-    variables = {
-      DIRENV_LOG_FORMAT = "";
-    };
-
     systemPackages = with pkgs; [
       ruff # replace with uv managed in 26.11
       uv

@@ -2,7 +2,6 @@
 {
   programs.ghostty = {
     enable = true;
-    enableFishIntegration = true;
     settings = {
       window-padding-x = 14;
       window-padding-y = 14;

@@ -17,6 +17,8 @@ in
 {
   home.packages = [ rtk ];
 
+  programs.ripgrep.enable = true;
+
   # Codex records project trust in config.toml, so install a writable copy.
   home.file.${codexConfigTarget}.enable = lib.mkForce false;
   home.file.${codexConfigStateTarget} = {

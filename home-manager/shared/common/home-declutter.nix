@@ -94,9 +94,6 @@ in
     REDISCLI_HISTFILE = "${dataHome}/redis/rediscli_history";
     REDISCLI_RCFILE = "${configHome}/redis/redisclirc";
 
-    # ripgrep
-    RIPGREP_CONFIG_PATH = "${configHome}/ripgrep/config";
-
     # Ruff
     RUFF_CACHE_DIR = "${cacheHome}/ruff";
 
