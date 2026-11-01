@@ -87,7 +87,7 @@ class Session:
         response = self.command(
             "hyprctl", "eval",
             "if surfaceTabletGestures then "
-            f"surfaceTabletGestures.set_enabled({value}) end",
+            "surfaceTabletGestures.ensure_registered() end",
         )
         if response != "ok":
             raise RuntimeError(f"Hyprgrass gesture configuration: {response}")

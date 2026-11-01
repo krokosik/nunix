@@ -58,6 +58,7 @@ in
         normalLayout = config.wayland.windowManager.hyprland.settings.config.general.layout or "dwindle";
         tabletServices = [
           "surface-tablet-osk.service"
+          "surface-tablet-keyboard-space.service"
           "surface-tablet-rotation.service"
         ];
       };
@@ -89,6 +90,28 @@ in
           UMask = "0077";
         };
         Install.WantedBy = singleton config.wayland.systemd.target;
+      };
+
+      # Deliberately not WantedBy: the switch watcher owns activation.
+      systemd.user.services.surface-tablet-keyboard-space = {
+        Unit = {
+          Description = "Reserve keyboard space for fullscreen Surface applications";
+          PartOf = [
+            config.wayland.systemd.target
+            "surface-tablet-mode.service"
+          ];
+          After = singleton "surface-tablet-osk.service";
+          ConditionPathExists = "%t/surface-tablet/tablet";
+        };
+        Service = {
+          ExecStart = "${getExe pkgs.python3} ${./tablet-mode/keyboard-space.py} ${getExe' pkgs.hyprland "hyprctl"}";
+          Restart = "on-failure";
+          RestartSec = 2;
+          NoNewPrivileges = true;
+          ProtectSystem = "strict";
+          ProtectHome = "read-only";
+          UMask = "0077";
+        };
       };
 
       # Deliberately not WantedBy: the switch watcher owns activation.
