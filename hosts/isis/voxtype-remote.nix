@@ -20,6 +20,10 @@ let
   };
 in
 {
+  # Whisper server segment boundaries should become spaces before typing.
+  programs.voxtype.settings.output.post_process.command =
+    "${getExe' pkgs.coreutils "tr"} --squeeze-repeats '[:space:]' ' '";
+
   programs.voxtype.settings.whisper = {
     mode = "cli";
     whisper_cli_path = getExe fallback;
