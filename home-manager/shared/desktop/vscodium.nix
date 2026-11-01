@@ -9,7 +9,7 @@ let
   vscode-extensions-universal = pkgs.nix-vscode-extensions.vscode-marketplace-release-universal;
 
   # trick to not clutter $HOME
-  vscodium = pkgs.vscodium.overrideAttrs (oldAttrs: {
+  vscodium = pkgs.unstable.vscodium.overrideAttrs (oldAttrs: {
     postPatch = (oldAttrs.postPatch or "") + /* bash */ ''
       substituteInPlace resources/app/product.json \
         --replace-fail '"dataFolderName": ".vscode-oss"' \
@@ -18,7 +18,7 @@ let
       # Each bundle embeds its own product configuration, including GUI helpers.
       for bundle in \
         out/cli.js \
-        out/main.js \
+        out/mainImpl.js \
         out/vs/code/node/cliProcessMain.js \
         out/vs/code/electron-utility/sharedProcess/sharedProcessMain.js \
         out/vs/platform/agentHost/node/agentHostMain.js \
