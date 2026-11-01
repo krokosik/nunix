@@ -21,7 +21,7 @@ Normal NixOS and Docker logs enter persistent journald; systemd-journal-upload
 posts the journal to local vlagent, whose bounded on-disk queue forwards it to
 VictoriaLogs. On `anubis`, both agents send over HTTPS to `osiris`'s Traefik
 entry point. The two ingress routers accept only `POST /api/v1/write` and
-`POST /insert/native`, respectively, from `config.vpsPrivateIp`, with separate
+`POST /insert/native`, respectively, from `config.tailscaleAddresses.anubis.ipv4`, with separate
 Basic Auth credentials. Backend storage APIs listen on loopback. Traefik's
 ingest-auth setup is optional for Traefik startup: failure to render the
 credential files must not take down unrelated web services.

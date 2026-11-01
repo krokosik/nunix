@@ -121,7 +121,7 @@ in
                 "100.64.0.0/10"
               ]; # Local & Tailscale
               proxyProtocol.trustedIPs = [
-                config.vpsPrivateIp
+                config.tailscaleAddresses.anubis.ipv4
                 config.mkIngressWireguard.edgeIPv4
               ];
             };
@@ -133,7 +133,7 @@ in
                 "100.64.0.0/10"
               ];
               proxyProtocol.trustedIPs = [
-                config.vpsPrivateIp
+                config.tailscaleAddresses.anubis.ipv4
                 config.mkIngressWireguard.edgeIPv4
               ];
               http.tls = {

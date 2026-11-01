@@ -21,6 +21,7 @@
     ./smartmon.nix
     ./ssh.nix
     ./sops.nix
+    ./tailscale-addresses.nix
     ./timesyncd.nix
     ./tz_locale.nix
     ./users.nix

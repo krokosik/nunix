@@ -445,7 +445,7 @@ in
     };
 
     networking.hosts = lib.mkIf (!cfg.central) {
-      ${config.homeserverPrivateIp} = [
+      ${config.tailscaleAddresses.osiris.ipv4} = [
         "metrics-ingest.${config.privateDomain}"
         "logs-ingest.${config.privateDomain}"
       ];

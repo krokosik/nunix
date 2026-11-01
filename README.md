@@ -82,6 +82,13 @@ offline access fails, connect the VPN and try again. Boot does not depend on
 the shares being reachable. Disconnecting the VPN while files are in use can
 still interrupt or stall I/O; close files before disconnecting.
 
+### Tailscale addresses
+
+Machine addresses live in `modules/common/tailscale-addresses.nix`. NixOS
+modules use `config.tailscaleAddresses.<machine>.ipv4` or `.ipv6`; Home Manager
+modules use `osConfig.tailscaleAddresses.<machine>.ipv4` or `.ipv6`. This shared
+inventory also supplies ingress rules and Grafana device labels.
+
 ### PostgreSQL major-version upgrades
 
 `services.postgresql.package` is pinned to a specific major

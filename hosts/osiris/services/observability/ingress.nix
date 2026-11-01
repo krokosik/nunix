@@ -94,7 +94,7 @@ in
       ];
     });
     middlewares = {
-      observability-ingest-source.ipAllowList.sourceRange = [ "${config.vpsPrivateIp}/32" ];
+      observability-ingest-source.ipAllowList.sourceRange = lib.lists.singleton "${config.tailscaleAddresses.anubis.ipv4}/32";
     }
     // lib.genAttrs names (name: {
       basicAuth.usersFile = "/run/observability-ingest-auth/${name}";

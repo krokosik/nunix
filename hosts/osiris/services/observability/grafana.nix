@@ -6,11 +6,14 @@
 }:
 let
   inherit (lib.meta) getExe getExe';
+  tailscaleAddresses = pkgs.writeText "tailscale-addresses.json" (
+    lib.generators.toJSON { } config.tailscaleAddresses
+  );
   dashboards = pkgs.runCommand "observability-dashboards" { } /* bash */ ''
     ${getExe' pkgs.coreutils "mkdir"} "$out"
     for source in ${./dashboards}/*.json; do
       name="$(${getExe' pkgs.coreutils "basename"} "$source")"
-      ${getExe pkgs.jq} --arg name "$name" --from-file ${./prepare-dashboards.jq} "$source" > "$out/$name"
+      ${getExe pkgs.jq} --arg name "$name" --slurpfile tailscaleAddresses ${tailscaleAddresses} --from-file ${./prepare-dashboards.jq} "$source" > "$out/$name"
     done
     ${getExe pkgs.jq} --exit-status --slurp '
       (map(.uid) | length == (unique | length)) and

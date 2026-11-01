@@ -87,16 +87,11 @@ def metric_panel($expr; $title):
   datasource_display_names |
   .datasource = vm | .title = $title |
   .targets = [{refId:"A",datasource:vm,expr:$expr,legendFormat:$title}];
-# Device addresses are a declarative snapshot of `tailscale status --json`.
+# Device addresses come from the shared NixOS Tailscale address inventory.
 # Match complete leading IPs in the datasource legend, retaining the raw IP in
 # the display name and leaving query grouping and non-tailnet clients intact.
 def tailscale_client_overrides:
-  [{anubis:["100.72.36.37","fd7a:115c:a1e0::2c3a:2426"],
-    horus:["100.122.167.68","fd7a:115c:a1e0::353a:a745"],
-    isis:["100.91.232.49","fd7a:115c:a1e0::fd2c:e832"],
-    lindbladian:["100.72.103.81","fd7a:115c:a1e0::792c:6752"],
-    osiris:["100.100.250.77","fd7a:115c:a1e0::ec3a:fa4d"],
-    "xq-dq72":["100.65.12.86","fd7a:115c:a1e0::5e3a:c56"]} |
+  [$tailscaleAddresses[0] |
     to_entries[] | .key as $device | .value[] as $ip |
     {matcher:{id:"byRegexp",options:("^"+($ip|gsub("\\.";"\\."))+"(?:\\s|$)")},
      properties:[{id:"displayName",value:($device+" ("+$ip+")")}]}];
@@ -106,7 +101,7 @@ def ip_log_panel($clientOverrides):
     " | stats by (client_ip, city, country, asn_org) count() as requests" |
   .targets[0].legendFormat = "{{client_ip}} {{city}} {{country}} {{asn_org}}" |
   .fieldConfig.overrides += $clientOverrides |
-  .description = "Access-log counts per interval, grouped by client IP with available city, country and ASN organisation. Known Tailscale clients are labelled by device name and IP using the address snapshot in prepare-dashboards.jq. Private or unmapped clients have no GeoIP details.";
+  .description = "Access-log counts per interval, grouped by client IP with available city, country and ASN organisation. Known Tailscale clients are labelled by device name and IP using the shared NixOS Tailscale address inventory. Private or unmapped clients have no GeoIP details.";
 def traefik:
   . as $export |
   tailscale_client_overrides as $clientOverrides |
