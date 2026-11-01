@@ -4,6 +4,7 @@
 #   * forwardAuthApps   — apps gated by the embedded outpost via Traefik
 #                         forward_auth (chain-authentik middleware)
 #   * oidcApps          — apps that speak OIDC against authentik directly
+#   * launcherApps      — dashboard links without authentication providers
 #
 # Forward-auth specifics: the embedded outpost has a single global
 # `providers` list. To avoid two blueprints clobbering it, this module
@@ -39,7 +40,7 @@ let
   fwAppNames = lib.attrNames fwApps;
   basicAuthApps = lib.filterAttrs (_: app: app.basicAuth != null) fwApps;
 
-  inherit (config.mkAuthentik) oidcApps;
+  inherit (config.mkAuthentik) oidcApps launcherApps;
   credentialType = import ../../../lib/types/credential.nix;
 
   # Classification taxonomy — options below constrain `accessGroup` and
@@ -231,6 +232,35 @@ let
   # Quote user-provided YAML scalars, keeping URLs and names safe from
   # YAML punctuation and preventing a value from becoming a YAML tag.
   yamlString = value: lib.strings.toJSON value;
+
+  launcherBlueprintDir =
+    name: app:
+    pkgs.writeTextDir "launcher-${name}.yaml" /* yaml */ ''
+      version: 1
+      metadata:
+        name: launcher-${name}
+      entries:
+        - model: authentik_core.application
+          id: app-${name}
+          identifiers:
+            slug: ${yamlString app.slug}
+          attrs:
+            name: ${yamlString app.displayName}
+            provider: null
+            group: ${yamlString app.displayGroup}
+            open_in_new_tab: true
+            meta_launch_url: ${yamlString app.launchUrl}
+            meta_icon: ${yamlString app.iconUrl}
+            policy_engine_mode: all
+
+        - model: authentik_policies.policybinding
+          identifiers:
+            target: !KeyOf app-${name}
+            order: 0
+          attrs:
+            group: !Find [authentik_core.group, [name, ${yamlString app.accessGroup}]]
+            enabled: true
+    '';
 
   oidcEnvName =
     name: kind: "AUTHENTIK_OIDC_${lib.toUpper (lib.replaceStrings [ "-" ] [ "_" ] name)}_${kind}";
@@ -459,6 +489,62 @@ in
       );
     };
 
+    launcherApps = lib.mkOption {
+      default = { };
+      description = ''
+        Dashboard links without an authentication provider. Each entry generates
+        an application and group policy binding. The binding controls tile
+        visibility only; the destination service owns its authentication.
+      '';
+      type = lib.types.attrsOf (
+        let
+          outerConfig = config;
+        in
+        lib.types.submodule (
+          { name, config, ... }:
+          {
+            options = {
+              host = lib.mkOption {
+                type = lib.types.str;
+                default = "${name}.${outerConfig.publicDomain}";
+                description = "External hostname of the application.";
+              };
+              launchUrl = lib.mkOption {
+                type = lib.types.str;
+                default = "https://${config.host}";
+                description = "URL opened from the Authentik application tile.";
+              };
+              iconUrl = lib.mkOption {
+                type = lib.types.str;
+                default = "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/${name}.png";
+                description = "Icon URL for the Authentik application tile.";
+              };
+              slug = lib.mkOption {
+                type = lib.types.str;
+                default = name;
+                description = "Authentik application slug.";
+              };
+              displayName = lib.mkOption {
+                type = lib.types.str;
+                default = name;
+                description = "Human-facing name of the application tile.";
+              };
+              accessGroup = lib.mkOption {
+                type = lib.types.enum accessGroupNames;
+                default = "admins";
+                description = "Access tier allowed to see the launcher tile.";
+              };
+              displayGroup = lib.mkOption {
+                type = lib.types.enum displayGroupNames;
+                default = "Infrastructure";
+                description = "Display category of the application tile.";
+              };
+            };
+          }
+        )
+      );
+    };
+
     oidcApps = lib.mkOption {
       default = { };
       description = ''
@@ -591,7 +677,7 @@ in
       # rather than the more cryptic type-check error.
       assertions =
         let
-          allApps = fwApps // oidcApps;
+          allApps = fwApps // oidcApps // launcherApps;
           invalid = name: app: [
             {
               assertion = lib.elem app.accessGroup accessGroupNames;
@@ -744,6 +830,10 @@ in
     # fires. Race-resilient via worker auto-retry.
     {
       mkAuthentik.extraBlueprints = [ groupsBaselineDir ];
+    }
+
+    {
+      mkAuthentik.extraBlueprints = lib.mapAttrsToList launcherBlueprintDir launcherApps;
     }
 
     # Forward-auth apps own the outpost's global providers list. OIDC

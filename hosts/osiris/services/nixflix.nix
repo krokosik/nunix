@@ -4,6 +4,9 @@
   pkgs,
   ...
 }:
+let
+  oidc = config.mkAuthentik.oidcApps.jellyfin;
+in
 {
   sops.secrets = {
     sonarr_api_key.key = "sonarr/api_key";
@@ -95,6 +98,52 @@
         metadataCountryCode = "PL";
       };
       plugins = {
+        "SSO-OIDC-Authentication" = {
+          enable = true;
+          # The Jellyfin 10.11-compatible release reports a different API name.
+          apiName = "SSO-OIDC Authentication";
+          config = {
+            DefaultProvider = "authentik";
+            AutoCreateUsers = true;
+            # Reuse existing accounts and watch history on their first OIDC login.
+            MigrateLocalUsers = true;
+            SyncDisplayName = false;
+            DefaultRoleName = "";
+            Providers = lib.lists.singleton {
+              ProviderId = "authentik";
+              DisplayName = "Authentik";
+              Enabled = true;
+              Authority = oidc.issuerUrl;
+              ClientId._secret = config.sops.secrets.${oidc.credentials.clientId.secretName}.path;
+              ClientSecret._secret = config.sops.secrets.${oidc.credentials.clientSecret.secretName}.path;
+              ServerBaseUrl = config.mkTraefikServices.jellyfin.fullHostname;
+              Scopes = "openid profile email";
+              RoleClaim = "groups";
+              UsernameClaim = "preferred_username";
+              ButtonColor = "#fd4b2d";
+              SyncProfileImage = false;
+              StrictAccessTokenValidation = true;
+            };
+            RoleMappings =
+              map
+                (role: {
+                  RoleName = role;
+                  ProviderFilter = "authentik";
+                  IsAdmin = role == "admins";
+                  Priority = if role == "admins" then 100 else 50;
+                  EnableAllLibraries = true;
+                  EnableMediaPlayback = true;
+                  EnableRemoteAccess = true;
+                  EnableTranscoding = true;
+                  EnableContentDeletion = false;
+                })
+                [
+                  "admins"
+                  oidc.accessGroup
+                ];
+          };
+        };
+
         "Open Subtitles" = {
           enable = true;
           config = {
@@ -175,6 +224,26 @@
     };
   };
 
+  # TODO: On Jellyfin 12, migrate this to OIDC plugin 2.x automatic branding.
+  nixflix.jellyfin.branding = {
+    # A form avoids Jellyfin rewriting anchors into differently styled link buttons.
+    # Keep the HTML on one line so Markdown does not escape it or wrap it in a paragraph.
+    loginDisclaimer = /* html */ ''
+      <div class="readOnlyContent"><form action="/sso/OIDC/Start/authentik" method="get"><button is="emby-button" type="submit" class="raised button-submit block emby-button" style="background: #fd4b2d !important;"><span>Sign in with Authentik</span></button></form></div>
+    '';
+
+    # Preserve Nixflix's theme import when extending the default branding CSS.
+    customCss =
+      lib.optionalString config.nixflix.theme.enable ''
+        @import url("https://theme-park.dev/css/base/jellyfin/${config.nixflix.theme.name}.css");
+      ''
+      + /* css */ ''
+        #loginPage .loginDisclaimer {
+          width: 100%;
+        }
+      '';
+  };
+
   mkObservability.inactiveAlertUnits = lib.mkIf config.nixflix.enable (
     lib.optionals config.nixflix.sonarr.enable (lib.lists.singleton config.systemd.services.sonarr.name)
     ++ lib.optionals config.nixflix.radarr.enable (
@@ -199,6 +268,21 @@
       lib.lists.singleton config.systemd.services.maintainerr.name
     )
   );
+
+  mkAuthentik.launcherApps.seerr = {
+    displayName = "Seerr";
+    displayGroup = "Apps";
+    accessGroup = "family";
+    launchUrl = config.mkTraefikServices.seerr.fullHostname;
+  };
+
+  mkAuthentik.oidcApps.jellyfin = {
+    displayName = "Jellyfin";
+    displayGroup = "Apps";
+    accessGroup = "family";
+    launchUrl = "${config.mkTraefikServices.jellyfin.fullHostname}/sso/OIDC/Start/authentik";
+    redirectUris = lib.lists.singleton "${config.mkTraefikServices.jellyfin.fullHostname}/sso/OIDC/Callback/authentik";
+  };
 
   mkAuthentik.forwardAuthApps =
     (lib.genAttrs

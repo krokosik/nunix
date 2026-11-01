@@ -160,6 +160,27 @@ use `pkgs.symlinkJoin`** here: authentik's `retrieve_file` calls
 their original store paths) all fail with "Invalid blueprint path".
 Real files via `cp -L` are required.
 
+### Adding a launcher to Authentik
+
+Use `mkAuthentik.launcherApps` for dashboard links to services that handle their
+own login:
+
+```nix
+mkAuthentik.launcherApps.seerr = {
+  displayName = "Seerr";
+  displayGroup = "Apps";
+  accessGroup = "family";
+  launchUrl = config.mkTraefikServices.seerr.fullHostname;
+};
+```
+
+Each entry generates an application without a provider and a group binding
+that controls tile visibility. It does not protect access to the destination.
+No credentials, OIDC provider, or forward-auth configuration are created.
+The default access group is `admins`, and the default display group is
+`Infrastructure`. `host`, `launchUrl`, `slug`, `displayName`, and `iconUrl`
+can be overridden; the default launch URL is `https://<name>.<publicDomain>`.
+
 ### Adding an OIDC service to Authentik
 
 1. From this repo, run `just oidc-secrets <app> [host]` (default host:
