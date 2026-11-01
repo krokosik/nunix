@@ -47,6 +47,23 @@ in
     settings = {
       approvals_reviewer = "auto_review";
 
+      projects =
+        lib.attrsets.genAttrs
+          (map (name: "${config.home.homeDirectory}/work/${name}") [
+            "nunix"
+            "rydar-sim"
+            "rustpill"
+            "nunix-secrets"
+            "split-pro"
+            "combik"
+            "mpmath"
+            "spin1"
+            "xmsr"
+          ])
+          (_: {
+            trust_level = "trusted";
+          });
+
       hooks.state."${codexConfigDir}/hooks.json:pre_tool_use:0:0".trusted_hash =
         "sha256:be6c6fcb2978ea348dd05101efed0afcf00efcbfb5d7e78949108142c875a77d";
 
