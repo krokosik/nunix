@@ -8,6 +8,17 @@ let
   open-vsx = pkgs.nix-vscode-extensions.open-vsx-release;
   vscode-extensions-universal = pkgs.nix-vscode-extensions.vscode-marketplace-release-universal;
 
+  # Keep first-install version tracking without opening Dependi's welcome tab.
+  withoutDependiWelcome =
+    extension:
+    extension.overrideAttrs (oldAttrs: {
+      postInstall = (oldAttrs.postInstall or "") + /* bash */ ''
+        substituteInPlace "$out/share/vscode/extensions/fill-labs.dependi/out/main.js" \
+          --replace-fail 'S.appendLine("First install"),_n.render(r),await e.setShownVersion(f.version)' \
+          'S.appendLine("First install"),await e.setShownVersion(f.version)'
+      '';
+    });
+
   # trick to not clutter $HOME
   vscodium = pkgs.unstable.vscodium.overrideAttrs (oldAttrs: {
     postPatch = (oldAttrs.postPatch or "") + /* bash */ ''
@@ -64,6 +75,7 @@ let
 
   baseSettings = {
     "update.mode" = "none";
+    "update.showReleaseNotes" = false;
     "workbench.iconTheme" = "vscode-icons";
     "git.enableSmartCommit" = true;
     "git.confirmSync" = false;
@@ -156,7 +168,7 @@ let
   rustExtensions = with vscode-extensions-universal; [
     rust-lang.rust-analyzer
     vadimcn.vscode-lldb
-    fill-labs.dependi
+    (withoutDependiWelcome fill-labs.dependi)
   ];
 
   latexExtensions = with vscode-extensions; [
@@ -230,7 +242,7 @@ let
           esbenp.prettier-vscode
           oxc.oxc-vscode
           orta.vscode-jest
-          fill-labs.dependi
+          (withoutDependiWelcome fill-labs.dependi)
         ]);
       userSettings = baseSettings // {
         "[css]" = {
