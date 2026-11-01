@@ -1,12 +1,9 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 let
-  inherit (lib) getExe';
-
   cfg = config.services.traefik;
 in
 {
@@ -258,20 +255,6 @@ in
           EnvironmentFile = config.sops.templates."traefik_cloudflare.env".path;
           Restart = lib.mkForce "always";
           RestartSec = "30s";
-
-          # Traefik disables every plugin after one download fails, invalidating
-          # all routers that use those plugin middlewares.
-          ExecStartPre = pkgs.writeShellScript "wait-for-traefik-plugin-dns" /* bash */ ''
-            for _ in {1..60}; do
-              if ${getExe' pkgs.systemd "resolvectl"} query --type=A plugins.traefik.io; then
-                exit 0
-              fi
-
-              ${getExe' pkgs.coreutils "sleep"} 1
-            done
-
-            exit 1
-          '';
         };
       };
 
