@@ -226,6 +226,7 @@ let
       extensions =
         commonExtensions
         ++ (with vscode-extensions; [
+          bradlc.vscode-tailwindcss
           esbenp.prettier-vscode
           oxc.oxc-vscode
           orta.vscode-jest
