@@ -77,7 +77,7 @@
     };
 
     niks3 = {
-      url = "github:Mic92/niks3";
+      url = "github:Mic92/niks3/v1.16.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -89,7 +89,7 @@
     # Upstream warns against overriding nixpkgs via follows because
     # python deps in the lockfile are pinned together; let it use its
     # own locked nixpkgs.
-    authentik-nix.url = "github:nix-community/authentik-nix";
+    authentik-nix.url = "github:nix-community/authentik-nix/version/2026.8.5";
   };
 
   outputs =
