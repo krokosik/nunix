@@ -7,6 +7,7 @@
   environment.systemPackages = with pkgs; [
     curl
     dust
+    efibootmgr
     exfatprogs
     ghostty.terminfo
     hwinfo
