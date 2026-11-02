@@ -18,9 +18,9 @@ index 765abda..69d9c20 100644
 +static bool im_pending_active = false;
 +static bool im_active = false;
 +static bool im_update_pending = false;
- 
- /* event handler prototypes */
- static void wl_pointer_enter(void *data, struct wl_pointer *wl_pointer,
+ static uint32_t custom_width = 0;
+ static double width_ratio = 1.0;
+ static enum { DOCK_FULL = 0, DOCK_LEFT = 1, DOCK_RIGHT = 2 } dock_mode = DOCK_FULL;
 @@ -587,6 +591,12 @@ layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
      // Not what we expected, or redimension, refresh and restart
      if (keyboard.w != w || keyboard.h != h) {

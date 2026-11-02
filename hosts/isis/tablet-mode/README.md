@@ -47,7 +47,7 @@ shared layout resolver use the same runtime sizing, including frame bars.
 ## KEYBOARD AND FUTURE GESTURES
 
 `surface-tablet-osk.service` has no login enablement. The watcher starts it only
-in tablet mode, with wvkbd 0.20 from the already-pinned unstable input, using
+in tablet mode, with wvkbd 0.21 from the already-pinned unstable input, using
 `--auto --hidden`. Visibility follows Wayland text-input requests; applications
 that do not issue those requests will not summon the keyboard. Laptop mode
 removes its runtime activation marker and stops the service.
