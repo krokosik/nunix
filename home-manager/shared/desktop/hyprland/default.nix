@@ -1,6 +1,7 @@
 { lib, ... }:
 {
   imports = [
+    ./animations.nix
     ./bindings.nix
     ./input.nix
     ./looknfeel.nix
@@ -18,69 +19,7 @@
 
     configType = "lua";
 
-    settings = {
-      config = {
-        animations.enabled = true;
-        master.mfact = 0.5;
-      };
-
-      animation = [
-        {
-          leaf = "windowsIn";
-          enabled = true;
-          speed = 3;
-          bezier = "default";
-        }
-        {
-          leaf = "windowsOut";
-          enabled = true;
-          speed = 3;
-          bezier = "default";
-        }
-        {
-          leaf = "workspaces";
-          enabled = true;
-          speed = 5;
-          bezier = "default";
-        }
-        {
-          leaf = "specialWorkspace";
-          enabled = true;
-          speed = 5;
-          bezier = "default";
-          style = "slidevert";
-        }
-        {
-          leaf = "windowsMove";
-          enabled = true;
-          speed = 4;
-          bezier = "default";
-        }
-        {
-          leaf = "fade";
-          enabled = true;
-          speed = 3;
-          bezier = "default";
-        }
-        {
-          leaf = "border";
-          enabled = true;
-          speed = 3;
-          bezier = "default";
-        }
-      ];
-
-      layer_rule = [
-        {
-          match.namespace = "^(quickshell)$";
-          no_anim = true;
-        }
-        {
-          match.namespace = "^dms:.*";
-          no_anim = true;
-        }
-      ];
-    };
+    settings.config.master.mfact = 0.5;
 
     extraConfig = lib.modules.mkAfter /* lua */ ''
       -- DMS-generated files intentionally load last and remain dynamic.
