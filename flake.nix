@@ -93,11 +93,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    run0-sudo-shim = {
-      url = "github:LordGrimmauld/run0-sudo-shim";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     lazyvim.url = "github:pfassina/lazyvim-nix";
 
     inventor.url = "github:Harvi654/Autodesk-Inventor-for-Linux/v0.3.1";

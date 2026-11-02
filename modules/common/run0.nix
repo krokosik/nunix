@@ -1,16 +1,19 @@
 {
   config,
-  inputs,
   lib,
+  pkgs,
   ...
 }:
 let
   inherit (lib.modules) mkIf;
+  inherit (lib.lists) singleton;
 in
 {
-  imports = [ inputs.run0-sudo-shim.nixosModules.default ];
+  environment.systemPackages = singleton pkgs.run0-sudo-shim;
 
-  security.run0-sudo-shim.enable = true;
+  security.sudo.enable = false;
+
+  security.polkit.enable = true;
 
   # TODO: Replace with security.run0.persistentAuth.enable after NixOS 26.11 is released.
   security.polkit.extraConfig = mkIf config.security.run0.wheelNeedsPassword /* javascript */ ''
