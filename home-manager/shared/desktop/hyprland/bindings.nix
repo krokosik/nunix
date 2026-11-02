@@ -5,7 +5,7 @@ let
   inherit (lib.meta) getExe;
 
   voxtype = getExe config.programs.voxtype.package;
-  browser = "zen-twilight";
+  browser = "zen-beta";
   editor = "codium";
   lua = mkLuaInline;
   luaValue = toLua { multiline = false; };

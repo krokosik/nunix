@@ -73,14 +73,10 @@
     voxtype.url = "github:peteonrails/voxtype/v1.1.1";
 
     zen-browser = {
-      url = "github:0xc000022070/zen-browser-flake";
+      # Beta 1.23.4b, newer than the existing Twilight 1.23t profile.
+      url = "github:0xc000022070/zen-browser-flake/f19490ac889eabb05bdb7e8dcb85225ee75bd87b";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
       inputs.home-manager.follows = "home-manager";
-    };
-
-    firefox-addons = {
-      url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nixflix = {
