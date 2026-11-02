@@ -37,6 +37,10 @@ in
       accessKeyFile = config.mkGarageBucket.niks3.accessKeyFile;
       secretKeyFile = config.mkGarageBucket.niks3.secretKeyFile;
     };
+    gc = {
+      enable = true;
+      olderThan = "360h"; # 15 days
+    };
   };
 
   mkTraefikServices.niks3 = {
