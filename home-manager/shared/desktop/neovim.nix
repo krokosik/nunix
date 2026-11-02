@@ -8,5 +8,8 @@
   };
 
   imports = [ inputs.lazyvim.homeManagerModules.default ];
-  programs.lazyvim.enable = true;
+  programs.lazyvim = {
+    enable = true;
+    ignoreBuildNotifications = true;
+  };
 }

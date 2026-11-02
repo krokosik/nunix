@@ -12,6 +12,10 @@
   wayland.windowManager.hyprland = {
     enable = true;
     package = null;
+
+    # NixOS installs and configures the portals alongside Hyprland.
+    portalPackage = null;
+
     configType = "lua";
 
     settings = {
