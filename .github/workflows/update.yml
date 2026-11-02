@@ -29,6 +29,7 @@ jobs:
           rea-flake
           opencode-flake
           nix-vscode-extensions
+          zen-browser-flake
 
 
       - name: Commit lockfile update
