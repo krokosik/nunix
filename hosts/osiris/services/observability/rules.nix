@@ -146,6 +146,19 @@ in
         labels.severity = "warning";
         annotations.summary = "Disk {{ $labels.device }} on {{ $labels.host }} has pending/uncorrectable sectors or new reallocated sectors/media errors";
       }
+      {
+        alert = "SmartSelfTestFailed";
+        # The exporter exposes this gauge for ATA self-test logs only.
+        # Include existing failures and deduplicate standard/extended logs.
+        expr = /* promql */ ''
+          max by (host, environment, instance, device) (
+            smartctl_device_self_test_log_error_count{job="host/smartctl"}
+          ) > 0
+        '';
+        for = "2m";
+        labels.severity = "warning";
+        annotations.summary = "Disk {{ $labels.device }} on {{ $labels.host }} has failures recorded in its SMART self-test log";
+      }
     ];
 
     zfs = withDashboard hostDashboard [

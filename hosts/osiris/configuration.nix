@@ -39,6 +39,19 @@ in
 
   mkAuthentik.google.enable = true;
 
+  services = {
+    # Unused SSD with pending/reallocated sectors; not part of either ZFS pool.
+    smartd.devices = singleton {
+      device = "/dev/disk/by-id/ata-M.2_SSD_512GB_D5BISP31202103";
+      options = "-d ignore";
+    };
+
+    prometheus.exporters.smartctl.extraFlags = [
+      "--smartctl.scan-device-type=by-id"
+      "--smartctl.device-exclude=^ata-M[.]2_SSD_512GB_D5BISP31202103$"
+    ];
+  };
+
   mkObservability = {
     enable = true;
     central = true;
