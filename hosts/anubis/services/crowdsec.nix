@@ -5,7 +5,9 @@
   ...
 }:
 let
-  secretspath = toString inputs.my-secrets;
+  inherit (lib.lists) singleton;
+  inherit (lib.modules) mkForce;
+  secretspath = "${inputs.my-secrets}";
 in
 {
   services.crowdsec = {
@@ -25,12 +27,12 @@ in
     localConfig.acquisitions = [
       {
         source = "journalctl";
-        journalctl_filter = [ "_SYSTEMD_UNIT=sshd.service" ];
+        journalctl_filter = singleton "_SYSTEMD_UNIT=sshd.service";
         labels.type = "syslog";
       }
       {
         source = "journalctl";
-        journalctl_filter = [ "_SYSTEMD_UNIT=haproxy.service" ];
+        journalctl_filter = singleton "_SYSTEMD_UNIT=haproxy.service";
         labels.type = "haproxy";
       }
     ];
@@ -45,21 +47,21 @@ in
     enable = true;
     # LAPI lives on osiris, so we authenticate via apiKeyPath instead of
     # auto-registering against a local crowdsec service.
-    registerBouncer.enable = lib.mkForce false;
+    registerBouncer.enable = mkForce false;
     secrets.apiKeyPath = config.sops.secrets.crowdsec_vps_bouncer_key.path;
     settings = {
       api_url = "https://crowdsec.${config.privateDomain}/";
       insecure_skip_verify = false;
       deny_action = "DROP";
-      supported_decisions_types = [ "ban" ];
+      supported_decisions_types = singleton "ban";
     };
   };
 
-  systemd.services.crowdsec.serviceConfig.LoadCredential = [
-    "lapi_credentials.yaml:${config.sops.templates."lapi_credentials.yaml".path}"
-  ];
+  systemd.services.crowdsec.serviceConfig.LoadCredential = singleton "lapi_credentials.yaml:${
+    config.sops.templates."lapi_credentials.yaml".path
+  }";
 
-  sops.templates."lapi_credentials.yaml".content = ''
+  sops.templates."lapi_credentials.yaml".content = /* yaml */ ''
     url: https://crowdsec.${config.privateDomain}/
     login: ${config.services.crowdsec.name}
     password: ${config.sops.placeholder.crowdsec_vps_machine_password}
@@ -70,13 +72,13 @@ in
       sopsFile = "${secretspath}/server/secrets.yaml";
       key = "crowdsec/vps_machine_password";
       mode = "0400";
-      restartUnits = [ "crowdsec.service" ];
+      restartUnits = singleton "crowdsec.service";
     };
     crowdsec_vps_bouncer_key = {
       sopsFile = "${secretspath}/server/secrets.yaml";
       key = "crowdsec/vps_bouncer_key";
       mode = "0400";
-      restartUnits = [ "crowdsec-firewall-bouncer.service" ];
+      restartUnits = singleton "crowdsec-firewall-bouncer.service";
     };
   };
 }

@@ -1,8 +1,12 @@
 {
+  lib,
   ...
 }:
+let
+  inherit (lib.lists) singleton;
+in
 {
-  imports = [ ../common/tailscale.nix ];
+  imports = singleton ../common/tailscale.nix;
 
   services.tailscale = {
     # Desktop nodes are authenticated interactively with `tailscale up`.

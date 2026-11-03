@@ -5,6 +5,7 @@
 }:
 let
   inherit (lib.lists) singleton;
+  inherit (lib.modules) mkForce;
   bucket = config.mkGarageBucket.livesync.bucketName;
 in
 {
@@ -23,5 +24,5 @@ in
   };
 
   services.traefik.dynamicConfigOptions.http.routers.livesync.rule =
-    lib.mkForce "Host(`livesync.${config.publicDomain}`) && (Path(`/${bucket}`) || PathPrefix(`/${bucket}/`))";
+    mkForce "Host(`livesync.${config.publicDomain}`) && (Path(`/${bucket}`) || PathPrefix(`/${bucket}/`))";
 }

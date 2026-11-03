@@ -1,5 +1,6 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
+  inherit (lib.lists) singleton;
   port = 3023;
 in
 {
@@ -13,9 +14,7 @@ in
 
   virtualisation.oci-containers.containers.bentopdf = {
     image = "ghcr.io/alam00000/bentopdf-simple:v2.8.6";
-    volumes = [
-      "/var/lib/bentopdf:/config"
-    ];
+    volumes = singleton "/var/lib/bentopdf:/config";
   };
 
   mkTraefikServices.bentopdf = {
@@ -32,7 +31,7 @@ in
   };
 
   mkObservabilityServices.bentopdf = {
-    units = [ "docker-bentopdf.service" ];
+    units = singleton "docker-bentopdf.service";
     probes.public = {
       url = config.mkTraefikServices.bentopdf.fullHostname;
       module = "http_reachable";

@@ -27,7 +27,7 @@
 
   };
 
-  # plugin deps
+  # PLUGIN DEPS
   environment.systemPackages = with pkgs; [
     # quick capture
     ffmpeg

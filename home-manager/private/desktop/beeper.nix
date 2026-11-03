@@ -1,9 +1,12 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
+let
+  inherit (lib.lists) singleton;
+in
 {
   # --no-update flag seems broken on nixos 26.05
-  home.packages = [ pkgs.unstable.beeper ];
+  home.packages = singleton pkgs.unstable.beeper;
 
-  xdg.configFile."BeeperTexts/custom.css".text = ''
+  xdg.configFile."BeeperTexts/custom.css".text = /* css */ ''
     /* Tokyo Night theme for Beeper Desktop v4.
      * Palette: Stylix base16 tokyo-night-dark.
      */

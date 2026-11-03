@@ -4,6 +4,9 @@
   pkgs,
   ...
 }:
+let
+  inherit (lib.lists) singleton;
+in
 {
   users.groups.msmtp = { };
 
@@ -16,7 +19,7 @@
   sops.secrets.smtp_token = {
     key = "proton/smtp_token";
     mode = "0400";
-    restartUnits = [ "msmptd.service" ];
+    restartUnits = singleton "msmptd.service";
   };
 
   programs.msmtp = {
@@ -40,20 +43,19 @@
     };
   };
 
-  systemd.services.msmtp.serviceConfig.LoadCredential = [
-    "smtp_token:${config.sops.secrets.smtp_token.path}"
-  ];
+  systemd.services.msmtp.serviceConfig.LoadCredential =
+    singleton "smtp_token:${config.sops.secrets.smtp_token.path}";
 
   # Local SMTP listener for apps that speak SMTP (e.g. authentik). Forwards
   # to the protonmail relay configured above via the same `programs.msmtp`
   systemd.services.msmtpd = {
     description = "Local SMTP relay (msmtpd → protonmail)";
-    wantedBy = [ "multi-user.target" ];
+    wantedBy = singleton "multi-user.target";
     serviceConfig = {
       Type = "simple";
       ExecStart = "${pkgs.msmtp}/bin/msmtpd --port=2500";
       Restart = "on-failure";
-      LoadCredential = [ "smtp_token:${config.sops.secrets.smtp_token.path}" ];
+      LoadCredential = singleton "smtp_token:${config.sops.secrets.smtp_token.path}";
     };
   };
 }

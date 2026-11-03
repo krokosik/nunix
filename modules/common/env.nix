@@ -1,5 +1,5 @@
 {
-  # Systemwide ENV variables
+  # SYSTEMWIDE ENV VARIABLES
   environment.variables = {
     EDITOR = "nvim";
     VISUAL = "nvim";

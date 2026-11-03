@@ -1,3 +1,7 @@
+{ lib, ... }:
+let
+  inherit (lib.lists) singleton;
+in
 {
   # Only manage Linux partitions. The Windows and recovery partitions share
   # this drive and must not be included in a disko GPT layout, so we specify
@@ -22,7 +26,7 @@
       device = "/dev/disk/by-id/nvme-eui.002538433141c938-part6";
       content = {
         type = "btrfs";
-        extraArgs = [ "--force" ];
+        extraArgs = singleton "--force";
         subvolumes = {
           "/root" = {
             mountpoint = "/";

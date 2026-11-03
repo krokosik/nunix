@@ -27,11 +27,13 @@ in
     ];
     path = [
       config.nix.package
-      pkgs.git
-      pkgs.jq
-      pkgs.openssh
-      pkgs.coreutils
-    ];
+    ]
+    ++ (with pkgs; [
+      git
+      jq
+      openssh
+      coreutils
+    ]);
     environment = {
       NUNIX_REPOSITORY = "https://github.com/krokosik/nunix";
       NUNIX_BRANCH = "main";
@@ -78,7 +80,7 @@ in
       hostNames=$(nix eval --json --no-update-lock-file --accept-flake-config \
         "$checkout#nixosConfigurations" --apply 'hosts: builtins.attrNames hosts')
       hostLines=$(jq --exit-status --raw-output '.[]' <<< "$hostNames")
-      mapfile -t hosts <<< "$hostLines"
+      mapfile --tab-separated hosts <<< "$hostLines"
 
       failed=()
       for host in "''${hosts[@]}"; do

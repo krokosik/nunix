@@ -29,6 +29,45 @@
   ...
 }:
 let
+  inherit (lib.attrsets)
+    attrNames
+    filterAttrs
+    mapAttrsToList
+    optionalAttrs
+    ;
+  inherit (lib.lists)
+    concatMap
+    elem
+    flatten
+    foldl'
+    length
+    optionals
+    singleton
+    ;
+  inherit (lib.modules) mkIf mkMerge;
+  inherit (lib.options) mkOption;
+  inherit (lib.trivial) mergeAttrs;
+  inherit (lib.strings)
+    concatMapStringsSep
+    concatStrings
+    concatStringsSep
+    escapeShellArg
+    optionalString
+    replaceStrings
+    toJSON
+    toUpper
+    ;
+  inherit (lib.types)
+    attrsOf
+    bool
+    enum
+    listOf
+    nonEmptyListOf
+    nullOr
+    path
+    str
+    submodule
+    ;
   authentikPort = 9000;
   restartAuthentik = [
     "authentik.service"
@@ -37,8 +76,8 @@ let
   ];
 
   fwApps = config.mkAuthentik.forwardAuthApps;
-  fwAppNames = lib.attrNames fwApps;
-  basicAuthApps = lib.filterAttrs (_: app: app.basicAuth != null) fwApps;
+  fwAppNames = attrNames fwApps;
+  basicAuthApps = filterAttrs (_: { basicAuth, ... }: basicAuth != null) fwApps;
 
   inherit (config.mkAuthentik) oidcApps launcherApps;
   credentialType = import ../../../lib/types/credential.nix;
@@ -73,7 +112,7 @@ let
   # applies in dependency order, so the cross-instance race that bit us
   # (forward-auth-apps applied before the groups existed) can't recur.
   # `grp-` prefix keeps the anchor namespace clear of app `id:` anchors.
-  groupsBaselineContent = ''
+  groupsBaselineContent = /* yaml */ ''
     version: 1
     metadata:
       name: groups-baseline
@@ -125,7 +164,7 @@ let
   # policy binding. `id:` anchors are used inside this same blueprint
   # by `!KeyOf` so the application can reference its own provider
   # without a managed-name lookup.
-  perFwAppEntries = name: app: ''
+  perFwAppEntries = name: app: /* yaml */ ''
     - model: authentik_providers_proxy.proxyprovider
       id: prov-${name}
       identifiers:
@@ -133,12 +172,12 @@ let
       attrs:
         mode: ${app.mode}
         external_host: ${app.host}
-    ${lib.optionalString (app.mode == "forward_domain") "    cookie_domain: ${app.cookieDomain}"}
+    ${optionalString (app.mode == "forward_domain") "    cookie_domain: ${app.cookieDomain}"}
         authentication_flow: !Find [authentik_flows.flow, [slug, default-authentication-flow]]
         authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
         invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
-    ${lib.optionalString (app.basicAuth != null) (
-      lib.concatStringsSep "\n" [
+    ${optionalString (app.basicAuth != null) (
+      concatStringsSep "\n" [
         "    basic_auth_enabled: true"
         "    basic_auth_user_attribute: ${name}_user"
         "    basic_auth_password_attribute: ${name}_password"
@@ -156,7 +195,7 @@ let
         open_in_new_tab: true
         meta_launch_url: ${app.launchUrl}
         meta_icon: ${app.iconUrl}
-    ${lib.optionalString app.hide "    meta_hide: true"}
+    ${optionalString app.hide "    meta_hide: true"}
         policy_engine_mode: all
 
     - model: authentik_policies.policybinding
@@ -170,7 +209,7 @@ let
   # The separator must match the column the first item lands at after
   # the indented-string strip. `${outpostProviders}` sits at column 6,
   # so subsequent items need six leading spaces to share that column.
-  outpostProviders = lib.concatMapStringsSep "\n      " (
+  outpostProviders = concatMapStringsSep "\n      " (
     n: "- !Find [authentik_providers_proxy.proxyprovider, [name, ${n}]]"
   ) fwAppNames;
 
@@ -180,7 +219,7 @@ let
   # outpost falls back to its bind address (http://0.0.0.0:9000),
   # which a browser can't resolve. Encoding both here makes
   # forward-auth deterministic across hosts.
-  outpostEntry = ''
+  outpostEntry = /* yaml */ ''
     - model: authentik_outposts.outpost
       identifiers:
         name: authentik Embedded Outpost
@@ -192,22 +231,22 @@ let
           authentik_host: https://authentik.${config.publicDomain}
           authentik_host_browser: https://authentik.${config.publicDomain}'';
 
-  fwBlueprintContent = ''
+  fwBlueprintContent = /* yaml */ ''
     version: 1
     metadata:
       name: forward-auth-apps
     entries:
-    ${lib.concatStringsSep "\n\n" ((lib.mapAttrsToList perFwAppEntries fwApps) ++ [ outpostEntry ])}
+    ${concatStringsSep "\n\n" ((mapAttrsToList perFwAppEntries fwApps) ++ singleton outpostEntry)}
   '';
 
   fwBlueprintDir = pkgs.writeTextDir "forward-auth-apps.yaml" fwBlueprintContent;
 
   # Group attributes cannot be filled in at build time. The oneshot reads
   # sops credentials and updates only the admins group's Basic credentials.
-  adminBasicAuthAttributes = lib.concatMapStringsSep ",\n" (
+  adminBasicAuthAttributes = concatMapStringsSep ",\n" (
     name:
-    ''"${name}_user": os.environ["${lib.toUpper name}_USERNAME"], "${name}_password": os.environ["${lib.toUpper name}_PASSWORD"]''
-  ) (lib.attrNames basicAuthApps);
+    ''"${name}_user": os.environ["${toUpper name}_USERNAME"], "${name}_password": os.environ["${toUpper name}_PASSWORD"]''
+  ) (attrNames basicAuthApps);
 
   adminBasicAuthCommand = pkgs.writeText "authentik-admin-basic-auth.py" /* python */ ''
     import os
@@ -220,18 +259,18 @@ let
 
   adminBasicAuthScript = pkgs.writeShellScript "authentik-admin-basic-auth" /* bash */ ''
     set -euo pipefail
-    ${lib.concatMapStringsSep "\n" (name: ''
+    ${concatMapStringsSep "\n" (name: /* bash */ ''
       test -s "$CREDENTIALS_DIRECTORY/${name}_password"
-      export ${lib.toUpper name}_USERNAME=${lib.escapeShellArg basicAuthApps.${name}.basicAuth.username}
-      export ${lib.toUpper name}_PASSWORD="$(<"$CREDENTIALS_DIRECTORY/${name}_password")"
-    '') (lib.attrNames basicAuthApps)}
+      export ${toUpper name}_USERNAME=${escapeShellArg basicAuthApps.${name}.basicAuth.username}
+      export ${toUpper name}_PASSWORD="$(<"$CREDENTIALS_DIRECTORY/${name}_password")"
+    '') (attrNames basicAuthApps)}
     exec ${config.services.authentik.authentikComponents.manage}/bin/manage.py shell \
       < ${adminBasicAuthCommand}
   '';
 
   # Quote user-provided YAML scalars, keeping URLs and names safe from
   # YAML punctuation and preventing a value from becoming a YAML tag.
-  yamlString = value: lib.strings.toJSON value;
+  yamlString = value: toJSON value;
 
   launcherBlueprintDir =
     name: app:
@@ -263,16 +302,18 @@ let
     '';
 
   oidcEnvName =
-    name: kind: "AUTHENTIK_OIDC_${lib.toUpper (lib.replaceStrings [ "-" ] [ "_" ] name)}_${kind}";
+    name: kind:
+    "AUTHENTIK_OIDC_${toUpper (replaceStrings (singleton "-") (singleton "_") name)}_${kind}";
 
   oidcBlueprintDir =
     name: app:
     let
-      providerFields = lib.concatStringsSep "\n" (
-        [ "      client_id: !Env ${oidcEnvName name "CLIENT_ID"}" ]
-        ++ lib.optionals (!app.publicClient) [
-          "      client_secret: !Env ${oidcEnvName name "CLIENT_SECRET"}"
-        ]
+      providerFields = concatStringsSep "\n" (
+        singleton "      client_id: !Env ${oidcEnvName name "CLIENT_ID"}"
+        ++ optionals (!app.publicClient) (
+          singleton "      client_secret: !Env ${oidcEnvName name "CLIENT_SECRET"}"
+        )
+
         ++ [
           "      client_type: ${if app.publicClient then "public" else "confidential"}"
           "      grant_types: [authorization_code, refresh_token]"
@@ -285,10 +326,10 @@ let
           "        - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/oauth2/scope-email]]"
           "        - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/oauth2/scope-profile]]"
         ]
-        ++ lib.optionals (app.logoutMethod != null) [ "      logout_method: ${app.logoutMethod}" ]
-        ++ lib.optionals (app.logoutUri != null) [ "      logout_uri: ${yamlString app.logoutUri}" ]
-        ++ [ "      redirect_uris:" ]
-        ++ lib.concatMap (url: [
+        ++ optionals (app.logoutMethod != null) (singleton "      logout_method: ${app.logoutMethod}")
+        ++ optionals (app.logoutUri != null) (singleton "      logout_uri: ${yamlString app.logoutUri}")
+        ++ singleton "      redirect_uris:"
+        ++ concatMap (url: [
           "        - matching_mode: strict"
           "          redirect_uri_type: authorization"
           "          url: ${yamlString url}"
@@ -346,9 +387,9 @@ let
         config.sops.placeholder.${app.credentials.clientSecret.secretName}
       }";
     in
-    idLine + "\n" + lib.optionalString (!app.publicClient) (secretLine + "\n");
+    idLine + "\n" + optionalString (!app.publicClient) (secretLine + "\n");
 
-  oidcWorkerEnvContent = lib.concatStrings (lib.mapAttrsToList oidcWorkerEnvLines oidcApps);
+  oidcWorkerEnvContent = concatStrings (mapAttrsToList oidcWorkerEnvLines oidcApps);
 
   # Stack upstream blueprints + every contributed dir into a single
   # real-file directory. Copy with `-L` to dereference: authentik's
@@ -356,22 +397,25 @@ let
   # rejects anything that resolves outside `blueprints_dir`, so
   # `symlinkJoin` (top-level entries are symlinks back to source store
   # paths) makes every apply fail with "Invalid blueprint path".
-  mergedBlueprints = pkgs.runCommandLocal "authentik-blueprints-merged" { } /* bash */ ''
-    mkdir --parents "$out"
-    cp --recursive --dereference ${config.services.authentik.authentikComponents.staticWorkdirDeps}/blueprints/. "$out/"
-    chmod --recursive u+w "$out"
-    ${lib.concatMapStringsSep "\n" (p: /* bash */ ''
-      cp --recursive --dereference ${p}/. "$out/"
+  mergedBlueprints = pkgs.callPackage (
+    { runCommandLocal }:
+    runCommandLocal "authentik-blueprints-merged" { } /* bash */ ''
+      mkdir --parents "$out"
+      cp --recursive --dereference ${config.services.authentik.authentikComponents.staticWorkdirDeps}/blueprints/. "$out/"
       chmod --recursive u+w "$out"
-    '') config.mkAuthentik.extraBlueprints}
-  '';
+      ${concatMapStringsSep "\n" (p: /* bash */ ''
+        cp --recursive --dereference ${p}/. "$out/"
+        chmod --recursive u+w "$out"
+      '') config.mkAuthentik.extraBlueprints}
+    ''
+  ) { };
 in
 {
-  imports = [ inputs.authentik-nix.nixosModules.default ];
+  imports = singleton inputs.authentik-nix.nixosModules.default;
 
   options.mkAuthentik = {
-    extraBlueprints = lib.mkOption {
-      type = lib.types.listOf lib.types.path;
+    extraBlueprints = mkOption {
+      type = listOf path;
       default = [ ];
       description = ''
         Extra blueprint directories or files to merge into authentik's
@@ -382,7 +426,7 @@ in
       '';
     };
 
-    forwardAuthApps = lib.mkOption {
+    forwardAuthApps = mkOption {
       default = { };
       description = ''
         Apps gated by authentik forward-auth via Traefik (chain-authentik
@@ -401,50 +445,50 @@ in
         fixed taxonomy declared in this module (see `accessGroupNames`
         / `displayGroupNames`) — typos fail the build via assertions.
       '';
-      type = lib.types.attrsOf (
-        lib.types.submodule (
+      type = attrsOf (
+        submodule (
           { name, ... }:
           {
             options = {
-              host = lib.mkOption {
-                type = lib.types.str;
+              host = mkOption {
+                type = str;
                 default = config.mkTraefikServices.${name}.fullHostname;
                 description = "External URL Traefik matches (or the domain-level authentication URL).";
               };
-              launchUrl = lib.mkOption {
-                type = lib.types.str;
+              launchUrl = mkOption {
+                type = str;
                 default = config.mkAuthentik.forwardAuthApps.${name}.host;
                 description = "URL opened from the application tile; may include a UI path without changing the authentication hostname.";
               };
-              mode = lib.mkOption {
-                type = lib.types.enum [
+              mode = mkOption {
+                type = enum [
                   "forward_single"
                   "forward_domain"
                 ];
                 default = "forward_single";
                 description = "Authentik proxy provider forward-auth mode.";
               };
-              cookieDomain = lib.mkOption {
-                type = lib.types.nullOr lib.types.str;
+              cookieDomain = mkOption {
+                type = nullOr str;
                 default = null;
                 description = "Cookie domain shared by hosts using a domain-level provider.";
               };
-              displayName = lib.mkOption {
-                type = lib.types.str;
+              displayName = mkOption {
+                type = str;
                 description = "Human-facing app name (authentik tile).";
               };
-              hide = lib.mkOption {
-                type = lib.types.bool;
+              hide = mkOption {
+                type = bool;
                 default = false;
                 description = "Hide this application from the Authentik library (e.g. a domain-level provider).";
               };
-              iconUrl = lib.mkOption {
-                type = lib.types.str;
+              iconUrl = mkOption {
+                type = str;
                 default = "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/${name}.png";
                 description = "Icon URL used on the authentik application tile.";
               };
-              accessGroup = lib.mkOption {
-                type = lib.types.enum accessGroupNames;
+              accessGroup = mkOption {
+                type = enum accessGroupNames;
                 default = "admins";
                 description = ''
                   Access tier whose members can reach this app via its
@@ -455,8 +499,8 @@ in
                   satisfy the policy for any junior tier.
                 '';
               };
-              displayGroup = lib.mkOption {
-                type = lib.types.enum displayGroupNames;
+              displayGroup = mkOption {
+                type = enum displayGroupNames;
                 default = "Infrastructure";
                 description = ''
                   UI display category for the application library tile.
@@ -465,21 +509,19 @@ in
                   no policy evaluation touches display groups.
                 '';
               };
-              basicAuth = lib.mkOption {
-                type = lib.types.nullOr (
-                  lib.types.submodule {
-                    options = {
-                      username = lib.mkOption {
-                        type = lib.types.str;
-                        description = "Upstream Basic Auth username.";
-                      };
-                      passwordSecretName = lib.mkOption {
-                        type = lib.types.str;
-                        description = "Name of an existing sops secret holding the upstream Basic Auth password.";
-                      };
+              basicAuth = mkOption {
+                type = nullOr (submodule {
+                  options = {
+                    username = mkOption {
+                      type = str;
+                      description = "Upstream Basic Auth username.";
                     };
-                  }
-                );
+                    passwordSecretName = mkOption {
+                      type = str;
+                      description = "Name of an existing sops secret holding the upstream Basic Auth password.";
+                    };
+                  };
+                });
                 default = null;
                 description = "Enable upstream HTTP Basic Auth, using credentials restricted to Authentik admins.";
               };
@@ -489,53 +531,53 @@ in
       );
     };
 
-    launcherApps = lib.mkOption {
+    launcherApps = mkOption {
       default = { };
       description = ''
         Dashboard links without an authentication provider. Each entry generates
         an application and group policy binding. The binding controls tile
         visibility only; the destination service owns its authentication.
       '';
-      type = lib.types.attrsOf (
+      type = attrsOf (
         let
           outerConfig = config;
         in
-        lib.types.submodule (
+        submodule (
           { name, config, ... }:
           {
             options = {
-              host = lib.mkOption {
-                type = lib.types.str;
+              host = mkOption {
+                type = str;
                 default = "${name}.${outerConfig.publicDomain}";
                 description = "External hostname of the application.";
               };
-              launchUrl = lib.mkOption {
-                type = lib.types.str;
+              launchUrl = mkOption {
+                type = str;
                 default = "https://${config.host}";
                 description = "URL opened from the Authentik application tile.";
               };
-              iconUrl = lib.mkOption {
-                type = lib.types.str;
+              iconUrl = mkOption {
+                type = str;
                 default = "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/${name}.png";
                 description = "Icon URL for the Authentik application tile.";
               };
-              slug = lib.mkOption {
-                type = lib.types.str;
+              slug = mkOption {
+                type = str;
                 default = name;
                 description = "Authentik application slug.";
               };
-              displayName = lib.mkOption {
-                type = lib.types.str;
+              displayName = mkOption {
+                type = str;
                 default = name;
                 description = "Human-facing name of the application tile.";
               };
-              accessGroup = lib.mkOption {
-                type = lib.types.enum accessGroupNames;
+              accessGroup = mkOption {
+                type = enum accessGroupNames;
                 default = "admins";
                 description = "Access tier allowed to see the launcher tile.";
               };
-              displayGroup = lib.mkOption {
-                type = lib.types.enum displayGroupNames;
+              displayGroup = mkOption {
+                type = enum displayGroupNames;
                 default = "Infrastructure";
                 description = "Display category of the application tile.";
               };
@@ -545,7 +587,7 @@ in
       );
     };
 
-    oidcApps = lib.mkOption {
+    oidcApps = mkOption {
       default = { };
       description = ''
         Apps that authenticate against Authentik via OIDC directly
@@ -555,70 +597,68 @@ in
         makes the credentials available to Authentik via `!Env`. The
         consuming service owns its own credential delivery.
       '';
-      type = lib.types.attrsOf (
+      type = attrsOf (
         let
           outerConfig = config;
         in
-        lib.types.submodule (
+        submodule (
           { name, config, ... }:
           {
             options = {
-              host = lib.mkOption {
-                type = lib.types.str;
+              host = mkOption {
+                type = str;
                 default = "${name}.${outerConfig.publicDomain}";
                 description = "External hostname of the application.";
               };
-              launchUrl = lib.mkOption {
-                type = lib.types.str;
+              launchUrl = mkOption {
+                type = str;
                 default = "https://${config.host}";
                 description = "URL opened from the Authentik application tile.";
               };
-              iconUrl = lib.mkOption {
-                type = lib.types.str;
+              iconUrl = mkOption {
+                type = str;
                 default = "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/${name}.png";
                 description = "Icon URL for the Authentik application tile.";
               };
-              slug = lib.mkOption {
-                type = lib.types.str;
+              slug = mkOption {
+                type = str;
                 default = name;
                 description = "Authentik application slug (and OIDC issuer path).";
               };
-              issuerUrl = lib.mkOption {
-                type = lib.types.str;
+              issuerUrl = mkOption {
+                type = str;
                 default = "${outerConfig.mkTraefikServices.authentik.fullHostname}/application/o/${config.slug}/";
                 description = "OIDC issuer URL derived from the Authentik route and application slug.";
               };
-              providerName = lib.mkOption {
-                type = lib.types.str;
+              providerName = mkOption {
+                type = str;
                 default = "provider for ${name}";
                 description = "Authentik OAuth2 provider name.";
               };
-              redirectUris = lib.mkOption {
-                type = lib.types.nonEmptyListOf lib.types.str;
+              redirectUris = mkOption {
+                type = nonEmptyListOf str;
                 description = "Allowed authorization callback URLs (strict matching).";
               };
-              logoutUri = lib.mkOption {
-                type = lib.types.nullOr lib.types.str;
+              logoutUri = mkOption {
+                type = nullOr str;
                 default = null;
                 description = "Optional OIDC logout callback URL.";
               };
-              logoutMethod = lib.mkOption {
-                type = lib.types.nullOr (
-                  lib.types.enum [
-                    "backchannel"
-                    "frontchannel"
-                  ]
-                );
+              logoutMethod = mkOption {
+                type = nullOr (enum [
+                  "backchannel"
+                  "frontchannel"
+                ]);
                 default = null;
                 description = "Optional Authentik OAuth2 logout method; null leaves Authentik's default.";
               };
-              publicClient = lib.mkOption {
-                type = lib.types.bool;
+              publicClient = mkOption {
+                type = bool;
                 default = false;
                 description = "Public PKCE client; do not provision a client secret.";
               };
               credentials = {
-                clientId = lib.mkOption {
+                clientId = mkOption {
                   type = credentialType {
                     inherit lib;
                     name = "${name}/oidc_client_id";
@@ -626,7 +666,7 @@ in
                   default = { };
                   description = "OIDC client ID sops credential.";
                 };
-                clientSecret = lib.mkOption {
+                clientSecret = mkOption {
                   type = credentialType {
                     inherit lib;
                     name = "${name}/oidc_client_secret";
@@ -635,16 +675,16 @@ in
                   description = "OIDC client secret sops credential (unused for public clients).";
                 };
               };
-              displayName = lib.mkOption {
-                type = lib.types.str;
+              displayName = mkOption {
+                type = str;
                 default = name;
                 description = ''
                   Human-facing app name (authentik tile). Defaults
                   to the attribute name.
                 '';
               };
-              accessGroup = lib.mkOption {
-                type = lib.types.enum accessGroupNames;
+              accessGroup = mkOption {
+                type = enum accessGroupNames;
                 default = "admins";
                 description = ''
                   Access tier whose members can reach this app via
@@ -652,8 +692,8 @@ in
                   as `forwardAuthApps.<name>.accessGroup`.
                 '';
               };
-              displayGroup = lib.mkOption {
-                type = lib.types.enum displayGroupNames;
+              displayGroup = mkOption {
+                type = enum displayGroupNames;
                 default = "Infrastructure";
                 description = ''
                   UI display category — same taxonomy as
@@ -667,7 +707,7 @@ in
     };
   };
 
-  config = lib.mkMerge [
+  config = mkMerge [
     {
       # Typo guard: validate every registered app's accessGroup and
       # displayGroup against the fixed taxonomy declared above. The
@@ -680,27 +720,26 @@ in
           allApps = fwApps // oidcApps // launcherApps;
           invalid = name: app: [
             {
-              assertion = lib.elem app.accessGroup accessGroupNames;
-              message = "mkAuthentik: ${name}.accessGroup=\"${app.accessGroup}\" is not one of ${lib.concatStringsSep "," accessGroupNames}";
+              assertion = elem app.accessGroup accessGroupNames;
+              message = "mkAuthentik: ${name}.accessGroup=\"${app.accessGroup}\" is not one of ${concatStringsSep "," accessGroupNames}";
             }
             {
-              assertion = lib.elem app.displayGroup displayGroupNames;
-              message = "mkAuthentik: ${name}.displayGroup=\"${app.displayGroup}\" is not one of ${lib.concatStringsSep "," displayGroupNames}";
+              assertion = elem app.displayGroup displayGroupNames;
+              message = "mkAuthentik: ${name}.displayGroup=\"${app.displayGroup}\" is not one of ${concatStringsSep "," displayGroupNames}";
             }
           ];
         in
-        lib.flatten (lib.mapAttrsToList invalid allApps)
-        ++ [
-          {
-            # Sanity check the taxonomy lists themselves — a typo here
-            # would silently break every assertion.
-            assertion = lib.length accessGroupNames == 4 && lib.length displayGroupNames == 4;
-            message = "mkAuthentik: group taxonomy lists changed shape — revisit assertions";
-          }
-        ]
+        flatten (mapAttrsToList invalid allApps)
+        ++ singleton {
+          # Sanity check the taxonomy lists themselves — a typo here
+          # would silently break every assertion.
+          assertion = length accessGroupNames == 4 && length displayGroupNames == 4;
+          message = "mkAuthentik: group taxonomy lists changed shape — revisit assertions";
+        }
+
         # A domain-level provider must be explicit about cookie scope; a
         # single-app provider cannot accidentally set a broad cookie domain.
-        ++ lib.mapAttrsToList (name: app: {
+        ++ mapAttrsToList (name: app: {
           assertion = (app.mode == "forward_domain") == (app.cookieDomain != null);
           message = "mkAuthentik.forwardAuthApps.${name}: cookieDomain is required only for forward_domain";
         }) fwApps;
@@ -713,7 +752,7 @@ in
       };
 
       sops.templates."authentik.env" = {
-        content = ''
+        content = /* bash */ ''
           AUTHENTIK_SECRET_KEY=${config.sops.placeholder.authentik_secret_key}
           AUTHENTIK_BOOTSTRAP_EMAIL=${config.sops.placeholder.authentik_bootstrap_email}
           AUTHENTIK_BOOTSTRAP_PASSWORD=${config.sops.placeholder.authentik_bootstrap_password}
@@ -741,7 +780,7 @@ in
       mkTraefikServices.authentik = {
         port = authentikPort;
         public = true;
-        chain = [ "chain-no-auth" ];
+        chain = singleton "chain-no-auth";
       };
 
       mkObservabilityServices.authentik = {
@@ -751,7 +790,7 @@ in
           config.systemd.services.authentik-worker.name
         ];
         probes.public.url = "${config.mkTraefikServices.authentik.fullHostname}/-/health/ready/";
-        logAlerts = lib.lists.singleton {
+        logAlerts = singleton {
           alert = "AuthentikUserSignup";
           interval = "30s";
           # Overlap evaluations to tolerate ingestion delays. Group by username
@@ -776,18 +815,20 @@ in
         };
       };
 
-      mkObservability.repeatedErrorUnits = lib.mkIf config.services.authentik.enable config.mkObservabilityServices.authentik.units;
+      mkObservability = {
+        repeatedErrorUnits = mkIf config.services.authentik.enable config.mkObservabilityServices.authentik.units;
 
-      mkObservability.inactiveAlertUnits = lib.mkIf config.services.authentik.enable config.mkObservabilityServices.authentik.units;
+        inactiveAlertUnits = mkIf config.services.authentik.enable config.mkObservabilityServices.authentik.units;
+      };
 
       mkObservabilityServices.authentik-worker.metrics.url = "http://[::1]:9301/metrics";
 
       # Heal DynamicUser+StateDirectory idmap and rsynced appdata ownership.
-      systemd.services.authentik-migrate.serviceConfig.ExecStartPre = [
-        "+${pkgs.writeShellScript "authentik-state-chown" ''
-          ${pkgs.coreutils}/bin/chown -R authentik:authentik /var/lib/private/authentik
-        ''}"
-      ];
+      systemd.services.authentik-migrate.serviceConfig.ExecStartPre = singleton "+${
+        pkgs.writeShellScript "authentik-state-chown" /* bash */ ''
+          ${pkgs.coreutils}/bin/chown --recursive authentik:authentik /var/lib/private/authentik
+        ''
+      }";
 
       # Real readiness boundary for the authentik stack. The three
       # native units are all Type=simple, so systemd considers them
@@ -816,9 +857,9 @@ in
           RemainAfterExit = true;
           TimeoutStartSec = "180s";
         };
-        script = ''
-          until ${pkgs.curl}/bin/curl -fsS -o /dev/null \
-            -m 3 http://localhost:${toString authentikPort}/-/health/ready/; do
+        script = /* bash */ ''
+          until ${pkgs.curl}/bin/curl --fail --silent --show-error --output /dev/null \
+            --max-time 3 http://localhost:${toString authentikPort}/-/health/ready/; do
             sleep 2
           done
         '';
@@ -829,17 +870,17 @@ in
     # contributed so they exist before any app blueprint's `!Find` lookup
     # fires. Race-resilient via worker auto-retry.
     {
-      mkAuthentik.extraBlueprints = [ groupsBaselineDir ];
+      mkAuthentik.extraBlueprints = singleton groupsBaselineDir;
     }
 
     {
-      mkAuthentik.extraBlueprints = lib.mapAttrsToList launcherBlueprintDir launcherApps;
+      mkAuthentik.extraBlueprints = mapAttrsToList launcherBlueprintDir launcherApps;
     }
 
     # Forward-auth apps own the outpost's global providers list. OIDC
     # blueprints use the baseline groups supplied independently above.
-    (lib.mkIf (fwApps != { }) {
-      mkAuthentik.extraBlueprints = [ fwBlueprintDir ];
+    (mkIf (fwApps != { }) {
+      mkAuthentik.extraBlueprints = singleton fwBlueprintDir;
     })
 
     # KWS provides domain-level forward auth for hosts without their own
@@ -855,21 +896,19 @@ in
       };
     }
 
-    (lib.mkIf (basicAuthApps != { }) {
-      assertions = lib.mapAttrsToList (name: app: {
+    (mkIf (basicAuthApps != { }) {
+      assertions = mapAttrsToList (name: app: {
         assertion = app.accessGroup == "admins";
         message = "mkAuthentik.forwardAuthApps.${name}: basicAuth requires accessGroup = admins";
       }) basicAuthApps;
 
       systemd.services.authentik-admin-basic-auth = {
         description = "Update Authentik admins' Basic Auth credentials";
-        after = [
-          "authentik-ready.service"
-        ];
-        requires = [ "authentik-ready.service" ];
-        wantedBy = [ "multi-user.target" ];
+        after = singleton "authentik-ready.service";
+        requires = singleton "authentik-ready.service";
+        wantedBy = singleton "multi-user.target";
         environment.PYTHONPATH = "${config.services.authentik.authentikComponents.staticWorkdirDeps}";
-        path = [ config.services.authentik.authentikComponents.pythonEnv ];
+        path = singleton config.services.authentik.authentikComponents.pythonEnv;
         serviceConfig = {
           Type = "oneshot";
           DynamicUser = true;
@@ -877,7 +916,7 @@ in
           StateDirectory = "authentik";
           WorkingDirectory = "/var/lib/authentik";
           EnvironmentFile = [ config.sops.templates."authentik.env".path ];
-          LoadCredential = lib.mapAttrsToList (
+          LoadCredential = mapAttrsToList (
             name: app: "${name}_password:${config.sops.secrets.${app.basicAuth.passwordSecretName}.path}"
           ) basicAuthApps;
           ExecStart = adminBasicAuthScript;
@@ -885,14 +924,14 @@ in
       };
     })
 
-    (lib.mkIf (oidcApps != { }) {
-      sops.secrets = lib.foldl' lib.mergeAttrs { } (
-        lib.mapAttrsToList (
+    (mkIf (oidcApps != { }) {
+      sops.secrets = foldl' mergeAttrs { } (
+        mapAttrsToList (
           _: app:
           {
             ${app.credentials.clientId.secretName} = mkOidcSecret app.credentials.clientId;
           }
-          // lib.optionalAttrs (!app.publicClient) {
+          // optionalAttrs (!app.publicClient) {
             ${app.credentials.clientSecret.secretName} = mkOidcSecret app.credentials.clientSecret;
           }
         ) oidcApps
@@ -913,9 +952,7 @@ in
         config.sops.templates."authentik-oidc-apps.env".path
       ];
 
-      mkAuthentik.extraBlueprints = lib.mapAttrsToList (
-        appName: app: oidcBlueprintDir appName app
-      ) oidcApps;
+      mkAuthentik.extraBlueprints = mapAttrsToList (appName: app: oidcBlueprintDir appName app) oidcApps;
     })
   ];
 }

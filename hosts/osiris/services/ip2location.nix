@@ -4,9 +4,13 @@
   lib,
   ...
 }:
-lib.mkIf config.services.traefik.enable {
+let
+  inherit (lib.lists) singleton;
+  inherit (lib.modules) mkIf;
+in
+mkIf config.services.traefik.enable {
   # 1. Template the IP2Location Download Token for systemd
-  sops.templates."ip2location.env".content = ''
+  sops.templates."ip2location.env".content = /* bash */ ''
     IP2LOCATION_TOKEN=${config.sops.placeholder.ip2location_token}
   '';
 
@@ -18,9 +22,9 @@ lib.mkIf config.services.traefik.enable {
   # 2. The Fetcher Service
   systemd.services.update-ip2location = {
     description = "Update IP2Location Database for Traefik";
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
-    before = [ "traefik.service" ];
+    after = singleton "network-online.target";
+    wants = singleton "network-online.target";
+    before = singleton "traefik.service";
 
     serviceConfig = {
       Type = "oneshot";
@@ -30,14 +34,14 @@ lib.mkIf config.services.traefik.enable {
       EnvironmentFile = config.sops.templates."ip2location.env".path;
     };
 
-    script = ''
+    script = /* bash */ ''
       cd /var/lib/traefik/plugins-storage
 
       # Download the zipped database
-      ${pkgs.curl}/bin/curl -L -s -o db.zip "https://www.ip2location.com/download?token=''${IP2LOCATION_TOKEN}&file=DB1LITEBINIPV6"
+      ${pkgs.curl}/bin/curl --location --silent --output db.zip "https://www.ip2location.com/download?token=''${IP2LOCATION_TOKEN}&file=DB1LITEBINIPV6"
 
       # Safety Check: If the file is under 100KB, it's a text error, not a database.
-      if [ $(${pkgs.coreutils}/bin/stat -c%s db.zip) -lt 102400 ]; then
+      if [ $(${pkgs.coreutils}/bin/stat --format=%s db.zip) -lt 102400 ]; then
         echo "IP2Location Error: Download failed or rate-limited. Server returned:"
         cat db.zip
         rm db.zip
@@ -51,7 +55,7 @@ lib.mkIf config.services.traefik.enable {
 
   systemd.timers.update-ip2location = {
     description = "Weekly update of IP2Location Database";
-    wantedBy = [ "timers.target" ];
+    wantedBy = singleton "timers.target";
     timerConfig = {
       OnCalendar = "weekly";
       Persistent = true;

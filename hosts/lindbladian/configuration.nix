@@ -4,6 +4,10 @@
   lib,
   ...
 }:
+let
+  inherit (lib.lists) singleton;
+  inherit (lib.modules) mkForce;
+in
 {
   imports = [
     ./build-host.nix
@@ -23,7 +27,7 @@
   hardware.facter.reportPath = ./facter.json;
 
   role = "desktop";
-  extraUsers = [ "lab" ];
+  extraUsers = singleton "lab";
 
   desktop.sambaMounts.allUsers = true;
 
@@ -34,23 +38,25 @@
     "nvidia_drm"
   ];
 
-  hardware.graphics = {
-    enable = true;
-    enable32Bit = true;
+  hardware = {
+    graphics = {
+      enable = true;
+      enable32Bit = true;
+    };
+
+    nvidia = {
+      modesetting.enable = true;
+      open = true;
+      branch = "latest";
+    };
   };
 
-  hardware.nvidia = {
-    modesetting.enable = true;
-    open = true;
-    branch = "latest";
-  };
-
-  stylix.image = lib.mkForce ../../wallpapers/wallpaper_thz.jpg;
+  stylix.image = mkForce ../../wallpapers/wallpaper_thz.jpg;
 
   username = "wkrokosz";
 
   # support building for anubis
-  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+  boot.binfmt.emulatedSystems = singleton "aarch64-linux";
 
   home-manager.users.${config.username} = {
     imports = [

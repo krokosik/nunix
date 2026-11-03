@@ -1,6 +1,6 @@
 { config, lib, ... }:
 let
-  inherit (lib) singleton optionals;
+  inherit (lib.lists) optionals singleton;
 in
 {
   services.sunshine = {

@@ -1,9 +1,11 @@
 {
+  lib,
   modulesPath,
   pkgs,
   ...
 }:
 let
+  inherit (lib.lists) singleton;
   rescueEnterNixos = pkgs.callPackage (
     {
       coreutils,
@@ -123,7 +125,7 @@ let
   ) { };
 in
 {
-  imports = [ "${modulesPath}/installer/cd-dvd/installation-cd-minimal.nix" ];
+  imports = singleton "${modulesPath}/installer/cd-dvd/installation-cd-minimal.nix";
 
   networking = {
     hostName = "nixos-rescue";

@@ -6,65 +6,95 @@
   ...
 }:
 let
-  inherit (lib.lists) elem;
-  inherit (lib) getName;
+  inherit (lib.lists) elem singleton;
+  inherit (lib.meta) getExe getExe';
+  inherit (lib.strings) getName;
   user = config.username;
   flakePath = "/home/${user}/work/nunix";
+  cutExe = getExe' pkgs.coreutils "cut";
+  gawkExe = getExe pkgs.gawk;
+  gitExe = getExe config.programs.git.package;
+  lessExe = getExe pkgs.less;
+  nixExe = getExe config.nix.package;
+  nixStoreExe = getExe' config.nix.package "nix-store";
+  sortExe = getExe' pkgs.coreutils "sort";
 in
 {
-  nix.channel.enable = false;
+  nix = {
+    channel.enable = false;
 
-  nix.settings = {
-    # Enable flakes
-    experimental-features = [
-      "nix-command"
-      "flakes"
-    ];
-    # Trusted users
-    trusted-users = [
-      "root"
-      "${user}"
-    ];
-    download-buffer-size = 500000000;
+    settings = {
+      # ENABLE FLAKES
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
+      # TRUSTED USERS
+      trusted-users = [
+        "root"
+        "${user}"
+      ];
+      download-buffer-size = 500000000;
 
-    # add extra cache substituters for binary cache access (e.g. cachix)
-    substituters = [
-      "https://nix-community.cachix.org/"
-      "https://niks3.${config.privateDomain}"
-    ];
-    # add extra cache signing keys for binary cache access (e.g. cachix)
-    trusted-public-keys = [
-      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      "niks3-1:hTt2LKPgxvboGPM2ZNZYLhuAkUQVJz9SmxDZh6vWqtw="
-    ];
-    connect-timeout = 2;
-    fallback = true;
+      # add extra cache substituters for binary cache access (e.g. cachix)
+      substituters = [
+        "https://nix-community.cachix.org/"
+        "https://niks3.${config.privateDomain}"
+      ];
+      # add extra cache signing keys for binary cache access (e.g. cachix)
+      trusted-public-keys = [
+        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+        "niks3-1:hTt2LKPgxvboGPM2ZNZYLhuAkUQVJz9SmxDZh6vWqtw="
+      ];
+      connect-timeout = 2;
+      fallback = true;
 
-    use-xdg-base-directories = true;
+      use-xdg-base-directories = true;
+    };
+
+    # Add unstable to flake registry to use locally (e.g. `nix run nixpkgs-unstable#hatch`)
+    registry.nixpkgs-unstable.flake = inputs.nixpkgs-unstable;
+
+    optimise.automatic = true;
   };
 
-  # Enable git
-  programs.git = {
-    enable = true;
-    package = pkgs.gitFull;
+  programs = {
+    # ENABLE GIT
+    git = {
+      enable = true;
+      package = pkgs.gitFull;
 
-    config = {
-      safe."directory" = flakePath;
+      config.safe."directory" = flakePath;
+    };
+
+    # ENABLE NH
+    nh = {
+      enable = true;
+      clean = {
+        enable = true;
+        extraArgs = "--keep 5 --keep-since 4d";
+      };
+      flake = flakePath;
     };
   };
 
-  # Enable nh
-  programs.nh = {
-    enable = true;
-    clean.enable = true;
-    clean.extraArgs = "--keep 5 --keep-since 4d";
-    flake = flakePath;
+  environment = {
+    sessionVariables.NIXOS_HOST = config.networking.hostName;
+
+    shellAliases = {
+      # SHOW NIX UPDATES
+      nd = /* bash */ ''
+        ${nixExe} profile diff-closures --profile /nix/var/nix/profiles/system |
+              ${gawkExe} '/^Version [0-9]+ -> [0-9]+:$/ {block=""} {block=block $0 "\n"} END {print block}'
+      '';
+      # SHOW INSTALLED PACKAGES
+      ni = "${nixStoreExe} --query --requisites /run/current-system/sw | ${cutExe} --delimiter=- --fields=2- | ${sortExe} | ${lessExe}";
+      # PULL NUNIX AND NUNIX-SECRETS REPOS
+      nl = "${gitExe} -C ${flakePath} pull";
+    };
+
+    systemPackages = singleton pkgs.nixfmt-tree;
   };
-
-  environment.sessionVariables.NIXOS_HOST = config.networking.hostName;
-
-  # Add unstable to flake registry to use locally (e.g. `nix run nixpkgs-unstable#hatch`)
-  nix.registry.nixpkgs-unstable.flake = inputs.nixpkgs-unstable;
 
   # Allow unfree packages and pulling some packages from stable
   nixpkgs.config = {
@@ -100,19 +130,7 @@ in
     permittedInsecurePackages = [ ];
   };
 
-  environment.shellAliases = {
-    # Show nix updates
-    nd = ''
-      nix profile diff-closures --profile /nix/var/nix/profiles/system |
-            awk '/^Version [0-9]+ -> [0-9]+:$/ {block=""} {block=block $0 "\n"} END {print block}'
-    '';
-    # Show installed packages
-    ni = "nix-store --query --requisites /run/current-system/sw | cut -d- -f2- | sort | less";
-    # Pull nunix and nunix-secrets repos
-    nl = "git -C ${flakePath} pull";
-  };
-
-  # System maintenance
+  # SYSTEM MAINTENANCE
   # system.autoUpgrade = {
   #   enable = true;
   #   flake = "${flakePath}#${config.networking.hostName}";
@@ -123,6 +141,7 @@ in
   #   persistent = true;
   #   randomizedDelaySec = "45min";
   # };
+
   # Allow nixos-upgrade to restart on failure (e.g. when laptop wakes up before network connection is set)
   systemd.services.nixos-upgrade = {
     preStart = "${pkgs.host}/bin/host ${config.publicDomain}"; # Check network connectivity
@@ -134,8 +153,6 @@ in
       StartLimitIntervalSec = 600;
       StartLimitBurst = 2;
     };
-    path = [ pkgs.host ];
+    path = singleton pkgs.host;
   };
-  nix.optimise.automatic = true;
-  environment.systemPackages = [ pkgs.nixfmt-tree ];
 }

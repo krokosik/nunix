@@ -5,6 +5,7 @@
   ...
 }:
 let
+  inherit (lib.kernel) module;
   inherit (lib.lists) singleton;
   inherit (lib.modules) mkAfter;
 
@@ -44,7 +45,7 @@ in
       name = "surface-pro-8-ov5693-clock-gate";
       patch = ./patches/ov5693-surface-pro-8-clock-gate.patch;
       structuredExtraConfig = {
-        VIDEO_INTEL_IPU6 = lib.kernel.module;
+        VIDEO_INTEL_IPU6 = module;
       };
     }
     {
@@ -59,10 +60,12 @@ in
 
   # Scope the tuned camera stack to the services. Overriding pkgs.libcamera
   # globally also changes application libraries through PipeWire and GStreamer.
-  services.pipewire.package = pkgs.pipewire.override { libcamera = surfaceLibcamera; };
+  services.pipewire = {
+    package = pkgs.pipewire.override { libcamera = surfaceLibcamera; };
 
-  services.pipewire.wireplumber.package = pkgs.wireplumber.override {
-    pipewire = config.services.pipewire.package;
+    wireplumber.package = pkgs.wireplumber.override {
+      pipewire = config.services.pipewire.package;
+    };
   };
 
   services.pipewire.wireplumber.extraConfig."10-surface-camera" = {

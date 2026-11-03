@@ -1,3 +1,7 @@
+{ lib, ... }:
+let
+  inherit (lib.lists) singleton;
+in
 {
   disko.devices = {
     disk.main = {
@@ -29,7 +33,7 @@
               settings.allowDiscards = true;
               content = {
                 type = "btrfs";
-                extraArgs = [ "--force" ];
+                extraArgs = singleton "--force";
                 subvolumes = {
                   "/root" = {
                     mountpoint = "/";

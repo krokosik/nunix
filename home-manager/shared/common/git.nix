@@ -7,6 +7,7 @@
 let
   inherit (lib.lists) singleton;
   inherit (lib.meta) getExe';
+  inherit (lib.modules) mkIf;
 in
 {
   programs.git = {
@@ -32,6 +33,6 @@ in
 
   programs.git-credential-oauth = {
     enable = true;
-    extraFlags = lib.mkIf (osConfig.role == "server") (singleton "--device");
+    extraFlags = mkIf (osConfig.role == "server") (singleton "--device");
   };
 }

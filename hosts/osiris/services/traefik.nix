@@ -4,6 +4,18 @@
   ...
 }:
 let
+  inherit (lib.attrsets) mapAttrs mapAttrs' nameValuePair;
+  inherit (lib.lists) singleton;
+  inherit (lib.modules) mkForce mkIf mkMerge;
+  inherit (lib.options) mkOption;
+  inherit (lib.types)
+    attrsOf
+    bool
+    listOf
+    port
+    str
+    submodule
+    ;
   cfg = config.services.traefik;
 in
 {
@@ -13,52 +25,52 @@ in
     ./traefik-logs.nix
   ];
 
-  options.mkTraefikServices = lib.mkOption {
-    type = lib.types.attrsOf (
+  options.mkTraefikServices = mkOption {
+    type = attrsOf (
       let
         outerConfig = config;
       in
-      lib.types.submodule (
+      submodule (
         { name, config, ... }:
         {
           options = {
-            port = lib.mkOption {
-              type = lib.types.port;
+            port = mkOption {
+              type = port;
               default = null;
               description = ''
                 Host port to bind the traefik service to.
               '';
             };
-            host = lib.mkOption {
-              type = lib.types.str;
+            host = mkOption {
+              type = str;
               default = "localhost";
               description = ''
                 Host address to where the traefik service is bound.
               '';
             };
-            subdomain = lib.mkOption {
-              type = lib.types.str;
+            subdomain = mkOption {
+              type = str;
               default = name;
               description = ''
                 Subdomain to bind the traefik service to. Defaults to the attribute name.
               '';
             };
-            public = lib.mkOption {
-              type = lib.types.bool;
+            public = mkOption {
+              type = bool;
               default = false;
               description = ''
                 Whether the traefik service is public-facing (routed via public domain) or internal-only (binds to private domain). Defaults to false (internal-only).
               '';
             };
-            chain = lib.mkOption {
-              type = lib.types.listOf lib.types.str;
-              default = [ "chain-authentik" ];
+            chain = mkOption {
+              type = listOf str;
+              default = singleton "chain-authentik";
               description = ''
                 Specify a list of middlewares to apply to the traefik router. Defaults to [ "chain-authentik" ].
               '';
             };
-            fullHostname = lib.mkOption {
-              type = lib.types.str;
+            fullHostname = mkOption {
+              type = str;
               readOnly = true;
               description = ''
                 Full hostname of the traefik service. Automatically derived from the subdomain and public/private domain options.
@@ -84,16 +96,18 @@ in
 
   # Merging uncoditional and conditional config requires merge, since implicit
   # config cannot coexist with explicit config (needed for mkIf).
-  config = lib.mkMerge [
+  config = mkMerge [
     {
       mkObservabilityServices.traefik = {
-        units = lib.lists.singleton config.systemd.services.traefik.name;
+        units = singleton config.systemd.services.traefik.name;
         metrics.url = "http://127.0.0.1:8000/metrics";
       };
 
-      mkObservability.repeatedErrorUnits = lib.mkIf cfg.enable config.mkObservabilityServices.traefik.units;
+      mkObservability = {
+        repeatedErrorUnits = mkIf cfg.enable config.mkObservabilityServices.traefik.units;
 
-      mkObservability.inactiveAlertUnits = lib.mkIf cfg.enable config.mkObservabilityServices.traefik.units;
+        inactiveAlertUnits = mkIf cfg.enable config.mkObservabilityServices.traefik.units;
+      };
 
       services.traefik = {
         enable = true;
@@ -135,15 +149,13 @@ in
               ];
               http.tls = {
                 certResolver = "cfResolver";
-                domains = [
-                  {
-                    main = "${config.publicDomain}";
-                    sans = [
-                      "*.${config.publicDomain}"
-                      "*.${config.privateDomain}"
-                    ];
-                  }
-                ];
+                domains = singleton {
+                  main = "${config.publicDomain}";
+                  sans = [
+                    "*.${config.publicDomain}"
+                    "*.${config.privateDomain}"
+                  ];
+                };
               };
             };
             traefik = {
@@ -156,14 +168,14 @@ in
             insecure = false;
           };
 
-          # Docker Provider
+          # DOCKER PROVIDER
           providers.docker = {
             endpoint = "unix:///var/run/docker.sock";
             exposedByDefault = false;
             network = "traefik_proxy";
           };
 
-          # Let's Encrypt (Cloudflare)
+          # LET'S ENCRYPT (CLOUDFLARE)
           certificatesResolvers.cfResolver.acme = {
             dnsChallenge = {
               provider = "cloudflare";
@@ -178,7 +190,7 @@ in
             };
           };
 
-          # Metrics & Logging
+          # METRICS & LOGGING
           metrics.prometheus = {
             entryPoint = "traefik";
             addEntryPointsLabels = true;
@@ -199,39 +211,39 @@ in
           accessLog = {
             format = "json";
             bufferingSize = 100;
-            fields.headers.defaultMode = "drop";
-            fields.headers.names = {
-              User-Agent = "keep";
-              Referer = "keep";
+            fields.headers = {
+              defaultMode = "drop";
+              names = {
+                User-Agent = "keep";
+                Referer = "keep";
+              };
             };
           };
         };
 
         dynamicConfigOptions.http = {
-          services = lib.mapAttrs' (
+          services = mapAttrs' (
             name: svc:
-            lib.nameValuePair "${name}-svc" {
-              loadBalancer.servers = [
-                { url = "http://${svc.host}:${toString svc.port}"; }
-              ];
+            nameValuePair "${name}-svc" {
+              loadBalancer.servers = singleton { url = "http://${svc.host}:${toString svc.port}"; };
             }
           ) config.mkTraefikServices;
 
           routers =
-            (lib.mapAttrs (name: svc: {
+            (mapAttrs (name: svc: {
               rule = "Host(`${svc.subdomain}.${
                 if svc.public then config.publicDomain else config.privateDomain
               }`)";
-              entryPoints = [ "websecure" ];
+              entryPoints = singleton "websecure";
               service = "${name}-svc";
               middlewares = svc.chain;
             }) config.mkTraefikServices)
             // {
               traefik-dashboard = {
                 rule = "Host(`traefik.${config.privateDomain}`)";
-                entryPoints = [ "websecure" ];
+                entryPoints = singleton "websecure";
                 service = "api@internal";
-                middlewares = [ "chain-authentik" ];
+                middlewares = singleton "chain-authentik";
               };
             };
         };
@@ -239,21 +251,21 @@ in
 
     }
 
-    (lib.mkIf cfg.enable {
-      users.users.traefik.extraGroups = [ "docker" ];
+    (mkIf cfg.enable {
+      users.users.traefik.extraGroups = singleton "docker";
 
       systemd.services.traefik = {
-        requires = [ "docker.service" ];
-        wants = [ "network-online.target" ];
+        requires = singleton "docker.service";
+        wants = singleton "network-online.target";
         after = [
           "docker.service"
           "network-online.target"
           "systemd-resolved.service"
         ];
-        startLimitIntervalSec = lib.mkForce 0;
+        startLimitIntervalSec = mkForce 0;
         serviceConfig = {
           EnvironmentFile = config.sops.templates."traefik_cloudflare.env".path;
-          Restart = lib.mkForce "always";
+          Restart = mkForce "always";
           RestartSec = "30s";
         };
       };
@@ -265,14 +277,14 @@ in
           cf_email.key = "cf/email";
         };
         templates."traefik_cloudflare.env" = {
-          content = ''
+          content = /* bash */ ''
             CF_DNS_API_TOKEN=${config.sops.placeholder.cf_dns_api_token}
             CF_ZONE_API_TOKEN=${config.sops.placeholder.cf_zone_api_token}
             CLOUDFARE_EMAIL=${config.sops.placeholder.cf_email}
           '';
 
           owner = config.users.users.traefik.name;
-          restartUnits = [ "traefik.service" ];
+          restartUnits = singleton "traefik.service";
         };
       };
 

@@ -5,9 +5,11 @@
   ...
 }:
 let
+  inherit (lib.licenses) mit;
   inherit (lib.lists) singleton;
   inherit (lib.meta) getExe getExe';
   inherit (lib.modules) mkIf;
+  inherit (lib.strings) makeBinPath makeLibraryPath;
 
   computerUse = pkgs.callPackage (
     {
@@ -54,14 +56,14 @@ let
         wrapProgram "$out/bin/computer-use-linux" \
           --set-default COMPUTER_USE_LINUX_INDICATOR_BIN "$out/bin/computer-use-linux-indicator" \
           --prefix PATH : ${
-            lib.makeBinPath [
+            makeBinPath [
               ydotool
               wtype
               hyprland
               glib
             ]
           } \
-          --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath (singleton libxkbcommon)}
+          --prefix LD_LIBRARY_PATH : ${makeLibraryPath (singleton libxkbcommon)}
 
         runHook postInstall
       '';
@@ -69,7 +71,7 @@ let
       meta = {
         description = "Linux desktop control over MCP";
         homepage = "https://github.com/agent-sh/computer-use-linux";
-        license = lib.licenses.mit;
+        license = mit;
         platforms = singleton "x86_64-linux";
         mainProgram = "computer-use-linux";
       };

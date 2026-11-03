@@ -1,7 +1,8 @@
 { lib, ... }:
 let
-  inherit (lib.hm.gvariant) mkTuple;
+  inherit (lib.hm) gvariant;
   inherit (lib.lists) singleton;
+  inherit (gvariant) mkTuple;
 in
 {
   # Blueman uses the zero UUID for device connections; audio UUIDs are unsupported.

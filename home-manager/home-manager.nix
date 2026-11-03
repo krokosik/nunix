@@ -1,11 +1,15 @@
 {
   inputs,
+  lib,
   outputs,
   pkgs,
   ...
 }:
+let
+  inherit (lib.lists) singleton;
+in
 {
-  # Home-manager configuration
+  # HOME-MANAGER CONFIGURATION
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
@@ -13,6 +17,6 @@
     extraSpecialArgs = {
       inherit inputs outputs pkgs;
     };
-    sharedModules = [ inputs.sops-nix.homeManagerModules.sops ];
+    sharedModules = singleton inputs.sops-nix.homeManagerModules.sops;
   };
 }

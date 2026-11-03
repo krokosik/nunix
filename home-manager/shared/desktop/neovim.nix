@@ -1,4 +1,7 @@
-{ inputs, ... }:
+{ inputs, lib, ... }:
+let
+  inherit (lib.lists) singleton;
+in
 {
   programs.neovim = {
     enable = true;
@@ -7,7 +10,7 @@
     viAlias = true;
   };
 
-  imports = [ inputs.lazyvim.homeManagerModules.default ];
+  imports = singleton inputs.lazyvim.homeManagerModules.default;
   programs.lazyvim = {
     enable = true;
     ignoreBuildNotifications = true;

@@ -4,8 +4,12 @@
   lib,
   ...
 }:
+let
+  inherit (lib.lists) singleton;
+  inherit (lib.modules) mkForce;
+in
 {
-  imports = [ inputs.dank-greeter.nixosModules.default ];
+  imports = singleton inputs.dank-greeter.nixosModules.default;
 
   programs.dms-greeter = {
     enable = true;
@@ -27,9 +31,9 @@
   services.greetd.settings.default_session.user = "greeter";
 
   systemd.services.greetd = {
-    after = [ "plymouth-quit.service" ];
+    after = singleton "plymouth-quit.service";
     serviceConfig = {
-      KeyringMode = lib.mkForce "inherit";
+      KeyringMode = mkForce "inherit";
       StandardError = "journal";
     };
   };

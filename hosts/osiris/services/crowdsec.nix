@@ -6,8 +6,12 @@
   ...
 }:
 let
-  inherit (lib.lists) singleton;
-  secretspath = toString inputs.my-secrets;
+  inherit (lib.lists) optionals singleton;
+  inherit (lib.meta) getExe';
+  inherit (lib.modules) mkForce mkIf;
+  secretspath = "${inputs.my-secrets}";
+  cscliExe = getExe' config.services.crowdsec.package "cscli";
+  run0Exe = getExe' config.systemd.package "run0";
 in
 {
   environment.etc."crowdsec/config.yaml".source =
@@ -39,19 +43,17 @@ in
       "crowdsecurity/appsec-generic-rules"
     ];
 
-    hub.appSecConfigs = [
-      "crowdsecurity/appsec-default"
-    ];
+    hub.appSecConfigs = singleton "crowdsecurity/appsec-default";
 
     localConfig.acquisitions = [
       {
         source = "journalctl";
-        journalctl_filter = [ "_SYSTEMD_UNIT=sshd.service" ];
+        journalctl_filter = singleton "_SYSTEMD_UNIT=sshd.service";
         labels.type = "syslog";
       }
       {
         source = "journalctl";
-        journalctl_filter = [ "_SYSTEMD_UNIT=traefik.service" ];
+        journalctl_filter = singleton "_SYSTEMD_UNIT=traefik.service";
         labels.type = "traefik";
       }
       {
@@ -82,19 +84,19 @@ in
     settings = {
       insecure_skip_verify = false;
       deny_action = "DROP";
-      supported_decisions_types = [ "ban" ];
+      supported_decisions_types = singleton "ban";
     };
   };
 
   mkObservability.inactiveAlertUnits =
-    lib.optionals config.services.crowdsec.enable (singleton config.systemd.services.crowdsec.name)
-    ++ lib.optionals config.services.crowdsec-firewall-bouncer.enable (
+    optionals config.services.crowdsec.enable (singleton config.systemd.services.crowdsec.name)
+    ++ optionals config.services.crowdsec-firewall-bouncer.enable (
       singleton config.systemd.services.crowdsec-firewall-bouncer.name
     );
 
-  systemd.services.traefik = lib.mkIf config.services.traefik.enable {
-    after = [ "crowdsec.service" ];
-    wants = [ "crowdsec.service" ];
+  systemd.services.traefik = mkIf config.services.traefik.enable {
+    after = singleton "crowdsec.service";
+    wants = singleton "crowdsec.service";
   };
 
   mkTraefikServices.crowdsec = {
@@ -109,29 +111,29 @@ in
     in
     {
       serviceConfig = {
-        DynamicUser = lib.mkForce false;
+        DynamicUser = mkForce false;
         StateDirectory = "crowdsec";
       };
-      postStart = ''
+      postStart = /* bash */ ''
         export USER=${config.users.users.crowdsec.name}
         CSCLI="/run/current-system/sw/bin/cscli"
 
-        if ! $CSCLI console status -o raw | ${pkgs.gnugrep}/bin/grep -q "true"; then
+        if ! $CSCLI console status --output raw | ${pkgs.gnugrep}/bin/grep --quiet "true"; then
           $CSCLI console enroll "$(< ${config.sops.secrets.crowdsec_console_token.path})" --name ${config.services.crowdsec.name}
         fi
 
-        # Inject VPS Agent (anubis)
-        if ! $CSCLI machines list -o json | ${pkgs.jq}/bin/jq -e '.[] | select(.machineId == "${vpsHostname}")' > /dev/null; then
+        # INJECT VPS AGENT (ANUBIS)
+        if ! $CSCLI machines list --output json | ${pkgs.jq}/bin/jq --exit-status '.[] | select(.machineId == "${vpsHostname}")' > /dev/null; then
            $CSCLI machines add ${vpsHostname} --password "$(< ${config.sops.secrets.crowdsec_vps_machine_password.path})" -f - > /dev/null
         fi
 
-        # Inject VPS Bouncer
-        if ! $CSCLI bouncers list -o json | ${pkgs.jq}/bin/jq -e '.[] | select(.name == "${vpsHostname}-bouncer")' > /dev/null; then
+        # INJECT VPS BOUNCER
+        if ! $CSCLI bouncers list --output json | ${pkgs.jq}/bin/jq --exit-status '.[] | select(.name == "${vpsHostname}-bouncer")' > /dev/null; then
            $CSCLI bouncers add ${vpsHostname}-bouncer --key "$(< ${config.sops.secrets.crowdsec_vps_bouncer_key.path})"
         fi
 
-        # Inject Traefik Bouncer
-        if ! $CSCLI bouncers list -o json | ${pkgs.jq}/bin/jq -e '.[] | select(.name == "traefik-bouncer")' > /dev/null; then
+        # INJECT TRAEFIK BOUNCER
+        if ! $CSCLI bouncers list --output json | ${pkgs.jq}/bin/jq --exit-status '.[] | select(.name == "traefik-bouncer")' > /dev/null; then
            $CSCLI bouncers add traefik-bouncer --key "$(< ${config.sops.secrets.crowdsec_traefik_bouncer_key.path})"
         fi
 
@@ -145,39 +147,39 @@ in
     };
 
   # cscli must be run as crowdsec user
-  environment.shellAliases.cscli = "run0 -u crowdsec cscli";
+  environment.shellAliases.cscli = "${run0Exe} --user crowdsec ${cscliExe}";
 
-  systemd.services.crowdsec-update-hub.serviceConfig.DynamicUser = lib.mkForce false;
+  systemd.services.crowdsec-update-hub.serviceConfig.DynamicUser = mkForce false;
   systemd.services.crowdsec-firewall-bouncer = {
-    startLimitIntervalSec = lib.mkForce 0;
+    startLimitIntervalSec = mkForce 0;
     serviceConfig = {
-      DynamicUser = lib.mkForce false;
+      DynamicUser = mkForce false;
       Restart = "always";
       RestartSec = "30s";
     };
   };
-  systemd.services.crowdsec-firewall-bouncer-register.serviceConfig.DynamicUser = lib.mkForce false;
+  systemd.services.crowdsec-firewall-bouncer-register.serviceConfig.DynamicUser = mkForce false;
 
   sops.secrets = {
     crowdsec_console_token = {
       key = "crowdsec/console_token";
       mode = "0400";
       owner = config.users.users.crowdsec.name;
-      restartUnits = [ "crowdsec.service" ];
+      restartUnits = singleton "crowdsec.service";
     };
     crowdsec_vps_machine_password = {
       sopsFile = "${secretspath}/server/secrets.yaml";
       key = "crowdsec/vps_machine_password";
       mode = "0400";
       owner = config.users.users.crowdsec.name;
-      restartUnits = [ "crowdsec.service" ];
+      restartUnits = singleton "crowdsec.service";
     };
     crowdsec_vps_bouncer_key = {
       sopsFile = "${secretspath}/server/secrets.yaml";
       key = "crowdsec/vps_bouncer_key";
       mode = "0400";
       owner = config.users.users.crowdsec.name;
-      restartUnits = [ "crowdsec.service" ];
+      restartUnits = singleton "crowdsec.service";
     };
   };
 }

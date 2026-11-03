@@ -5,11 +5,13 @@
   ...
 }:
 let
+  inherit (lib.lists) singleton;
+  inherit (lib.modules) mkIf;
   oidc = config.mkAuthentik.oidcApps.immich;
 in
 {
   # ==========================================
-  # Immich Configuration
+  # IMMICH CONFIGURATION
   # ==========================================
   services.immich = {
     enable = true;
@@ -56,29 +58,28 @@ in
     logoutUri = "${config.mkTraefikServices.immich.fullHostname}/api/oauth/backchannel-logout";
   };
 
-  systemd.services.immich-server.unitConfig.RequiresMountsFor = [
-    config.services.immich.mediaLocation
-  ];
+  systemd.services.immich-server.unitConfig.RequiresMountsFor =
+    singleton config.services.immich.mediaLocation;
 
   mkPostgresServices.immich = { };
 
   services.postgresql = {
-    extensions = ps: with ps; lib.singleton vectorchord;
-    initdbArgs = [ "--data-checksums" ];
+    extensions = ps: with ps; singleton vectorchord;
+    initdbArgs = singleton "--data-checksums";
   };
 
   mkTraefikServices.immich = {
     public = true;
-    chain = [ "chain-no-auth" ];
+    chain = singleton "chain-no-auth";
     port = config.services.immich.port;
   };
 
   mkObservabilityServices.immich = {
-    units = [ "immich-server.service" ];
+    units = singleton "immich-server.service";
     probes.public = {
       url = "${config.mkTraefikServices.immich.fullHostname}/api/server/ping";
     };
   };
 
-  mkObservability.inactiveAlertUnits = lib.mkIf config.services.immich.enable config.mkObservabilityServices.immich.units;
+  mkObservability.inactiveAlertUnits = mkIf config.services.immich.enable config.mkObservabilityServices.immich.units;
 }

@@ -6,6 +6,7 @@
 }:
 let
   inherit (lib.lists) singleton;
+  inherit (lib.meta) getExe';
   inherit (config.home-manager.users.${config.username}.home) sessionVariables;
   mathematica = pkgs.unstable.mathematica.override {
     source = pkgs.requireFile {
@@ -26,13 +27,14 @@ in
   home-manager.users.${config.username} = {
     home.packages = singleton mathematica;
 
-    xdg.dataFile."applications/com.wolfram.Wolfram.15.0.desktop".source =
-      pkgs.runCommand "wolfram-desktop" { }
-        /* bash */ ''
-          cp ${mathematica}/share/applications/com.wolfram.Wolfram.15.0.desktop "$out"
-          substituteInPlace "$out" --replace-fail $'\nExec=' \
-            $'\nExec=${lib.getExe' pkgs.coreutils "env"} WOLFRAM_USERBASE=${sessionVariables.WOLFRAM_USERBASE} WOLFRAM_LOCALBASE=${sessionVariables.WOLFRAM_LOCALBASE} '
-        '';
+    xdg.dataFile."applications/com.wolfram.Wolfram.15.0.desktop".source = pkgs.callPackage (
+      { runCommand }:
+      runCommand "wolfram-desktop" { } /* bash */ ''
+        cp ${mathematica}/share/applications/com.wolfram.Wolfram.15.0.desktop "$out"
+        substituteInPlace "$out" --replace-fail $'\nExec=' \
+          $'\nExec=${getExe' pkgs.coreutils "env"} WOLFRAM_USERBASE=${sessionVariables.WOLFRAM_USERBASE} WOLFRAM_LOCALBASE=${sessionVariables.WOLFRAM_LOCALBASE} '
+      ''
+    ) { };
 
     programs.mcp.servers.Wolfram = {
       enabled = false;

@@ -1,16 +1,18 @@
 {
   config,
+  lib,
   ...
 }:
+let
+  inherit (lib.lists) singleton;
+in
 {
   services.tailscale.enable = true;
 
   networking.firewall = {
-    trustedInterfaces = [ "tailscale0" ];
-    allowedUDPPorts = [ config.services.tailscale.port ];
+    trustedInterfaces = singleton "tailscale0";
+    allowedUDPPorts = singleton config.services.tailscale.port;
   };
 
-  systemd.services.tailscaled.serviceConfig.Environment = [
-    "TS_DEBUG_FIREWALL_MODE=nftables"
-  ];
+  systemd.services.tailscaled.serviceConfig.Environment = singleton "TS_DEBUG_FIREWALL_MODE=nftables";
 }

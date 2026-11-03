@@ -1,15 +1,20 @@
 { config, lib, ... }:
 let
-  listenerFlag = lib.lists.findFirst (
-    flag: lib.strings.hasPrefix "-httpListenAddr=" flag
+  inherit (lib.lists) findFirst last;
+  inherit (lib.strings)
+    hasPrefix
+    removePrefix
+    splitString
+    toInt
+    ;
+  listenerFlag = findFirst (
+    flag: hasPrefix "-httpListenAddr=" flag
   ) "" config.services.vmagent.extraArgs;
 in
 {
   mkTraefikServices.vmagent = {
     host = "127.0.0.1";
-    port = lib.toInt (
-      lib.lists.last (lib.splitString ":" (lib.removePrefix "-httpListenAddr=" listenerFlag))
-    );
+    port = toInt (last (splitString ":" (removePrefix "-httpListenAddr=" listenerFlag)));
     chain = [
       "chain-tailscale"
       "chain-authentik"

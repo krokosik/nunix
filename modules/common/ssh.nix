@@ -5,9 +5,10 @@
   ...
 }:
 let
-  inherit (lib) getExe';
+  inherit (lib.lists) singleton;
+  inherit (lib.meta) getExe';
 
-  sshKeys = import ./ssh-keys.nix;
+  sshKeys = import ./ssh-keys.nix { inherit lib; };
 in
 {
   programs.ssh = {
@@ -27,7 +28,7 @@ in
   # unencrypted user key. Existing identities are never rotated.
   systemd.services.generate-user-ssh-key = {
     description = "Generate SSH key for ${config.username}";
-    wantedBy = [ "multi-user.target" ];
+    wantedBy = singleton "multi-user.target";
     serviceConfig = {
       Type = "oneshot";
       User = config.username;

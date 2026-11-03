@@ -5,9 +5,9 @@
   ...
 }:
 let
+  inherit (lib.attrsets) mapAttrsToList;
   inherit (lib.lists) singleton;
   inherit (lib.modules) mkIf;
-  inherit (lib.attrsets) mapAttrsToList;
   inherit (lib.strings) concatStringsSep;
 
   yaml = pkgs.formats.yaml { };
@@ -43,17 +43,20 @@ in
 {
   mkAuthentik.extraBlueprints = mkIf config.services.authentik.enable (
     singleton (
-      pkgs.runCommandLocal "authentik-flows-blueprint" { } /* bash */ ''
-        mkdir --parents "$out/default"
-        cp ${./authentik-blueprints/flows.yaml} "$out/default/flow-default-authentication-flow.yaml"
-        substituteInPlace "$out/default/flow-default-authentication-flow.yaml" \
-          --replace-fail 'authentik.krokosik.com' 'authentik.${config.publicDomain}'
-        ${concatStringsSep "\n" (
-          mapAttrsToList (filename: name: /* bash */ ''
-            cp ${delegateBlueprint filename name} "$out/default/${filename}"
-          '') delegatedDefaults
-        )}
-      ''
+      pkgs.callPackage (
+        { runCommandLocal }:
+        runCommandLocal "authentik-flows-blueprint" { } /* bash */ ''
+          mkdir --parents "$out/default"
+          cp ${./authentik-blueprints/flows.yaml} "$out/default/flow-default-authentication-flow.yaml"
+          substituteInPlace "$out/default/flow-default-authentication-flow.yaml" \
+            --replace-fail 'authentik.krokosik.com' 'authentik.${config.publicDomain}'
+          ${concatStringsSep "\n" (
+            mapAttrsToList (filename: name: /* bash */ ''
+              cp ${delegateBlueprint filename name} "$out/default/${filename}"
+            '') delegatedDefaults
+          )}
+        ''
+      ) { }
     )
   );
 }

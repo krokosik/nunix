@@ -30,35 +30,39 @@ in
   );
 
   # The Type Cover and a USB keyboard must work at the LUKS prompt.
-  boot.initrd.availableKernelModules = [
-    "pinctrl_tigerlake"
-    "intel_lpss_pci"
-    "8250_dw"
-    "surface_aggregator"
-    "surface_aggregator_registry"
-    "surface_aggregator_hub"
-    "surface_hid_core"
-    "surface_hid"
-    "hid_multitouch"
-    "usbhid"
-    "xhci_pci"
-  ];
+  boot = {
+    initrd.availableKernelModules = [
+      "pinctrl_tigerlake"
+      "intel_lpss_pci"
+      "8250_dw"
+      "surface_aggregator"
+      "surface_aggregator_registry"
+      "surface_aggregator_hub"
+      "surface_hid_core"
+      "surface_hid"
+      "hid_multitouch"
+      "usbhid"
+      "xhci_pci"
+    ];
 
-  # The default also includes --firmware-builtin
-  boot.loader.limine.secureBoot.autoEnrollKeys.extraArgs = singleton "--microsoft";
+    # The default also includes --firmware-builtin
+    loader.limine.secureBoot.autoEnrollKeys.extraArgs = singleton "--microsoft";
+  };
 
   # FIRMWARE AND TOOLS
-  hardware.cpu.intel.updateMicrocode = true;
+  hardware = {
+    cpu.intel.updateMicrocode = true;
 
-  hardware.enableRedistributableFirmware = true;
+    enableRedistributableFirmware = true;
+  };
 
   # Capture firmware-enforced CPU limits during the first minute after boot.
   boot.kernelModules = singleton "msr";
 
   systemd.services.surface-power-diagnostics = {
     description = "Record Surface CPU power and throttle state after boot";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "systemd-modules-load.service" ];
+    wantedBy = singleton "multi-user.target";
+    after = singleton "systemd-modules-load.service";
 
     serviceConfig = {
       Type = "simple";
@@ -150,9 +154,9 @@ in
   # iio-hyprland consumes accelerometer orientation from iio-sensor-proxy.
   hardware.sensor.iio.enable = true;
 
-  environment.systemPackages = [
-    pkgs.surface-control
-    pkgs.iptsd
-    pkgs.v4l-utils
+  environment.systemPackages = with pkgs; [
+    surface-control
+    iptsd
+    v4l-utils
   ];
 }

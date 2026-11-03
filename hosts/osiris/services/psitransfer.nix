@@ -1,5 +1,7 @@
 { config, lib, ... }:
 let
+  inherit (lib.lists) singleton;
+  inherit (lib) stringAfter;
   name = "psitransfer";
   port = 3039;
   containerUser = config.username; # UID/GID 1000 on osiris
@@ -17,25 +19,23 @@ in
     secrets.psitransfer_password.key = "psitransfer/password";
 
     templates."psitransfer.env" = {
-      content = ''
+      content = /* bash */ ''
         PSITRANSFER_ADMIN_PASS=${config.sops.placeholder.psitransfer_password}
       '';
 
       owner = containerUser;
-      restartUnits = [ containerUnit ];
+      restartUnits = singleton containerUnit;
     };
   };
 
   virtualisation.oci-containers.containers.psitransfer = {
     image = "psitrax/psitransfer:v2.4.4";
-    volumes = [
-      "${dataPath}:/data"
-    ];
+    volumes = singleton "${dataPath}:/data";
   };
 
-  system.activationScripts.makePsiTransferDir = lib.stringAfter [ "var" ] ''
-    mkdir -p ${dataPath}
-    chown -R 1000:1000 ${dataPath}
+  system.activationScripts.makePsiTransferDir = stringAfter (singleton "var") /* bash */ ''
+    mkdir --parents ${dataPath}
+    chown --recursive 1000:1000 ${dataPath}
   '';
 
   mkTraefikServices.psitransfer = {
@@ -50,7 +50,7 @@ in
   };
 
   mkObservabilityServices.psitransfer = {
-    units = [ containerUnit ];
+    units = singleton containerUnit;
     probes.public = {
       url = config.mkTraefikServices.psitransfer.fullHostname;
       module = "http_reachable";

@@ -1,10 +1,9 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
+let
+  inherit (lib.lists) singleton;
+in
 {
-  imports = [
-    ./autostart.nix
-  ];
+  imports = singleton ./autostart.nix;
 
-  home.packages = with pkgs; [
-    shotcut
-  ];
+  home.packages = with pkgs; singleton shotcut;
 }

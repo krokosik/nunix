@@ -1,5 +1,6 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
+  inherit (lib.lists) singleton;
   port = 3024;
 in
 {
@@ -12,13 +13,9 @@ in
 
   virtualisation.oci-containers.containers.convertx = {
     image = "ghcr.io/c4illin/convertx:v0.18.0";
-    extraOptions = [
-      # Intel QuickSync GPU for FFmpeg hardware acceleration
-      "--device=/dev/dri:/dev/dri"
-    ];
-    volumes = [
-      "/var/lib/convertx:/app/data"
-    ];
+    # Intel QuickSync GPU for FFmpeg hardware acceleration
+    extraOptions = singleton "--device=/dev/dri:/dev/dri";
+    volumes = singleton "/var/lib/convertx:/app/data";
     environment = {
       ACCOUNT_REGISTRATION = "false";
       HTTP_ALLOWED = "false";
@@ -45,7 +42,7 @@ in
   };
 
   mkObservabilityServices.convertx = {
-    units = [ "docker-convertx.service" ];
+    units = singleton "docker-convertx.service";
     probes.public = {
       url = config.mkTraefikServices.convertx.fullHostname;
       module = "http_reachable";

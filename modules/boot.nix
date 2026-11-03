@@ -4,7 +4,7 @@
   ...
 }:
 {
-  # Systemd-boot Configuration
+  # SYSTEMD-BOOT CONFIGURATION
   boot = {
     consoleLogLevel = 0;
     kernelParams = [

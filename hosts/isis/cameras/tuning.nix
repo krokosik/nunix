@@ -7,6 +7,7 @@
   cameraSource,
 }:
 let
+  inherit (lib.licenses) unfree;
   driverPackage = fetchurl {
     url = "https://download.microsoft.com/download/6a5b8acd-9bb2-4813-8cdd-09f603f91ee5/SurfacePro8_Win11_22631_26.073.32221.0.msi";
     hash = "sha256-BAo+6ip1B+AkGDJa99wPJAQ4w64l0LMRavV0Pu+Reoc=";
@@ -26,7 +27,7 @@ runCommand "surface-pro-8-camera-tuning"
     # The OEM calibration is not licensed for redistribution.
     preferLocalBuild = true;
     allowSubstitutes = false;
-    meta.license = lib.licenses.unfree;
+    meta.license = unfree;
   }
   /* bash */ ''
     7zz e ${driverPackage} cab1.cab

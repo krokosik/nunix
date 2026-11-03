@@ -1,4 +1,7 @@
-{ config, ... }:
+{ config, lib, ... }:
+let
+  inherit (lib.lists) singleton;
+in
 {
   services.haproxy = {
     enable = true;
@@ -67,8 +70,10 @@
     '';
   };
 
-  mkObservabilityServices.haproxy.units = [ "haproxy.service" ];
-  mkObservabilityServices.haproxy.metrics.url = "http://127.0.0.1:8404/metrics";
+  mkObservabilityServices.haproxy = {
+    units = singleton "haproxy.service";
+    metrics.url = "http://127.0.0.1:8404/metrics";
+  };
 
   mkObservability.inactiveAlertUnits = config.mkObservabilityServices.haproxy.units;
 

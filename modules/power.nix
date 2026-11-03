@@ -1,16 +1,20 @@
 {
+  lib,
   pkgs,
   ...
 }:
+let
+  inherit (lib.lists) singleton;
+in
 {
-  # Power management
+  # POWER MANAGEMENT
   powerManagement.powertop.enable = true;
   services.tlp.enable = true;
 
   systemd.services.setBatteryChargeLimit = {
     description = "Set battery charge limit to 75% when started and 96% when stopped";
     enable = false;
-    wantedBy = [ "multi-user.target" ];
+    wantedBy = singleton "multi-user.target";
 
     serviceConfig = {
       Type = "oneshot";

@@ -4,14 +4,18 @@
   lib,
   ...
 }:
+let
+  inherit (lib.lists) singleton;
+  inherit (lib.modules) mkDefault;
+in
 {
-  imports = [ inputs.niks3.nixosModules.niks3-auto-upload ];
+  imports = singleton inputs.niks3.nixosModules.niks3-auto-upload;
 
   sops.secrets.niks3_api_token = {
     sopsFile = "${inputs.my-secrets}/common/secrets.yaml";
     key = "niks3/api_token";
-    owner = lib.mkDefault "root";
-    restartUnits = [ "niks3-auto-upload.service" ];
+    owner = mkDefault "root";
+    restartUnits = singleton "niks3-auto-upload.service";
   };
 
   services.niks3-auto-upload = {

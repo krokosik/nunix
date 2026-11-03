@@ -21,11 +21,13 @@ let
           version
           src
           ;
-        buildInputs = (old.buildInputs or [ ]) ++ [
-          pkgs.libpulseaudio
-          pkgs.glibmm
-          pkgs.systemd
-        ];
+        buildInputs =
+          (old.buildInputs or [ ])
+          ++ (with pkgs; [
+            libpulseaudio
+            glibmm
+            systemd
+          ]);
         mesonFlags = (old.mesonFlags or [ ]) ++ [
           "-Dhyprgrass-pulse=true"
           "-Dhyprgrass-backlight=true"
@@ -79,10 +81,13 @@ in
         Service = {
           ExecStart = "${getExe osConfig.programs.iio-hyprland.package} eDP-1";
           Environment = singleton "PATH=${
-            makeBinPath [
-              pkgs.hyprland
-              pkgs.jq
-            ]
+            makeBinPath (
+              with pkgs;
+              [
+                hyprland
+                jq
+              ]
+            )
           }";
           ExecStopPost = "${getExe' pkgs.hyprland "hyprctl"} eval 'hl.monitor({output = \"eDP-1\", transform = 0}); hl.config({input = {touchdevice = {transform = 0}, tablet = {transform = 0}}})'";
           Restart = "always";

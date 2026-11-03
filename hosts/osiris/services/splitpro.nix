@@ -1,8 +1,10 @@
 {
   config,
+  lib,
   ...
 }:
 let
+  inherit (lib.lists) singleton;
   name = "splitpro";
   port = 3000;
   oidc = config.mkAuthentik.oidcApps.splitpro;
@@ -21,9 +23,9 @@ in
 
   # --- PostgreSQL extensions ---
   services.postgresql = {
-    extensions = pp: [ pp.pg_cron ];
+    extensions = pp: singleton pp.pg_cron;
     settings = {
-      shared_preload_libraries = [ "pg_cron" ];
+      shared_preload_libraries = singleton "pg_cron";
       "cron.database_name" = name;
       "cron.timezone" = "UTC";
     };
@@ -31,7 +33,7 @@ in
 
   mkContainerServices.splitpro = {
     inherit port;
-    stateDirs = [ "/var/lib/splitpro/uploads" ];
+    stateDirs = singleton "/var/lib/splitpro/uploads";
   };
 
   mkAuthentik.oidcApps.splitpro = {
@@ -40,7 +42,7 @@ in
     accessGroup = "users";
     iconUrl = "https://raw.githubusercontent.com/krokosik/split-pro/main/public/logo_circle.png";
     launchUrl = "${config.mkTraefikServices.splitpro.fullHostname}/auth/signin";
-    redirectUris = [ "${config.mkTraefikServices.splitpro.fullHostname}/api/auth/callback/authentik" ];
+    redirectUris = singleton "${config.mkTraefikServices.splitpro.fullHostname}/api/auth/callback/authentik";
     logoutUri = "${config.mkTraefikServices.splitpro.fullHostname}/api/auth/signout";
   };
 
@@ -52,7 +54,7 @@ in
       webpush_email.key = "splitpro/webpush_email";
     };
     templates."splitpro.env" = {
-      content = ''
+      content = /* bash */ ''
         NEXTAUTH_SECRET=${config.sops.placeholder.nextauth_secret}
         DATABASE_URL=postgresql://${name}:${
           config.sops.placeholder.${config.mkPostgresServices.splitpro.secretName}
@@ -65,18 +67,18 @@ in
       '';
 
       owner = containerUser;
-      restartUnits = [ containerUnit ];
+      restartUnits = singleton containerUnit;
     };
   };
 
   mkTraefikServices.splitpro = {
     inherit port;
     public = true;
-    chain = [ "chain-no-auth" ];
+    chain = singleton "chain-no-auth";
   };
 
   mkObservabilityServices.splitpro = {
-    units = [ containerUnit ];
+    units = singleton containerUnit;
     probes.public.url = config.mkTraefikServices.splitpro.fullHostname;
   };
 
@@ -84,12 +86,8 @@ in
 
   virtualisation.oci-containers.containers.splitpro = {
     image = "ossapps/splitpro:v2.1.5";
-    extraOptions = [
-      "--add-host=host.docker.internal:host-gateway"
-    ];
-    volumes = [
-      "/var/lib/splitpro/uploads:/app/uploads"
-    ];
+    extraOptions = singleton "--add-host=host.docker.internal:host-gateway";
+    volumes = singleton "/var/lib/splitpro/uploads:/app/uploads";
     environment = {
       HOSTNAME = "0.0.0.0";
       DEFAULT_HOMEPAGE = "/balances";

@@ -5,52 +5,58 @@
   ...
 }:
 let
+  inherit (lib.generators) toJSON;
+  inherit (lib.lists) singleton;
   inherit (lib.meta) getExe getExe';
+  inherit (lib.strings) removePrefix;
   tailscaleAddresses = pkgs.writeText "tailscale-addresses.json" (
-    lib.generators.toJSON { } config.tailscaleAddresses
+    toJSON { } config.tailscaleAddresses
   );
-  dashboards = pkgs.runCommand "observability-dashboards" { } /* bash */ ''
-    ${getExe' pkgs.coreutils "mkdir"} "$out"
-    for source in ${./dashboards}/*.json; do
-      name="$(${getExe' pkgs.coreutils "basename"} "$source")"
-      ${getExe pkgs.jq} --arg name "$name" --slurpfile tailscaleAddresses ${tailscaleAddresses} --from-file ${./prepare-dashboards.jq} "$source" > "$out/$name"
-    done
-    ${getExe pkgs.jq} --exit-status --slurp '
-      (map(.uid) | length == (unique | length)) and
-      all(.[]; (.title | type == "string") and (.uid | type == "string"))
-    ' "$out"/*.json > /dev/null
-  '';
+  dashboards = pkgs.callPackage (
+    { runCommand }:
+    runCommand "observability-dashboards" { } /* bash */ ''
+      ${getExe' pkgs.coreutils "mkdir"} "$out"
+      for source in ${./dashboards}/*.json; do
+        name="$(${getExe' pkgs.coreutils "basename"} "$source")"
+        ${getExe pkgs.jq} --arg name "$name" --slurpfile tailscaleAddresses ${tailscaleAddresses} --from-file ${./prepare-dashboards.jq} "$source" > "$out/$name"
+      done
+      ${getExe pkgs.jq} --exit-status --slurp '
+        (map(.uid) | length == (unique | length)) and
+        all(.[]; (.title | type == "string") and (.uid | type == "string"))
+      ' "$out"/*.json > /dev/null
+    ''
+  ) { };
 in
 {
   mkAuthentik.oidcApps.grafana = {
     # The Authentik application host and callback must use the same private
     # hostname as Grafana's Traefik route and root_url.
-    host = lib.removePrefix "https://" config.mkTraefikServices.grafana.fullHostname;
+    host = removePrefix "https://" config.mkTraefikServices.grafana.fullHostname;
     displayName = "Grafana";
     displayGroup = "Infrastructure";
     accessGroup = "admins";
     launchUrl = config.mkTraefikServices.grafana.fullHostname;
-    redirectUris = [ "${config.mkTraefikServices.grafana.fullHostname}/login/generic_oauth" ];
+    redirectUris = singleton "${config.mkTraefikServices.grafana.fullHostname}/login/generic_oauth";
   };
 
   mkTraefikServices.grafana = {
     port = config.services.grafana.settings.server.http_port;
-    chain = [ "chain-no-auth" ];
+    chain = singleton "chain-no-auth";
   };
 
   sops.secrets.grafana_secret_key = {
     key = "grafana/secret_key";
     owner = "grafana";
-    restartUnits = [ "grafana.service" ];
+    restartUnits = singleton "grafana.service";
   };
   sops.secrets.grafana_admin_password = {
     key = "grafana/admin_password";
     owner = "grafana";
-    restartUnits = [ "grafana.service" ];
+    restartUnits = singleton "grafana.service";
   };
 
   sops.templates."grafana-oauth.env" = {
-    content = ''
+    content = /* bash */ ''
       GF_AUTH_GENERIC_OAUTH_CLIENT_ID=${
         config.sops.placeholder.${config.mkAuthentik.oidcApps.grafana.credentials.clientId.secretName}
       }
@@ -59,7 +65,7 @@ in
       }
     '';
     owner = "grafana";
-    restartUnits = [ "grafana.service" ];
+    restartUnits = singleton "grafana.service";
   };
 
   systemd.services.grafana.serviceConfig.EnvironmentFile = [
@@ -68,16 +74,18 @@ in
 
   services.grafana = {
     enable = true;
-    declarativePlugins = [ pkgs.grafanaPlugins.victoriametrics-logs-datasource ];
+    declarativePlugins = singleton pkgs.grafanaPlugins.victoriametrics-logs-datasource;
     settings = {
       server = {
         http_addr = "127.0.0.1";
         http_port = 3001;
         root_url = config.mkTraefikServices.grafana.fullHostname;
       };
-      security.secret_key = "$__file{${config.sops.secrets.grafana_secret_key.path}}";
-      security.admin_password = "$__file{${config.sops.secrets.grafana_admin_password.path}}";
-      security.cookie_secure = true;
+      security = {
+        secret_key = "$__file{${config.sops.secrets.grafana_secret_key.path}}";
+        admin_password = "$__file{${config.sops.secrets.grafana_admin_password.path}}";
+        cookie_secure = true;
+      };
       analytics.reporting_enabled = false;
       users.auto_assign_org_role = "Viewer";
       "auth.generic_oauth" = {
@@ -93,7 +101,7 @@ in
     };
     provision = {
       enable = true;
-      dashboards.settings.providers = lib.lists.singleton {
+      dashboards.settings.providers = singleton {
         name = "observability";
         folder = "Observability";
         disableDeletion = false;

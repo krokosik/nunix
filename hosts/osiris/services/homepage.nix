@@ -18,10 +18,13 @@ in
         port = config.mkTraefikServices.homepage.port;
       });
 
-      root = pkgs.runCommand "homelab-homepage" { } /* bash */ ''
-        mkdir --parents "$out"
-        cp ${../../../docs/oauth-pages}/*.html ${../../../docs/oauth-pages}/style.css "$out/"
-      '';
+      root = pkgs.callPackage (
+        { runCommand }:
+        runCommand "homelab-homepage" { } /* bash */ ''
+          mkdir --parents "$out"
+          cp ${../../../docs/oauth-pages}/*.html ${../../../docs/oauth-pages}/style.css "$out/"
+        ''
+      ) { };
     };
   };
 

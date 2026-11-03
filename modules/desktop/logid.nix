@@ -1,4 +1,7 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
+let
+  inherit (lib.lists) singleton;
+in
 {
   environment.etc."logid.cfg".text = /* conf */ ''
     devices: (
@@ -78,8 +81,8 @@
 
   systemd.services.logid = {
     description = "Logitech input device daemon";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "systemd-udev-settle.service" ];
+    wantedBy = singleton "multi-user.target";
+    after = singleton "systemd-udev-settle.service";
 
     serviceConfig = {
       ExecStart = "${pkgs.logiops}/bin/logid --config /etc/logid.cfg";

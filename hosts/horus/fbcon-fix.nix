@@ -1,18 +1,21 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
+let
+  inherit (lib.lists) singleton;
+in
 {
   systemd.services.fbcon-native-resolution = {
     description = "Set NVIDIA fbcon resolution after Plymouth";
 
-    before = [ "greetd.service" ];
-    after = [ "plymouth-quit.service" ];
-    wantedBy = [ "greetd.service" ];
+    before = singleton "greetd.service";
+    after = singleton "plymouth-quit.service";
+    wantedBy = singleton "greetd.service";
 
     serviceConfig = {
       Type = "oneshot";
       TimeoutStartSec = "5s";
     };
 
-    script = ''
+    script = /* bash */ ''
       # fb0 starts as simpledrm, then AMD, and eventually becomes NVIDIA.
       # Do not touch it until NVIDIA owns it.
       for _ in $(${pkgs.coreutils}/bin/seq 1 100); do

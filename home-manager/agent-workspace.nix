@@ -5,8 +5,10 @@
   ...
 }:
 let
+  inherit (lib.licenses) mit;
   inherit (lib.lists) singleton;
   inherit (lib.meta) getExe;
+  inherit (lib.strings) makeBinPath makeLibraryPath;
 
   agentWorkspace = pkgs.callPackage (
     {
@@ -50,7 +52,7 @@ let
       freetype,
     }:
     let
-      runtimePath = lib.makeBinPath [
+      runtimePath = makeBinPath [
         xvfb
         openbox
         xdotool
@@ -123,9 +125,9 @@ let
         mkdir --parents "$out/share/agent-workspace-linux"
         cp --recursive "$skillSrc/skills/agent-workspace-linux" "$out/share/agent-workspace-linux/skill"
         makeWrapper "$out/bin/.agent-workspace-linux-unwrapped" "$out/bin/agent-workspace-linux" \
-          --prefix PATH : "${lib.makeBinPath (singleton workspaceBubblewrap)}:${runtimePath}" \
+          --prefix PATH : "${makeBinPath (singleton workspaceBubblewrap)}:${runtimePath}" \
           --prefix LD_LIBRARY_PATH : ${
-            lib.makeLibraryPath [
+            makeLibraryPath [
               libxkbcommon
               wayland
               libGL
@@ -141,7 +143,7 @@ let
       meta = {
         description = "Isolated Linux desktop workspaces for AI agents over MCP";
         homepage = "https://github.com/agent-sh/agent-workspace-linux";
-        license = lib.licenses.mit;
+        license = mit;
         platforms = singleton "x86_64-linux";
         mainProgram = "agent-workspace-linux";
       };

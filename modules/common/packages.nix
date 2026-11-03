@@ -3,7 +3,7 @@
   ...
 }:
 {
-  # General systemwide packages
+  # GENERAL SYSTEMWIDE PACKAGES
   environment.systemPackages = with pkgs; [
     curl
     dust

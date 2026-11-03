@@ -1,3 +1,7 @@
+{ lib, ... }:
+let
+  inherit (lib.lists) singleton;
+in
 {
   services.traefik.dynamicConfigOptions.http.middlewares = {
 
@@ -8,7 +12,7 @@
         "PUT"
       ];
       accessControlMaxAge = 100;
-      hostsProxyHeaders = [ "X-Forwarded-Host" ];
+      hostsProxyHeaders = singleton "X-Forwarded-Host";
       stsSeconds = 63072000;
       stsIncludeSubdomains = true;
       stsPreload = true;

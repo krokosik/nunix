@@ -1,4 +1,7 @@
 { lib, ... }:
+let
+  inherit (lib.modules) mkAfter;
+in
 {
   imports = [
     ./animations.nix
@@ -21,7 +24,7 @@
 
     settings.config.master.mfact = 0.5;
 
-    extraConfig = lib.modules.mkAfter /* lua */ ''
+    extraConfig = mkAfter /* lua */ ''
       -- DMS-generated files intentionally load last and remain dynamic.
       require("dms.colors")
       require("dms.outputs")

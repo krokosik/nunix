@@ -1,7 +1,9 @@
 { osConfig, inputs, ... }:
 {
-  home.username = osConfig.username;
-  home.homeDirectory = "/home/${osConfig.username}";
+  home = {
+    username = osConfig.username;
+    homeDirectory = "/home/${osConfig.username}";
+  };
 
   sops = {
     # The system service supplies this 0400 key outside the Nix store.

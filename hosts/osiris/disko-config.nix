@@ -109,8 +109,10 @@
           };
           "reserved" = {
             type = "zfs_fs";
-            options.mountpoint = "none";
-            options.refreservation = "10G";
+            options = {
+              mountpoint = "none";
+              refreservation = "10G";
+            };
           };
         };
       };

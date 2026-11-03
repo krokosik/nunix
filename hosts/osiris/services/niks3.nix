@@ -5,17 +5,18 @@
 }:
 let
   inherit (lib.lists) singleton;
+  inherit (lib.modules) mkIf;
 in
 {
   sops.secrets = {
     niks3_api_token = {
       owner = "niks3";
-      restartUnits = [ "niks3.service" ];
+      restartUnits = singleton "niks3.service";
     };
     niks3_signing_key = {
       key = "niks3/signing_key";
       owner = "niks3";
-      restartUnits = [ "niks3.service" ];
+      restartUnits = singleton "niks3.service";
     };
   };
 
@@ -49,7 +50,7 @@ in
     chain = singleton "chain-tailscale";
   };
 
-  mkObservability.inactiveAlertUnits = lib.mkIf config.services.niks3.enable (
+  mkObservability.inactiveAlertUnits = mkIf config.services.niks3.enable (
     singleton config.systemd.services.niks3.name
   );
 }

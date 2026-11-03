@@ -11,7 +11,7 @@ let
   voxtypePackages = inputs.voxtype.packages.${pkgs.stdenv.hostPlatform.system};
 in
 {
-  imports = [ inputs.voxtype.homeManagerModules.default ];
+  imports = singleton inputs.voxtype.homeManagerModules.default;
 
   config.programs.voxtype = {
     enable = true;

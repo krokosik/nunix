@@ -6,85 +6,126 @@
   ...
 }:
 let
+  inherit (lib.attrsets)
+    attrNames
+    attrValues
+    concatMapAttrs
+    filterAttrs
+    listToAttrs
+    mapAttrs'
+    mapAttrsToList
+    nameValuePair
+    optionalAttrs
+    ;
+  inherit (lib.lists)
+    all
+    concatLists
+    concatMap
+    elem
+    elemAt
+    head
+    last
+    optional
+    optionals
+    singleton
+    unique
+    ;
+  inherit (lib.modules) mkIf;
+  inherit (lib.options) mkEnableOption mkOption;
+  inherit (lib.strings)
+    concatMapStrings
+    concatStringsSep
+    escapeRegex
+    match
+    splitString
+    toJSON
+    ;
+  inherit (lib.types)
+    attrsOf
+    bool
+    enum
+    listOf
+    nonEmptyStr
+    nullOr
+    str
+    submodule
+    ;
   cfg = config.mkObservability;
   services = config.mkObservabilityServices;
   host = config.networking.hostName;
   loopback = "127.0.0.1";
-  inherit (lib.lists) singleton;
 
-  ruleType = lib.types.submodule {
+  ruleType = submodule {
     options = {
-      alert = lib.mkOption { type = lib.types.nonEmptyStr; };
-      expr = lib.mkOption { type = lib.types.nonEmptyStr; };
-      for = lib.mkOption {
-        type = lib.types.str;
+      alert = mkOption { type = nonEmptyStr; };
+      expr = mkOption { type = nonEmptyStr; };
+      for = mkOption {
+        type = str;
         default = "0s";
       };
-      labels = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
+      labels = mkOption {
+        type = attrsOf str;
         default = { };
       };
-      annotations = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
+      annotations = mkOption {
+        type = attrsOf str;
         default = { };
       };
     };
   };
 
-  endpointType = lib.types.submodule {
+  endpointType = submodule {
     options = {
-      url = lib.mkOption { type = lib.types.str; };
-      interval = lib.mkOption {
-        type = lib.types.str;
+      url = mkOption { type = str; };
+      interval = mkOption {
+        type = str;
         default = "30s";
       };
-      labels = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
+      labels = mkOption {
+        type = attrsOf str;
         default = { };
       };
     };
   };
 
-  logRuleType = lib.types.submodule {
+  logRuleType = submodule {
     options = {
-      alert = lib.mkOption { type = lib.types.nonEmptyStr; };
-      expr = lib.mkOption { type = lib.types.nonEmptyStr; };
-      interval = lib.mkOption {
-        type = lib.types.str;
+      alert = mkOption { type = nonEmptyStr; };
+      expr = mkOption { type = nonEmptyStr; };
+      interval = mkOption {
+        type = str;
         default = "5m";
       };
-      for = lib.mkOption {
-        type = lib.types.str;
+      for = mkOption {
+        type = str;
         default = "0s";
       };
-      labels = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
+      labels = mkOption {
+        type = attrsOf str;
         default = { };
       };
-      annotations = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
+      annotations = mkOption {
+        type = attrsOf str;
         default = { };
       };
     };
   };
 
-  localTargets = lib.mapAttrs' (
-    name: endpoint: lib.nameValuePair "host/${name}" endpoint
-  ) cfg.hostMetrics;
-  serviceTargets = lib.concatMapAttrs (
+  localTargets = mapAttrs' (name: endpoint: nameValuePair "host/${name}" endpoint) cfg.hostMetrics;
+  serviceTargets = concatMapAttrs (
     name: service:
-    lib.optionalAttrs (service.metrics != null) {
+    optionalAttrs (service.metrics != null) {
       "service/${name}" = service.metrics;
     }
   ) services;
-  postgresTarget = lib.optionalAttrs (config.services.postgresql.enable && cfg.enable) {
+  postgresTarget = optionalAttrs (config.services.postgresql.enable && cfg.enable) {
     "host/postgres" = {
       url = "http://${loopback}:${toString config.services.prometheus.exporters.postgres.port}/metrics";
       interval = "30s";
       labels = { };
     };
   };
-  smartTarget = lib.optionalAttrs (!config.isVirtual && cfg.enable) {
+  smartTarget = optionalAttrs (!config.isVirtual && cfg.enable) {
     "host/smartctl" = {
       url = "http://${loopback}:${toString config.services.prometheus.exporters.smartctl.port}/metrics";
       interval = "60s";
@@ -95,13 +136,13 @@ let
   # imports another nixosConfiguration to discover its services.
   scrapeTargets = localTargets // serviceTargets // postgresTarget // smartTarget;
 
-  scrapeJobs = lib.mapAttrsToList (
+  scrapeJobs = mapAttrsToList (
     name: endpoint:
     let
-      parsed = lib.match "(https?)://([^/]+)(/.*)?" endpoint.url;
-      scheme = lib.elemAt parsed 0;
-      address = lib.elemAt parsed 1;
-      path = lib.elemAt parsed 2;
+      parsed = match "(https?)://([^/]+)(/.*)?" endpoint.url;
+      scheme = elemAt parsed 0;
+      address = elemAt parsed 1;
+      path = elemAt parsed 2;
     in
     {
       job_name = name;
@@ -111,19 +152,19 @@ let
       static_configs = singleton {
         targets = singleton address;
         labels = endpoint.labels // {
-          service = lib.lists.last (lib.splitString "/" name);
+          service = last (splitString "/" name);
         };
       };
     }
   ) scrapeTargets;
 
-  probes = lib.concatMapAttrs (
+  probes = concatMapAttrs (
     name: service:
-    lib.mapAttrs' (probeName: probe: lib.nameValuePair "${name}/${probeName}" probe) service.probes
+    mapAttrs' (probeName: probe: nameValuePair "${name}/${probeName}" probe) service.probes
   ) services;
-  probeFamilies = probe: lib.optional probe.checkIPv4 "4" ++ lib.optional probe.checkIPv6 "6";
-  probeJobs = lib.concatLists (
-    lib.mapAttrsToList (
+  probeFamilies = probe: optional probe.checkIPv4 "4" ++ optional probe.checkIPv6 "6";
+  probeJobs = concatLists (
+    mapAttrsToList (
       name: probe:
       map (family: {
         job_name = "probe/${name}/ip${family}";
@@ -133,8 +174,8 @@ let
         static_configs = singleton {
           targets = singleton probe.url;
           labels = probe.labels // {
-            service = lib.lists.head (lib.splitString "/" name);
-            check = lib.lists.last (lib.splitString "/" name);
+            service = head (splitString "/" name);
+            check = last (splitString "/" name);
             ip_family = family;
             vantage = host;
           };
@@ -181,13 +222,13 @@ let
     tcp_connect.prober = "tcp";
     icmp_ping.prober = "icmp";
   };
-  blackboxModules = lib.concatMapAttrs (
+  blackboxModules = concatMapAttrs (
     name: module:
-    lib.listToAttrs (
+    listToAttrs (
       map
         (
           family:
-          lib.nameValuePair "${name}_ip${family}" (
+          nameValuePair "${name}_ip${family}" (
             module
             // {
               ${module.prober} = (module.${module.prober} or { }) // {
@@ -203,14 +244,15 @@ let
         ]
     )
   ) probeModules;
-  monitoredUnits = lib.unique (
+  monitoredUnits = unique (
     cfg.monitoredUnits
     ++ cfg.inactiveAlertUnits
-    ++ lib.concatMap (svc: svc.units) (lib.attrValues services)
+    ++ concatMap ({ units, ... }: units) (attrValues services)
   );
-  writableFilesystems = lib.filterAttrs (
-    _: fs:
-    lib.elem fs.fsType [
+  writableFilesystems = filterAttrs (
+    _:
+    { fsType, options, ... }:
+    elem fsType [
       "zfs"
       "ext4"
       "ext3"
@@ -220,12 +262,12 @@ let
       "vfat"
       "f2fs"
     ]
-    && !lib.elem "ro" fs.options
+    && !elem "ro" options
   ) config.fileSystems;
-  expectedPools = lib.unique (
+  expectedPools = unique (
     config.boot.zfs.extraPools
-    ++ map ({ device, ... }: lib.lists.head (lib.splitString "/" device)) (
-      lib.attrValues (lib.filterAttrs (_: fs: fs.fsType == "zfs") config.fileSystems)
+    ++ map ({ device, ... }: head (splitString "/" device)) (
+      attrValues (filterAttrs (_: { fsType, ... }: fsType == "zfs") config.fileSystems)
     )
   );
   # These declarations travel with each host's metrics, without evaluating
@@ -235,22 +277,22 @@ let
       # HELP node_expected_filesystem_writable Configured persistent writable mountpoint.
       # TYPE node_expected_filesystem_writable gauge
     ''
-    + lib.concatMapStrings (mountpoint: /* prometheus */ ''
-      node_expected_filesystem_writable{mountpoint=${lib.strings.toJSON mountpoint}} 1
-    '') (lib.attrNames writableFilesystems)
+    + concatMapStrings (mountpoint: /* prometheus */ ''
+      node_expected_filesystem_writable{mountpoint=${toJSON mountpoint}} 1
+    '') (attrNames writableFilesystems)
     + /* prometheus */ ''
       # HELP node_expected_zfs_pool Configured ZFS pool.
       # TYPE node_expected_zfs_pool gauge
     ''
-    + lib.concatMapStrings (pool: /* prometheus */ ''
-      node_expected_zfs_pool{zpool=${lib.strings.toJSON pool}} 1
+    + concatMapStrings (pool: /* prometheus */ ''
+      node_expected_zfs_pool{zpool=${toJSON pool}} 1
     '') expectedPools
     + /* prometheus */ ''
       # HELP node_expected_systemd_unit_active Systemd unit expected to remain active.
       # TYPE node_expected_systemd_unit_active gauge
     ''
-    + lib.concatMapStrings (unit: /* prometheus */ ''
-      node_expected_systemd_unit_active{name=${lib.strings.toJSON unit}} 1
+    + concatMapStrings (unit: /* prometheus */ ''
+      node_expected_systemd_unit_active{name=${toJSON unit}} 1
     '') cfg.inactiveAlertUnits
   );
   remoteMetricsUrl = "https://metrics-ingest.${config.privateDomain}/api/v1/write";
@@ -259,111 +301,107 @@ in
 {
   options = {
     mkObservability = {
-      enable = lib.mkEnableOption "host-local metrics and journal forwarding";
-      environment = lib.mkOption {
-        type = lib.types.str;
+      enable = mkEnableOption "host-local metrics and journal forwarding";
+      environment = mkOption {
+        type = str;
         default = "home";
       };
-      central = lib.mkOption {
-        type = lib.types.bool;
+      central = mkOption {
+        type = bool;
         default = false;
         description = "Run the Victoria stores and centralized alerting on this host.";
       };
-      hostMetrics = lib.mkOption {
-        type = lib.types.attrsOf endpointType;
+      hostMetrics = mkOption {
+        type = attrsOf endpointType;
         default = { };
         description = "Host-level exporter and infrastructure scrape endpoints.";
       };
-      monitoredUnits = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
+      monitoredUnits = mkOption {
+        type = listOf str;
         default = [ ];
         description = "Host infrastructure units tracked by the node exporter.";
       };
-      repeatedErrorUnits = lib.mkOption {
-        type = lib.types.listOf lib.types.nonEmptyStr;
+      repeatedErrorUnits = mkOption {
+        type = listOf nonEmptyStr;
         default = [ ];
-        apply = lib.lists.unique;
+        apply = unique;
         description = "Systemd units whose structured error-level logs are counted by the central RepeatedServiceErrors rule.";
       };
-      inactiveAlertUnits = lib.mkOption {
-        type = lib.types.listOf lib.types.nonEmptyStr;
+      inactiveAlertUnits = mkOption {
+        type = listOf nonEmptyStr;
         default = [ ];
-        apply = lib.lists.unique;
+        apply = unique;
         description = "Long-running systemd units expected to remain active. Adds them to node exporter collection and the per-host SystemdUnitInactive alert inventory.";
       };
-      metricRules = lib.mkOption {
-        type = lib.types.attrsOf (lib.types.listOf ruleType);
+      metricRules = mkOption {
+        type = attrsOf (listOf ruleType);
         default = { };
         description = "Rules explicitly registered on the central host, grouped by owner.";
       };
-      logRules = lib.mkOption {
-        type = lib.types.attrsOf (lib.types.listOf logRuleType);
+      logRules = mkOption {
+        type = attrsOf (listOf logRuleType);
         default = { };
         description = "LogsQL rules explicitly registered on the central host.";
       };
     };
 
-    mkObservabilityServices = lib.mkOption {
-      type = lib.types.attrsOf (
-        lib.types.submodule {
-          options = {
-            units = lib.mkOption {
-              type = lib.types.listOf lib.types.str;
-              default = [ ];
-            };
-            metrics = lib.mkOption {
-              type = lib.types.nullOr endpointType;
-              default = null;
-            };
-            probes = lib.mkOption {
-              type = lib.types.attrsOf (
-                lib.types.submodule {
-                  options = {
-                    url = lib.mkOption { type = lib.types.str; };
-                    module = lib.mkOption {
-                      type = lib.types.enum (lib.attrNames probeModules);
-                      default = "http_2xx";
-                    };
-                    checkIPv4 = lib.mkOption {
-                      type = lib.types.bool;
-                      default = true;
-                      description = "Check IPv4 independently, without falling back to IPv6.";
-                    };
-                    checkIPv6 = lib.mkOption {
-                      type = lib.types.bool;
-                      default = true;
-                      description = "Check IPv6 independently, without falling back to IPv4. Disable for IPv4-only targets or probing hosts.";
-                    };
-                    interval = lib.mkOption {
-                      type = lib.types.str;
-                      default = "30s";
-                    };
-                    labels = lib.mkOption {
-                      type = lib.types.attrsOf lib.types.str;
-                      default = { };
-                    };
-                  };
-                }
-              );
-              default = { };
-            };
-            metricAlerts = lib.mkOption {
-              type = lib.types.listOf ruleType;
-              default = [ ];
-            };
-            logAlerts = lib.mkOption {
-              type = lib.types.listOf logRuleType;
-              default = [ ];
-            };
+    mkObservabilityServices = mkOption {
+      type = attrsOf (submodule {
+        options = {
+          units = mkOption {
+            type = listOf str;
+            default = [ ];
           };
-        }
-      );
+          metrics = mkOption {
+            type = nullOr endpointType;
+            default = null;
+          };
+          probes = mkOption {
+            type = attrsOf (submodule {
+              options = {
+                url = mkOption { type = str; };
+                module = mkOption {
+                  type = enum (attrNames probeModules);
+                  default = "http_2xx";
+                };
+                checkIPv4 = mkOption {
+                  type = bool;
+                  default = true;
+                  description = "Check IPv4 independently, without falling back to IPv6.";
+                };
+                checkIPv6 = mkOption {
+                  type = bool;
+                  default = true;
+                  description = "Check IPv6 independently, without falling back to IPv4. Disable for IPv4-only targets or probing hosts.";
+                };
+                interval = mkOption {
+                  type = str;
+                  default = "30s";
+                };
+                labels = mkOption {
+                  type = attrsOf str;
+                  default = { };
+                };
+              };
+            });
+            default = { };
+          };
+          metricAlerts = mkOption {
+            type = listOf ruleType;
+            default = [ ];
+          };
+          logAlerts = mkOption {
+            type = listOf logRuleType;
+            default = [ ];
+          };
+        };
+      });
       default = { };
       description = "Per-service observability declarations for this host.";
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
     mkObservability.inactiveAlertUnits = [
       config.systemd.services.vmagent.name
       config.systemd.services.vlagent.name
@@ -385,12 +423,12 @@ in
         "--collector.systemd.enable-start-time-metrics"
         "--collector.textfile.directory=${expectationMetrics}"
       ]
-      ++ lib.optionals (monitoredUnits != [ ]) [
-        "--collector.systemd.unit-include=^(${lib.concatStringsSep "|" (map lib.escapeRegex monitoredUnits)})$"
-      ];
+      ++ optionals (monitoredUnits != [ ]) (
+        singleton "--collector.systemd.unit-include=^(${concatStringsSep "|" (map escapeRegex monitoredUnits)})$"
+      );
     };
 
-    services.prometheus.exporters.blackbox = lib.mkIf (probes != { }) {
+    services.prometheus.exporters.blackbox = mkIf (probes != { }) {
       enable = true;
       listenAddress = loopback;
       configFile = (pkgs.formats.yaml { }).generate "blackbox.yaml" {
@@ -398,7 +436,7 @@ in
       };
     };
 
-    services.prometheus.exporters.postgres = lib.mkIf config.services.postgresql.enable {
+    services.prometheus.exporters.postgres = mkIf config.services.postgresql.enable {
       enable = true;
       listenAddress = loopback;
       runAsLocalSuperUser = true;
@@ -408,22 +446,25 @@ in
       ];
     };
 
-    services.prometheus.exporters.smartctl = lib.mkIf (!config.isVirtual) {
+    services.prometheus.exporters.smartctl = mkIf (!config.isVirtual) {
       enable = true;
       listenAddress = loopback;
     };
 
-    mkObservability.hostMetrics.node.url = "http://${loopback}:${toString config.services.prometheus.exporters.node.port}/metrics";
-    mkObservability.hostMetrics.blackbox = lib.mkIf (probes != { }) {
-      url = "http://${loopback}:${toString config.services.prometheus.exporters.blackbox.port}/metrics";
+    mkObservability.hostMetrics = {
+      node.url = "http://${loopback}:${toString config.services.prometheus.exporters.node.port}/metrics";
+
+      blackbox = mkIf (probes != { }) {
+        url = "http://${loopback}:${toString config.services.prometheus.exporters.blackbox.port}/metrics";
+      };
     };
 
     services.vmagent = {
       enable = true;
       remoteWrite = {
         url = if cfg.central then "http://${loopback}:8428/api/v1/write" else remoteMetricsUrl;
-        basicAuthUsername = lib.mkIf (!cfg.central) "anubis-metrics";
-        basicAuthPasswordFile = lib.mkIf (
+        basicAuthUsername = mkIf (!cfg.central) "anubis-metrics";
+        basicAuthPasswordFile = mkIf (
           !cfg.central
         ) config.sops.secrets.observability_metrics_ingest_password.path;
       };
@@ -444,7 +485,7 @@ in
       ];
     };
 
-    networking.hosts = lib.mkIf (!cfg.central) {
+    networking.hosts = mkIf (!cfg.central) {
       ${config.tailscaleAddresses.osiris.ipv4} = [
         "metrics-ingest.${config.privateDomain}"
         "logs-ingest.${config.privateDomain}"
@@ -463,12 +504,12 @@ in
       remoteWrite = {
         url = if cfg.central then "http://${loopback}:9428/insert/native" else remoteLogsUrl;
         maxDiskUsagePerUrl = "1GiB";
-        basicAuthUsername = lib.mkIf (!cfg.central) "anubis-logs";
-        basicAuthPasswordFile = lib.mkIf (
+        basicAuthUsername = mkIf (!cfg.central) "anubis-logs";
+        basicAuthPasswordFile = mkIf (
           !cfg.central
         ) config.sops.secrets.observability_logs_ingest_password.path;
       };
-      extraArgs = [ "-httpListenAddr=${loopback}:9429" ];
+      extraArgs = singleton "-httpListenAddr=${loopback}:9429";
     };
 
     # Basic Auth and the remote-write buffer are provided by the native
@@ -480,7 +521,7 @@ in
       SystemKeepFree=2G
     '';
 
-    sops.secrets = lib.mkIf (!cfg.central) {
+    sops.secrets = mkIf (!cfg.central) {
       observability_metrics_ingest_password = {
         key = "observability/metrics_ingest_password";
         restartUnits = singleton "vmagent.service";
@@ -494,13 +535,21 @@ in
     };
 
     assertions =
-      lib.mapAttrsToList (name: svc: {
-        assertion = lib.all (rule: rule.labels ? severity) (svc.metricAlerts ++ svc.logAlerts);
-        message = "mkObservabilityServices.${name}: every alert needs a severity label";
-      }) services
-      ++ lib.mapAttrsToList (name: probe: {
-        assertion = probe.checkIPv4 || probe.checkIPv6;
-        message = "mkObservabilityServices probe ${name}: at least one of checkIPv4 and checkIPv6 must be enabled";
-      }) probes;
+      mapAttrsToList (
+        name:
+        { metricAlerts, logAlerts, ... }:
+        {
+          assertion = all ({ labels, ... }: labels ? severity) (metricAlerts ++ logAlerts);
+          message = "mkObservabilityServices.${name}: every alert needs a severity label";
+        }
+      ) services
+      ++ mapAttrsToList (
+        name:
+        { checkIPv4, checkIPv6, ... }:
+        {
+          assertion = checkIPv4 || checkIPv6;
+          message = "mkObservabilityServices probe ${name}: at least one of checkIPv4 and checkIPv6 must be enabled";
+        }
+      ) probes;
   };
 }

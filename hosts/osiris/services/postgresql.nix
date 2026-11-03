@@ -5,10 +5,21 @@
   ...
 }:
 let
+  inherit (lib.attrsets) mapAttrs' mapAttrsToList nameValuePair;
+  inherit (lib.lists) map singleton;
+  inherit (lib.modules) mkIf mkMerge mkOverride;
+  inherit (lib.options) mkOption;
+  inherit (lib.strings) concatStringsSep replaceStrings;
+  inherit (lib.types)
+    attrsOf
+    listOf
+    str
+    submodule
+    ;
   svcs = config.mkPostgresServices;
 in
 {
-  options.mkPostgresServices = lib.mkOption {
+  options.mkPostgresServices = mkOption {
     default = { };
     description = ''
       svcs that consume the shared native postgres instance with a
@@ -17,14 +28,14 @@ in
       the password into its own env file and pointing the upstream
       service at host.containers.internal:5432.
     '';
-    type = lib.types.attrsOf (
-      lib.types.submodule (
+    type = attrsOf (
+      submodule (
         { name, ... }:
         {
           options = {
-            dbName = lib.mkOption {
-              type = lib.types.str;
-              default = lib.replaceStrings [ "-" ] [ "_" ] name;
+            dbName = mkOption {
+              type = str;
+              default = replaceStrings (singleton "-") (singleton "_") name;
               description = ''
                 Postgres database (and role) name. Defaults to the
                 attribute name with hyphens replaced by underscores
@@ -32,9 +43,9 @@ in
                 a valid SQL identifier.
               '';
             };
-            consumerService = lib.mkOption {
-              type = lib.types.listOf lib.types.str;
-              default = [ "${config.virtualisation.oci-containers.backend}-${name}.service" ];
+            consumerService = mkOption {
+              type = listOf str;
+              default = singleton "${config.virtualisation.oci-containers.backend}-${name}.service";
               description = ''
                 Systemd units that consume this role and must wait
                 for the password rotation oneshot to complete. The
@@ -47,8 +58,8 @@ in
                 single representative unit.
               '';
             };
-            secretName = lib.mkOption {
-              type = lib.types.str;
+            secretName = mkOption {
+              type = str;
               default = "${name}/db_password";
               description = ''
                 sops secret name for the role's password. Defaults
@@ -56,8 +67,8 @@ in
                 secret already exists under a non-standard name.
               '';
             };
-            extraCommands = lib.mkOption {
-              type = lib.types.listOf lib.types.str;
+            extraCommands = mkOption {
+              type = listOf str;
               default = [ ];
               description = ''
                 Extra SQL commands to run as the postgres superuser
@@ -72,10 +83,10 @@ in
     );
   };
 
-  config = lib.mkMerge [
+  config = mkMerge [
     {
-      mkObservability.inactiveAlertUnits = lib.mkIf config.services.postgresql.enable (
-        lib.lists.singleton config.systemd.services.postgresql.name
+      mkObservability.inactiveAlertUnits = mkIf config.services.postgresql.enable (
+        singleton config.systemd.services.postgresql.name
       );
 
       services.postgresql = {
@@ -85,7 +96,7 @@ in
 
         # Peer auth for native services on the Unix socket; scram for TCP.
         # Container svcs connect from the default docker bridge.
-        authentication = lib.mkOverride 10 ''
+        authentication = mkOverride 10 ''
           local all all                peer
           host  all all 127.0.0.1/32   scram-sha-256
           host  all all ::1/128        scram-sha-256
@@ -94,35 +105,40 @@ in
       };
     }
 
-    (lib.mkIf (svcs != { }) {
-      sops.secrets = lib.mapAttrs' (
-        name: svc:
-        lib.nameValuePair svc.secretName {
+    (mkIf (svcs != { }) {
+      sops.secrets = mapAttrs' (
+        name:
+        { secretName, ... }:
+        nameValuePair secretName {
           owner = "postgres";
-          restartUnits = [ "${name}-db-password.service" ];
+          restartUnits = singleton "${name}-db-password.service";
         }
       ) svcs;
 
       services.postgresql = {
-        ensureDatabases = lib.mapAttrsToList (_: svc: svc.dbName) svcs;
-        ensureUsers = lib.mapAttrsToList (_: svc: {
-          name = svc.dbName;
-          ensureDBOwnership = true;
-        }) svcs;
+        ensureDatabases = mapAttrsToList (_: { dbName, ... }: dbName) svcs;
+        ensureUsers = mapAttrsToList (
+          _:
+          { dbName, ... }:
+          {
+            name = dbName;
+            ensureDBOwnership = true;
+          }
+        ) svcs;
       };
 
-      systemd.services = lib.mapAttrs' (
+      systemd.services = mapAttrs' (
         name: svc:
         let
           secretPath = config.sops.secrets.${svc.secretName}.path;
         in
-        lib.nameValuePair "${name}-db-password" {
+        nameValuePair "${name}-db-password" {
           description = "Set ${name} postgres role password from sops secret";
           after = [
             "postgresql.service"
             "postgresql-setup.service"
           ];
-          requires = [ "postgresql.service" ];
+          requires = singleton "postgresql.service";
           wants = [
             "postgresql-setup.service"
             "sops-install-secrets.service"
@@ -143,20 +159,22 @@ in
             User = "postgres";
             Group = "postgres";
           };
-          script = ''
-            set -euo pipefail
-            if [ ! -s "${secretPath}" ]; then
-              echo "ERROR: sops secret ${secretPath} is empty — refusing to clear ${svc.dbName} postgres password" >&2
-              exit 1
-            fi
-            ${config.services.postgresql.package}/bin/psql -tAc \
-              "ALTER USER ${svc.dbName} WITH PASSWORD '$(cat ${secretPath})'"
-          ''
-          + (lib.concatStringsSep "\n" (
-            lib.map (
-              cmd: "${config.services.postgresql.package}/bin/psql -d ${svc.dbName} -tAc \"${cmd}\""
-            ) svc.extraCommands
-          ));
+          script =
+            /* bash */ ''
+              set -euo pipefail
+              if [ ! -s "${secretPath}" ]; then
+                echo "ERROR: sops secret ${secretPath} is empty — refusing to clear ${svc.dbName} postgres password" >&2
+                exit 1
+              fi
+              ${config.services.postgresql.package}/bin/psql -tAc \
+                "ALTER USER ${svc.dbName} WITH PASSWORD '$(cat ${secretPath})'"
+            ''
+            + (concatStringsSep "\n" (
+              map (
+                cmd:
+                "${config.services.postgresql.package}/bin/psql --dbname=${svc.dbName} --tuples-only --no-align --command=\"${cmd}\""
+              ) svc.extraCommands
+            ));
         }
       ) svcs;
     })

@@ -3,35 +3,42 @@
 # 2. Get its hash: nix hash file ~/downloads/aptos.zip
 # 3. Add the file to the store: nix-store --add-fixed sha256 ~/downloads/aptos.zip
 
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 let
-  aptosFonts = pkgs.stdenvNoCC.mkDerivation {
-    pname = "aptos-fonts";
-    version = "4.40";
+  inherit (lib.lists) singleton;
+  aptosFonts = pkgs.callPackage (
+    {
+      lib,
+      stdenvNoCC,
+      fetchurl,
+      unzip,
+    }:
+    stdenvNoCC.mkDerivation {
+      pname = "aptos-fonts";
+      version = "4.40";
 
-    src = pkgs.fetchurl {
-      url = "https://download.microsoft.com/download/8/6/0/860a94fa-7feb-44ef-ac79-c072d9113d69/Microsoft%20Aptos%20Fonts.zip";
-      hash = "sha256-ZSj9Eg5xmp+YXpQhTspoh9FlO4hFaRankqYwsC6VsCU=";
-    };
+      src = fetchurl {
+        url = "https://download.microsoft.com/download/8/6/0/860a94fa-7feb-44ef-ac79-c072d9113d69/Microsoft%20Aptos%20Fonts.zip";
+        hash = "sha256-ZSj9Eg5xmp+YXpQhTspoh9FlO4hFaRankqYwsC6VsCU=";
+      };
 
-    nativeBuildInputs = [ pkgs.unzip ];
+      nativeBuildInputs = singleton unzip;
 
-    dontUnpack = true;
+      dontUnpack = true;
 
-    installPhase = ''
-      mkdir -p $out/share/fonts/truetype
-      unzip "$src" -d unpacked
+      installPhase = /* bash */ ''
+        mkdir --parents $out/share/fonts/truetype
+        unzip "$src" -d unpacked
 
-      find unpacked \
-        -type f \
-        -iname '*.ttf' \
-        -exec install -Dm444 {} -t $out/share/fonts/truetype \;
-    '';
-  };
+        find unpacked \
+          -type f \
+          -iname '*.ttf' \
+          -exec install --directory --mode=444 {} --target-directory=$out/share/fonts/truetype \;
+      '';
+    }
+  ) { };
 in
 {
-  fonts.packages = [
-    aptosFonts
-  ];
+  fonts.packages = singleton aptosFonts;
 }

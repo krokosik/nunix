@@ -19,7 +19,7 @@ in
 
     on._args = [
       "hyprland.start"
-      (mkLuaInline ''
+      (mkLuaInline /* lua */ ''
         function()
           hl.exec_cmd("hyprctl dispatch focusmonitor 'desc:Dell Inc. DELL S2725QS 3H8D364'")
           hl.exec_cmd("hyprctl dispatch workspace 1")

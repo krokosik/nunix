@@ -7,6 +7,7 @@
 }:
 let
   inherit (lib.attrsets) genAttrs;
+  inherit (lib.lists) singleton;
   inherit (lib.meta) getExe getExe';
   inherit (lib.strings) concatMapStringsSep;
 
@@ -91,15 +92,17 @@ let
 in
 {
   home-manager.users = genAttrs config.extraUsers (username: {
-    imports = [ ../../home-manager/shared/desktop ];
+    imports = singleton ../../home-manager/shared/desktop;
 
-    home.username = username;
-    home.homeDirectory = "/home/${username}";
+    home = {
+      username = username;
+      homeDirectory = "/home/${username}";
 
-    home.packages = with pkgs; [
-      flatpak
-      bazaar
-    ];
+      packages = with pkgs; [
+        flatpak
+        bazaar
+      ];
+    };
 
     programs.fish.shellAliases.flatpak = "${flatpakExe} --user";
 
@@ -109,12 +112,12 @@ in
         Type = "oneshot";
         ExecStart = "${flatpakExe} remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo";
       };
-      Install.WantedBy = [ "default.target" ];
+      Install.WantedBy = singleton "default.target";
     };
   });
 
   system.activationScripts.seedExtraUserDms = {
-    deps = [ "users" ];
+    deps = singleton "users";
     text = /* bash */ ''
       copy_if_missing() {
         local source="$1"

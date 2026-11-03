@@ -1,4 +1,12 @@
-{ inputs, pkgs, ... }:
+{
+  inputs,
+  lib,
+  pkgs,
+  ...
+}:
+let
+  inherit (lib.lists) singleton;
+in
 {
   environment.systemPackages = with pkgs; [
     freecad
@@ -6,11 +14,11 @@
     (kicad.override { stable = true; })
   ];
 
-  imports = [ inputs.inventor.nixosModules.default ];
+  imports = singleton inputs.inventor.nixosModules.default;
 
   programs.autodesk-inventor = {
     enable = true;
-    versions = [ "2027" ];
+    versions = singleton "2027";
   };
 
   services.flatpak = {

@@ -22,6 +22,8 @@
   ];
 
   services.accounts-daemon.enable = true;
-  services.printing.enable = true;
-  services.upower.enable = true;
+  services = {
+    printing.enable = true;
+    upower.enable = true;
+  };
 }

@@ -38,7 +38,7 @@ in
     ];
   };
 
-  boot.loader.limine.extraEntries = ''
+  boot.loader.limine.extraEntries = /* limine */ ''
     /Windows 11
         protocol: efi_chainload
         image_path: guid(45957aa2-3cc2-4a30-a487-ecb327670d56):/EFI/Microsoft/Boot/bootmgfw.efi

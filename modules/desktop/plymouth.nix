@@ -3,8 +3,13 @@
   lib,
   ...
 }:
+let
+  inherit (lib.lists) singleton;
+  inherit (lib.meta) getExe';
+  inherit (lib.modules) mkForce;
+in
 {
-  # Limine Configuration with plymouth
+  # LIMINE CONFIGURATION WITH PLYMOUTH
   boot = {
     consoleLogLevel = 0;
     kernelParams = [
@@ -23,17 +28,17 @@
   # hold on the plymouth splash screen for longer
   systemd.services = {
     plymouth-quit = {
-      after = [ "multi-user.target" ];
-      serviceConfig.ExecStart = lib.mkForce [
-        "-${lib.getExe' pkgs.plymouth "plymouth"} quit --retain-splash"
-      ];
+      after = singleton "multi-user.target";
+      serviceConfig.ExecStart = mkForce (
+        singleton "-${getExe' pkgs.plymouth "plymouth"} quit --retain-splash"
+      );
     };
     # We do not want boot to wait for splash to be dismissed
     plymouth-quit-wait.enable = false;
 
-    plymouth-poweroff.wantedBy = [ "poweroff.target" ];
-    plymouth-halt.wantedBy = [ "halt.target" ];
-    plymouth-reboot.wantedBy = [ "reboot.target" ];
+    plymouth-poweroff.wantedBy = singleton "poweroff.target";
+    plymouth-halt.wantedBy = singleton "halt.target";
+    plymouth-reboot.wantedBy = singleton "reboot.target";
 
     clear-tty-on-shutdown = {
       description = "Clear TTY to hide text flashes during shutdown handoff";

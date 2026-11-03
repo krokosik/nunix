@@ -5,6 +5,8 @@
   ...
 }:
 let
+  inherit (lib.lists) singleton;
+  inherit (lib.modules) mkForce mkIf;
   port = 5006;
   user = "actual";
   group = "actual";
@@ -16,7 +18,7 @@ in
     displayGroup = "Finance";
     accessGroup = "friends";
     iconUrl = "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/actual-budget.png";
-    redirectUris = [ "${config.mkTraefikServices.actual.fullHostname}/openid/callback" ];
+    redirectUris = singleton "${config.mkTraefikServices.actual.fullHostname}/openid/callback";
     credentials = {
       clientId = {
         inherit group;
@@ -53,17 +55,17 @@ in
     };
   };
 
-  systemd.services.actual.serviceConfig.ReadWritePaths = lib.mkForce [
-    config.services.actual.settings.dataDir
-  ];
+  systemd.services.actual.serviceConfig.ReadWritePaths = mkForce (
+    singleton config.services.actual.settings.dataDir
+  );
 
-  mkObservability.inactiveAlertUnits = lib.mkIf config.services.actual.enable (
-    lib.lists.singleton config.systemd.services.actual.name
+  mkObservability.inactiveAlertUnits = mkIf config.services.actual.enable (
+    singleton config.systemd.services.actual.name
   );
 
   mkTraefikServices.actual = {
     inherit port;
     public = true;
-    chain = [ "chain-no-auth" ];
+    chain = singleton "chain-no-auth";
   };
 }

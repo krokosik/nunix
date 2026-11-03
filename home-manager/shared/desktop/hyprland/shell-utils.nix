@@ -1,11 +1,12 @@
 { lib, pkgs, ... }:
 let
+  inherit (lib.lists) singleton;
   launchOrFocus = pkgs.writeShellApplication {
     name = "launch-or-focus";
-    runtimeInputs = [
-      pkgs.coreutils
-      pkgs.hyprland
-      pkgs.jq
+    runtimeInputs = with pkgs; [
+      coreutils
+      hyprland
+      jq
     ];
     text = /* bash */ ''
       if (( $# == 0 )); then
@@ -18,7 +19,7 @@ let
 
       windowAddress=$(
         hyprctl clients -j |
-          jq -r --arg pattern "$windowPattern" '
+          jq --raw-output --arg pattern "$windowPattern" '
             .[]
             | select(
                 (.class | test("\\b" + $pattern + "\\b"; "i"))
@@ -27,7 +28,7 @@ let
               )
             | .address
           ' |
-          head -n 1
+          head --lines=1
       )
 
       if [[ -n "$windowAddress" ]]; then
@@ -55,6 +56,6 @@ let
   };
 in
 {
-  home.packages = [ launchOrFocus ];
+  home.packages = singleton launchOrFocus;
 
 }

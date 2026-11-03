@@ -6,8 +6,8 @@
   ...
 }:
 let
-  inherit (lib.meta) getExe getExe';
   inherit (lib.lists) singleton;
+  inherit (lib.meta) getExe getExe';
   upstreamDms = inputs.dms.packages.${pkgs.stdenv.hostPlatform.system}.default;
   python = pkgs.python3.withPackages (packages: singleton packages.evdev);
   wvkbd =
@@ -28,25 +28,27 @@ in
   boot.kernelModules = singleton "surface_aggregator_tabletsw";
 
   # Access to this switch only; no additional input-group membership.
-  services.udev.extraRules = ''
+  services.udev.extraRules = /* udev */ ''
     SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="Microsoft Surface KIP Tablet Mode Switch", TAG+="uaccess"
   '';
 
   # Repackage runtime QML; reuse the upstream Go binary and Qt dependencies.
-  programs.dank-material-shell.package =
-    pkgs.runCommand "dms-surface-tablet"
+  programs.dank-material-shell.package = pkgs.callPackage (
+    { runCommand, python3 }:
+    runCommand "dms-surface-tablet"
       {
         meta.mainProgram = "dms";
       }
       /* bash */ ''
         cp --recursive ${upstreamDms}/. "$out"
         chmod --recursive u+w "$out"
-        ${getExe pkgs.python3} ${./tablet-mode/patch-dms.py} "$out/share/quickshell/dms"
+        ${getExe python3} ${./tablet-mode/patch-dms.py} "$out/share/quickshell/dms"
         substituteInPlace "$out/bin/dms" \
           --replace-fail '${upstreamDms}/share/quickshell/dms' "$out/share/quickshell/dms"
         substituteInPlace "$out/lib/systemd/user/dms.service" \
           --replace-fail '${upstreamDms}/bin/dms' "$out/bin/dms"
-      '';
+      ''
+  ) { };
 
   home-manager.users.${config.username} =
     { config, osConfig, ... }:

@@ -4,6 +4,8 @@
   ...
 }:
 let
+  inherit (lib.lists) singleton;
+  inherit (lib.strings) escapeShellArg;
   vault = "${config.xdg.userDirs.documents}/vault";
   repository = "${config.xdg.stateHome}/restic/vault";
 in
@@ -13,11 +15,11 @@ in
   services.restic = {
     enable = true;
     backups.vault = {
-      paths = lib.lists.singleton vault;
+      paths = singleton vault;
       inherit repository;
       passwordFile = config.sops.secrets.restic_vault_password.path;
       initialize = true;
-      extraBackupArgs = lib.lists.singleton "--skip-if-unchanged";
+      extraBackupArgs = singleton "--skip-if-unchanged";
       pruneOpts = [
         "--keep-daily 30"
         "--keep-weekly 8"
@@ -30,7 +32,7 @@ in
         RandomizedDelaySec = "1h";
       };
       backupPrepareCommand = /* bash */ ''
-        vault=${lib.escapeShellArg vault}
+        vault=${escapeShellArg vault}
         if [[ ! -d "$vault/.obsidian" ]]; then
           echo "Vault is missing its .obsidian directory: $vault" >&2
           exit 1

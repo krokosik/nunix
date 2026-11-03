@@ -5,78 +5,96 @@
   ...
 }:
 let
-  inherit (lib.lists) singleton;
+  inherit (lib.attrsets)
+    attrNames
+    listToAttrs
+    mapAttrs'
+    mapAttrsToList
+    nameValuePair
+    ;
+  inherit (lib.lists) concatMap optional singleton;
+  inherit (lib.meta) getExe getExe';
+  inherit (lib.modules) mkForce mkIf mkMerge;
+  inherit (lib.options) mkOption;
+  inherit (lib.strings) escapeShellArg escapeShellArgs optionalString;
+  inherit (lib.types)
+    attrsOf
+    bool
+    listOf
+    str
+    submodule
+    ;
   rpc_port = 3901;
   s3_port = 3900;
   buckets = config.mkGarageBucket;
 in
 {
-  options.mkGarageBucket = lib.mkOption {
+  options.mkGarageBucket = mkOption {
     default = { };
     description = ''
       Garage buckets with service-specific SOPS credentials. The helper
       provisions each bucket and access key, applies its permissions, and
       orders the provisioning unit before every consumer service.
     '';
-    type = lib.types.attrsOf (
+    type = attrsOf (
       let
         outerConfig = config;
       in
-      lib.types.submodule (
+      submodule (
         { name, config, ... }:
         {
           options = {
-            bucketName = lib.mkOption {
-              type = lib.types.str;
+            bucketName = mkOption {
+              type = str;
               default = name;
               description = "Garage bucket name. Defaults to the attribute name.";
             };
-            credentialOwner = lib.mkOption {
-              type = lib.types.str;
+            credentialOwner = mkOption {
+              type = str;
               default = name;
               description = "System user that reads this bucket's SOPS credentials.";
             };
-            consumerService = lib.mkOption {
-              type = lib.types.listOf lib.types.str;
+            consumerService = mkOption {
+              type = listOf str;
               default = singleton "${name}.service";
               description = ''
                 Systemd units that consume this bucket and must wait for
                 Garage provisioning to complete.
               '';
             };
-            accessKeySecretName = lib.mkOption {
-              type = lib.types.str;
+            accessKeySecretName = mkOption {
+              type = str;
               default = "${name}/s3_access_key";
               description = "SOPS secret name containing the Garage access key.";
             };
-            secretKeySecretName = lib.mkOption {
-              type = lib.types.str;
+            secretKeySecretName = mkOption {
+              type = str;
               default = "${name}/s3_secret_key";
               description = "SOPS secret name containing the Garage secret key.";
             };
-            accessKeyFile = lib.mkOption {
-              type = lib.types.str;
+            accessKeyFile = mkOption {
+              type = str;
               readOnly = true;
               description = "Decrypted Garage access key path.";
             };
-            secretKeyFile = lib.mkOption {
-              type = lib.types.str;
+            secretKeyFile = mkOption {
+              type = str;
               readOnly = true;
               description = "Decrypted Garage secret key path.";
             };
             permissions = {
-              read = lib.mkOption {
-                type = lib.types.bool;
+              read = mkOption {
+                type = bool;
                 default = true;
                 description = "Grant read access to the bucket.";
               };
-              write = lib.mkOption {
-                type = lib.types.bool;
+              write = mkOption {
+                type = bool;
                 default = true;
                 description = "Grant write access to the bucket.";
               };
-              owner = lib.mkOption {
-                type = lib.types.bool;
+              owner = mkOption {
+                type = bool;
                 default = false;
                 description = "Grant bucket administrative access.";
               };
@@ -92,31 +110,33 @@ in
     );
   };
 
-  config = lib.mkMerge [
+  config = mkMerge [
     {
-      users.groups.garage = { };
-      users.users.garage = {
-        isSystemUser = true;
-        group = "garage";
+      users = {
+        groups.garage = { };
+        users.garage = {
+          isSystemUser = true;
+          group = "garage";
+        };
       };
 
       sops.secrets = {
         garage_rpc_secret = {
           key = "garage/rpc_secret";
           owner = "garage";
-          restartUnits = [ "garage.service" ];
+          restartUnits = singleton "garage.service";
         };
         garage_default_access_key.key = "garage/default_access_key";
         garage_default_secret_key.key = "garage/default_secret_key";
       };
 
       sops.templates."garage-default.env" = {
-        content = ''
+        content = /* bash */ ''
           GARAGE_DEFAULT_ACCESS_KEY=${config.sops.placeholder.garage_default_access_key}
           GARAGE_DEFAULT_SECRET_KEY=${config.sops.placeholder.garage_default_secret_key}
           GARAGE_DEFAULT_BUCKET=default
         '';
-        restartUnits = [ "garage.service" ];
+        restartUnits = singleton "garage.service";
       };
 
       services.garage = {
@@ -147,11 +167,11 @@ in
       };
 
       systemd.services.garage.serviceConfig = {
-        DynamicUser = lib.mkForce false;
+        DynamicUser = mkForce false;
         User = "garage";
         Group = "garage";
-        ExecStart = lib.mkForce ''
-          ${lib.getExe pkgs.garage_2} server --single-node --default-bucket
+        ExecStart = mkForce /* bash */ ''
+          ${getExe pkgs.garage_2} server --single-node --default-bucket
         '';
       };
 
@@ -165,21 +185,21 @@ in
         metrics.url = "http://${config.services.garage.settings.admin.api_bind_addr}/metrics";
       };
 
-      mkObservability.inactiveAlertUnits = lib.mkIf config.services.garage.enable config.mkObservabilityServices.garage.units;
+      mkObservability.inactiveAlertUnits = mkIf config.services.garage.enable config.mkObservabilityServices.garage.units;
     }
 
-    (lib.mkIf (buckets != { }) {
-      assertions = lib.mapAttrsToList (name: bucket: {
+    (mkIf (buckets != { }) {
+      assertions = mapAttrsToList (name: bucket: {
         assertion = bucket.permissions.read || bucket.permissions.write || bucket.permissions.owner;
         message = "mkGarageBucket.${name} must grant at least one permission";
       }) buckets;
 
-      sops.secrets = lib.listToAttrs (
-        lib.concatMap (
+      sops.secrets = listToAttrs (
+        concatMap (
           name:
           let
             bucket = buckets.${name};
-            restartUnits = [ "${name}-garage-bucket.service" ] ++ bucket.consumerService;
+            restartUnits = singleton "${name}-garage-bucket.service" ++ bucket.consumerService;
           in
           [
             {
@@ -197,26 +217,26 @@ in
               };
             }
           ]
-        ) (lib.attrNames buckets)
+        ) (attrNames buckets)
       );
 
-      systemd.services = lib.mapAttrs' (
+      systemd.services = mapAttrs' (
         name: bucket:
         let
           permissionArgs =
-            lib.optional bucket.permissions.read "--read"
-            ++ lib.optional bucket.permissions.write "--write"
-            ++ lib.optional bucket.permissions.owner "--owner";
+            optional bucket.permissions.read "--read"
+            ++ optional bucket.permissions.write "--write"
+            ++ optional bucket.permissions.owner "--owner";
           deniedPermissionArgs =
-            lib.optional (!bucket.permissions.read) "--read"
-            ++ lib.optional (!bucket.permissions.write) "--write"
-            ++ lib.optional (!bucket.permissions.owner) "--owner";
+            optional (!bucket.permissions.read) "--read"
+            ++ optional (!bucket.permissions.write) "--write"
+            ++ optional (!bucket.permissions.owner) "--owner";
         in
-        lib.nameValuePair "${name}-garage-bucket" {
+        nameValuePair "${name}-garage-bucket" {
           description = "Provision the ${bucket.bucketName} Garage bucket and access key";
-          after = [ "garage.service" ];
-          requires = [ "garage.service" ];
-          wants = [ "sops-install-secrets.service" ];
+          after = singleton "garage.service";
+          requires = singleton "garage.service";
+          wants = singleton "sops-install-secrets.service";
           requiredBy = bucket.consumerService;
           before = bucket.consumerService;
           unitConfig.ConditionPathExists = [
@@ -231,7 +251,7 @@ in
               "s3_secret_key:${bucket.secretKeyFile}"
             ];
           };
-          script = ''
+          script = /* bash */ ''
             set -euo pipefail
 
             if [ ! -s "$CREDENTIALS_DIRECTORY/s3_access_key" ] || [ ! -s "$CREDENTIALS_DIRECTORY/s3_secret_key" ]; then
@@ -241,14 +261,14 @@ in
 
             access_key="$(<"$CREDENTIALS_DIRECTORY/s3_access_key")"
             secret_key="$(<"$CREDENTIALS_DIRECTORY/s3_secret_key")"
-            garage=${lib.getExe config.services.garage.package}
+            garage=${getExe config.services.garage.package}
 
             for _ in {1..60}; do
               if "$garage" status > /dev/null 2>&1; then
                 break
               fi
 
-              ${lib.getExe' pkgs.coreutils "sleep"} 1
+              ${getExe' pkgs.coreutils "sleep"} 1
             done
 
             if ! "$garage" status > /dev/null 2>&1; then
@@ -260,13 +280,13 @@ in
               "$garage" key import --yes "$access_key" "$secret_key"
             fi
 
-            if ! "$garage" bucket info ${lib.escapeShellArg bucket.bucketName} > /dev/null 2>&1; then
-              "$garage" bucket create ${lib.escapeShellArg bucket.bucketName}
+            if ! "$garage" bucket info ${escapeShellArg bucket.bucketName} > /dev/null 2>&1; then
+              "$garage" bucket create ${escapeShellArg bucket.bucketName}
             fi
 
-            "$garage" bucket allow ${lib.escapeShellArgs permissionArgs} ${lib.escapeShellArg bucket.bucketName} --key "$access_key"
-            ${lib.optionalString (deniedPermissionArgs != [ ]) ''
-              "$garage" bucket deny ${lib.escapeShellArgs deniedPermissionArgs} ${lib.escapeShellArg bucket.bucketName} --key "$access_key"
+            "$garage" bucket allow ${escapeShellArgs permissionArgs} ${escapeShellArg bucket.bucketName} --key "$access_key"
+            ${optionalString (deniedPermissionArgs != [ ]) /* bash */ ''
+              "$garage" bucket deny ${escapeShellArgs deniedPermissionArgs} ${escapeShellArg bucket.bucketName} --key "$access_key"
             ''}
           '';
         }

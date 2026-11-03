@@ -1,6 +1,10 @@
 { config, lib, ... }:
 let
-  dashboard = file: "${config.mkTraefikServices.grafana.fullHostname}/d/${(lib.importJSON file).uid}";
+  inherit (lib.lists) singleton;
+  inherit (lib.modules) mkIf;
+  inherit (lib.strings) concatStringsSep toJSON;
+  inherit (lib.trivial) importJSON;
+  dashboard = file: "${config.mkTraefikServices.grafana.fullHostname}/d/${(importJSON file).uid}";
   hostDashboard = "${dashboard ./dashboards/node_exporter.json}?var-host={{ $labels.host | queryEscape }}&var-job=host%2Fnode";
   postgresDashboard = "${dashboard ./dashboards/postgresql.json}?var-host={{ $labels.host | queryEscape }}&var-instance={{ $labels.instance | queryEscape }}";
   smartDashboard = "${dashboard ./dashboards/smart.json}?var-host={{ $labels.host | queryEscape }}&var-node={{ $labels.instance | queryEscape }}&var-disk={{ $labels.device | queryEscape }}";
@@ -214,43 +218,52 @@ in
         '';
         for = "5m";
         labels.severity = "critical";
-        annotations.summary = "{{ $labels.name }} inactive on {{ $labels.host }}";
-        annotations.dashboard_url = hostDashboard;
+        annotations = {
+          summary = "{{ $labels.name }} inactive on {{ $labels.host }}";
+          dashboard_url = hostDashboard;
+        };
       }
       {
         alert = "ScrapeDown";
         expr = ''up{job=~"service/.*|host/.*"} == 0'';
         for = "2m";
         labels.severity = "warning";
-        annotations.summary = "Metrics target {{ $labels.job }} down on {{ $labels.host }}";
-        annotations.dashboard_url = "${config.mkTraefikServices.grafana.fullHostname}/dashboards";
+        annotations = {
+          summary = "Metrics target {{ $labels.job }} down on {{ $labels.host }}";
+          dashboard_url = "${config.mkTraefikServices.grafana.fullHostname}/dashboards";
+        };
       }
       {
         alert = "CertificateExpiring";
         expr = ''probe_ssl_earliest_cert_expiry{job=~"probe/.*"} - time() < 14 * 24 * 3600'';
         for = "1h";
         labels.severity = "warning";
-        annotations.summary = "Certificate for {{ $labels.service }} expires within 14 days";
-        annotations.dashboard_url = probeDashboard;
+        annotations = {
+          summary = "Certificate for {{ $labels.service }} expires within 14 days";
+          dashboard_url = probeDashboard;
+        };
       }
     ];
   };
 
-  mkObservability.logRules.platform = lib.mkIf (config.mkObservability.repeatedErrorUnits != [ ]) (
-    lib.lists.singleton {
-      alert = "RepeatedServiceErrors";
-      interval = "5m";
-      expr = /* logsql */ ''
-        _SYSTEMD_UNIT:in(${lib.concatStringsSep ", " (map lib.strings.toJSON config.mkObservability.repeatedErrorUnits)})
-        level:in("error", "crit", "alert", "emerg")
-        | stats by (_HOSTNAME, _SYSTEMD_UNIT) count() as errors
-        | filter errors:>20
-      '';
-      labels.severity = "warning";
-      annotations.summary = "Repeated errors from {{ $labels._SYSTEMD_UNIT }} on {{ $labels._HOSTNAME }}";
-      annotations.dashboard_url = config.mkAuthentik.forwardAuthApps.victorialogs.launchUrl;
-      annotations.dashboard_label = "Logs";
-    }
-  );
+  mkObservability.logRules.platform =
+    mkIf (config.mkObservability.repeatedErrorUnits != [ ])
+      (singleton {
+        alert = "RepeatedServiceErrors";
+        interval = "5m";
+        expr = /* logsql */ ''
+          _SYSTEMD_UNIT:in(${concatStringsSep ", " (map toJSON config.mkObservability.repeatedErrorUnits)})
+          level:in("error", "crit", "alert", "emerg")
+          | stats by (_HOSTNAME, _SYSTEMD_UNIT) count() as errors
+          | filter errors:>20
+        '';
+        labels.severity = "warning";
+
+        annotations = {
+          summary = "Repeated errors from {{ $labels._SYSTEMD_UNIT }} on {{ $labels._HOSTNAME }}";
+          dashboard_url = config.mkAuthentik.forwardAuthApps.victorialogs.launchUrl;
+          dashboard_label = "Logs";
+        };
+      });
 
 }

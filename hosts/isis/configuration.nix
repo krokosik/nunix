@@ -4,6 +4,9 @@
   lib,
   ...
 }:
+let
+  inherit (lib.lists) singleton;
+in
 {
   imports = [
     ./disko-config.nix
@@ -22,7 +25,7 @@
   hardware.facter.reportPath = ./facter.json;
 
   role = "desktop";
-  extraUsers = [ "guest" ];
+  extraUsers = singleton "guest";
 
   hardware.microsoft-surface.kernelVersion = "stable";
 

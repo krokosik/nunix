@@ -6,6 +6,8 @@
 }:
 let
   inherit (lib.lists) singleton;
+  inherit (lib.meta) getExe';
+  inherit (lib.modules) mkAfter mkForce;
   configuration = {
     global.telegram_bot_token_file = config.sops.secrets.alertmanager_telegram_token.path;
     templates = singleton "${./telegram.tmpl}";
@@ -80,39 +82,40 @@ in
     alertmanager_telegram_token = {
       key = "alertmanager/telegram_bot_token";
       owner = "alertmanager";
-      restartUnits = [ "alertmanager.service" ];
+      restartUnits = singleton "alertmanager.service";
     };
     alertmanager_telegram_chat_id = {
       key = "alertmanager/telegram_chat_id";
-      restartUnits = [ "alertmanager.service" ];
+      restartUnits = singleton "alertmanager.service";
     };
   };
 
   # The chat ID is numeric in Alertmanager's schema. Substitute only the
   # placeholder at startup, keeping the actual value outside the Nix store.
   systemd.services.alertmanager = {
-    preStart = lib.mkAfter ''
+    preStart = mkAfter /* bash */ ''
       set -euo pipefail
       chat_id="$(<"$CREDENTIALS_DIRECTORY/telegram_chat_id")"
       [[ "$chat_id" =~ ^-?[0-9]+$ ]] || { echo "Invalid Telegram chat ID" >&2; exit 1; }
-      ${lib.getExe' pkgs.gnused "sed"} "s/\"chat_id\":1/\"chat_id\":$chat_id/g" /tmp/alert-manager-substituted.yaml > /tmp/alert-manager-ready.yaml
-      ${lib.getExe' pkgs.coreutils "mv"} /tmp/alert-manager-ready.yaml /tmp/alert-manager-substituted.yaml
+      ${getExe' pkgs.gnused "sed"} "s/\"chat_id\":1/\"chat_id\":$chat_id/g" /tmp/alert-manager-substituted.yaml > /tmp/alert-manager-ready.yaml
+      ${getExe' pkgs.coreutils "mv"} /tmp/alert-manager-ready.yaml /tmp/alert-manager-substituted.yaml
     '';
-    serviceConfig.LoadCredential = [
-      "telegram_chat_id:${config.sops.secrets.alertmanager_telegram_chat_id.path}"
-    ];
-    wants = [ "msmtpd.service" ];
-    after = [ "msmtpd.service" ];
+    serviceConfig.LoadCredential = singleton "telegram_chat_id:${config.sops.secrets.alertmanager_telegram_chat_id.path}";
+    wants = singleton "msmtpd.service";
+    after = singleton "msmtpd.service";
   };
 
-  users.groups.alertmanager = { };
-  users.users.alertmanager = {
-    isSystemUser = true;
-    group = "alertmanager";
+  users = {
+    groups.alertmanager = { };
+
+    users.alertmanager = {
+      isSystemUser = true;
+      group = "alertmanager";
+    };
   };
 
   systemd.services.alertmanager.serviceConfig = {
-    DynamicUser = lib.mkForce false;
+    DynamicUser = mkForce false;
     User = "alertmanager";
     Group = "alertmanager";
   };

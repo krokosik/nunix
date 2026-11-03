@@ -18,18 +18,31 @@
   ...
 }:
 let
+  inherit (lib.attrsets) mapAttrs mapAttrsToList optionalAttrs;
+  inherit (lib.lists) concatLists singleton;
+  inherit (lib.modules) mkForce mkMerge;
+  inherit (lib.options) literalExpression mkOption;
+  inherit (lib.types)
+    attrsOf
+    bool
+    listOf
+    nullOr
+    port
+    str
+    submodule
+    ;
   serverUid = 1234;
   serverGid = 1234;
 in
 {
-  options.mkContainerServices = lib.mkOption {
-    type = lib.types.attrsOf (
-      lib.types.submodule (
+  options.mkContainerServices = mkOption {
+    type = attrsOf (
+      submodule (
         { name, config, ... }:
         {
           options = {
-            port = lib.mkOption {
-              type = lib.types.nullOr lib.types.port;
+            port = mkOption {
+              type = nullOr port;
               default = null;
               description = ''
                 Host port to publish on 127.0.0.1. Left null for svcs that
@@ -38,41 +51,41 @@ in
                 directly) — no `ports` entry is emitted in that case.
               '';
             };
-            containerPort = lib.mkOption {
-              type = lib.types.nullOr lib.types.port;
+            containerPort = mkOption {
+              type = nullOr port;
               default = config.port;
-              defaultText = lib.literalExpression "config.port";
+              defaultText = literalExpression "config.port";
               description = "Port the svc listens on inside the container. Defaults to `port`.";
             };
-            stateDirs = lib.mkOption {
-              type = lib.types.listOf lib.types.str;
-              default = [ "/var/lib/containers/${name}" ];
-              defaultText = lib.literalExpression ''[ "/var/lib/containers/''${name}" ]'';
+            stateDirs = mkOption {
+              type = listOf str;
+              default = singleton "/var/lib/containers/${name}";
+              defaultText = literalExpression ''[ "/var/lib/containers/''${name}" ]'';
               description = ''
                 Host directories to create (0750, owned by stateDirOwner:stateDirGroup)
                 for this container's persistent state. Multi-subdir svcs list every
                 subdir they bind-mount.
               '';
             };
-            stateDirOwner = lib.mkOption {
-              type = lib.types.str;
+            stateDirOwner = mkOption {
+              type = str;
               default = toString serverUid;
-              defaultText = lib.literalExpression "toString serverUid";
+              defaultText = literalExpression "toString serverUid";
               description = "Owner for the stateDirs tmpfiles rules. Defaults to the server user's uid.";
             };
-            stateDirGroup = lib.mkOption {
-              type = lib.types.str;
+            stateDirGroup = mkOption {
+              type = str;
               default = toString serverGid;
-              defaultText = lib.literalExpression "toString serverGid";
+              defaultText = literalExpression "toString serverGid";
               description = "Group for the stateDirs tmpfiles rules. Defaults to the servers gid.";
             };
-            tzEnv = lib.mkOption {
-              type = lib.types.bool;
+            tzEnv = mkOption {
+              type = bool;
               default = true;
               description = "Emit `TZ = config.time.timeZone` in the container environment.";
             };
-            manageUser = lib.mkOption {
-              type = lib.types.bool;
+            manageUser = mkOption {
+              type = bool;
               default = true;
               description = ''
                 Whether this module sets the container's runtime user identity.
@@ -81,8 +94,8 @@ in
                 the svc module then sets those itself.
               '';
             };
-            linuxServer = lib.mkOption {
-              type = lib.types.bool;
+            linuxServer = mkOption {
+              type = bool;
               default = false;
               description = ''
                 Emit PUID/PGID env (server uid/gid) instead of a container
@@ -111,18 +124,18 @@ in
     # colon. `containerPort` defaults to `config.port`, so nothing trips
     # this today — it's a latent guard against a future svc decoupling
     # the two.
-    assertions = lib.mapAttrsToList (name: svc: {
+    assertions = mapAttrsToList (name: svc: {
       assertion = svc.port == null || svc.containerPort != null;
       message = "mkContainerServices.${name}: containerPort must not be null when port is set";
     }) config.mkContainerServices;
 
     # Backend specific configuration for the container runtime.
-    users.users.${config.username}.extraGroups = [ "docker" ];
+    users.users.${config.username}.extraGroups = singleton "docker";
 
     # Containers on the default docker bridge reach host services
     # (postgres, etc.) via host.containers.internal -> 10.88.0.1.
     # Trust the bridge so the firewall doesn't drop those packets.
-    networking.firewall.trustedInterfaces = [ "docker0" ];
+    networking.firewall.trustedInterfaces = singleton "docker0";
 
     virtualisation = {
       docker = {
@@ -130,7 +143,7 @@ in
         autoPrune.enable = true;
         daemon.settings = {
           log-driver = "journald";
-          dns = [ "172.17.0.1" ];
+          dns = singleton "172.17.0.1";
           bip = "172.17.0.1/16";
         };
         enableOnBoot = config.role == "server";
@@ -140,34 +153,34 @@ in
       # Per-svc container fragments contributed via `mkContainerServices.<name>`.
       # Each entry merges with the svc module's own container definition
       # (image, volumes, extra env), which stays in the svc module.
-      oci-containers.containers = lib.mapAttrs (
+      oci-containers.containers = mapAttrs (
         _: svc:
-        lib.mkMerge [
-          (lib.optionalAttrs (svc.port != null) {
-            ports = [ "127.0.0.1:${toString svc.port}:${toString svc.containerPort}" ];
+        mkMerge [
+          (optionalAttrs (svc.port != null) {
+            ports = singleton "127.0.0.1:${toString svc.port}:${toString svc.containerPort}";
           })
-          (lib.optionalAttrs (svc.manageUser && svc.linuxServer) {
+          (optionalAttrs (svc.manageUser && svc.linuxServer) {
             environment = {
               PUID = toString serverUid;
               PGID = toString serverGid;
             };
           })
-          (lib.optionalAttrs (svc.manageUser && !svc.linuxServer) {
+          (optionalAttrs (svc.manageUser && !svc.linuxServer) {
             user = "${toString serverUid}:${toString serverGid}";
           })
-          (lib.optionalAttrs svc.tzEnv {
+          (optionalAttrs svc.tzEnv {
             environment.TZ = config.time.timeZone;
           })
           {
-            extraOptions = [ "--security-opt=no-new-privileges" ];
+            extraOptions = singleton "--security-opt=no-new-privileges";
           }
         ]
       ) config.mkContainerServices;
     };
 
     # docker isn't allowed to forward packets from docker0 to the actual NIC by default
-    boot.kernel.sysctl."net.ipv4.ip_forward" = lib.mkForce 1;
-    boot.kernel.sysctl."net.ipv6.conf.all.forwarding" = lib.mkForce 1;
+    boot.kernel.sysctl."net.ipv4.ip_forward" = mkForce 1;
+    boot.kernel.sysctl."net.ipv6.conf.all.forwarding" = mkForce 1;
 
     # add Docker DNS to resolved
     services.resolved.settings.Resolve.DNSStubListenerExtra = "172.17.0.1";
@@ -176,13 +189,13 @@ in
     # own subdirs (/var/lib/containers/<svc>) owned by the server user,
     # which lets a single backup path cover every svc automatically.
     # Per-svc subdirs come from `mkContainerServices.<name>.stateDirs`.
-    systemd.tmpfiles.rules = [
-      "d /var/lib/containers 0755 root root -"
-    ]
-    ++ lib.concatLists (
-      lib.mapAttrsToList (
-        _: svc: map (dir: "d ${dir} 0750 ${svc.stateDirOwner} ${svc.stateDirGroup} -") svc.stateDirs
-      ) config.mkContainerServices
-    );
+    systemd.tmpfiles.rules =
+      singleton "d /var/lib/containers 0755 root root -"
+
+      ++ concatLists (
+        mapAttrsToList (
+          _: svc: map (dir: "d ${dir} 0750 ${svc.stateDirOwner} ${svc.stateDirGroup} -") svc.stateDirs
+        ) config.mkContainerServices
+      );
   };
 }

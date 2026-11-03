@@ -5,9 +5,9 @@
   ...
 }:
 let
-  inherit (lib) mkIf;
-  inherit (lib.meta) getExe';
   inherit (lib.lists) singleton;
+  inherit (lib.meta) getExe';
+  inherit (lib.modules) mkIf;
 in
 {
   services.nfs.server.enable = mkIf (config.role == "server") true;

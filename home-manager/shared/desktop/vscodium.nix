@@ -4,6 +4,8 @@
   ...
 }:
 let
+  inherit (lib.attrsets) attrNames;
+  inherit (lib.lists) singleton;
   vscode-extensions = pkgs.nix-vscode-extensions.vscode-marketplace-release;
   open-vsx = pkgs.nix-vscode-extensions.open-vsx-release;
   vscode-extensions-universal = pkgs.nix-vscode-extensions.vscode-marketplace-release-universal;
@@ -185,19 +187,20 @@ let
     Arduino = {
       extensions = commonExtensions;
       userSettings = baseSettings // {
-        "arduino.additionalUrls" = [
-          "https://arduino.esp8266.com/stable/package_esp8266com_index.json"
-        ];
+        "arduino.additionalUrls" =
+          singleton "https://arduino.esp8266.com/stable/package_esp8266com_index.json";
         "arduino.useArduinoCli" = true;
         "cmake.configureOnOpen" = true;
       };
     };
 
     "C++" = {
-      extensions = commonExtensions ++ [
-        vscode-extensions.llvm-vs-code-extensions.vscode-clangd
-        vscode-extensions.ms-vscode.cmake-tools
-      ];
+      extensions =
+        commonExtensions
+        ++ (with vscode-extensions; [
+          llvm-vs-code-extensions.vscode-clangd
+          ms-vscode.cmake-tools
+        ]);
       userSettings = baseSettings // {
         "C_Cpp.intelliSenseEngine" = "disabled";
         "cmake.pinnedCommands" = [
@@ -303,5 +306,5 @@ in
 
   home.file.".vscode-oss/extensions".target = ".local/share/codium/extensions";
 
-  stylix.targets.vscodium.profileNames = lib.attrNames profiles;
+  stylix.targets.vscodium.profileNames = attrNames profiles;
 }

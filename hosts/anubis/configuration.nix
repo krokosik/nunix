@@ -1,8 +1,12 @@
 {
   config,
+  lib,
   inputs,
   ...
 }:
+let
+  inherit (lib.lists) singleton;
+in
 {
   imports = [
     ./disko-config.nix
@@ -20,22 +24,24 @@
   latestZFSKernel = true; # Set to use latest available ZFS compatible kernel
 
   home-manager.users.${config.username} = {
-    imports = [
-      ../../home-manager/shared/common
-    ];
+    imports = singleton ../../home-manager/shared/common;
   };
 
   role = "server"; # Set role of the machine (desktop/server)
 
-  mkObservability.enable = true;
-  mkObservability.monitoredUnits = [
-    "vmagent.service"
-    "vlagent.service"
-    "systemd-journal-upload.service"
-  ];
+  mkObservability = {
+    enable = true;
+    monitoredUnits = [
+      "vmagent.service"
+      "vlagent.service"
+      "systemd-journal-upload.service"
+    ];
+  };
 
-  networking.hostId = "98165cf2"; # head -c4 /dev/urandom | od -A none -t x4
-  networking.useNetworkd = true;
+  networking = {
+    hostId = "98165cf2"; # head --bytes=4 /dev/urandom | od --address-radix=none --format=x4
+    useNetworkd = true;
+  };
 
   mkIngressWireguard = {
     enable = true;
@@ -43,7 +49,7 @@
     peerPublicKey = "luBECxE+b9Wuck66WXQdwzfRzUvlHqu8/goArANV+HU=";
   };
 
-  # Swap (zram)
+  # SWAP (ZRAM)
   zramSwap.enable = true;
 
   system.stateVersion = "26.05";

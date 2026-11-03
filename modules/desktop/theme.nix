@@ -5,10 +5,15 @@
   pkgs,
   ...
 }:
+let
+  inherit (lib.attrsets) mapAttrs' nameValuePair;
+  inherit (lib.lists) singleton;
+  inherit (lib.modules) mkForce;
+in
 {
-  imports = [ inputs.stylix.nixosModules.stylix ];
+  imports = singleton inputs.stylix.nixosModules.stylix;
 
-  home-manager.sharedModules = lib.lists.singleton (
+  home-manager.sharedModules = singleton (
     { config, osConfig, ... }:
     {
       home.pointerCursor.dotIcons.enable = false;
@@ -20,7 +25,7 @@
 
       # Some Flatpaks persist their sandbox home; home-relative theme symlinks become stale
       # across Home Manager generations and collide with Flatpak's filesystem setup.
-      xdg.dataFile."flatpak/overrides/global".text = lib.mkForce /* ini */ ''
+      xdg.dataFile."flatpak/overrides/global".text = mkForce /* ini */ ''
         [Context]
         filesystems=${osConfig.environment.etc."stylix/${config.home.username}".source}:ro;
 
@@ -31,9 +36,9 @@
     }
   );
 
-  environment.etc = lib.attrsets.mapAttrs' (
+  environment.etc = mapAttrs' (
     name: home:
-    lib.attrsets.nameValuePair "stylix/${name}" {
+    nameValuePair "stylix/${name}" {
       # Expose this store directory directly to Flatpak (/etc is reserved).
       # Keep it self-contained so no additional store permissions are needed.
       source = pkgs.callPackage (

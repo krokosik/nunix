@@ -4,8 +4,9 @@
   ...
 }:
 let
+  inherit (lib.lists) singleton;
+  inherit (lib.modules) mkIf;
   nm = config.networking.networkmanager.enable;
-  inherit (lib) mkIf;
   ifStatic = mkIf (!nm);
 in
 {
@@ -21,7 +22,7 @@ in
       Resolve = {
         DNSSEC = ifStatic "true";
         MulticastDNS = "resolve";
-        Domains = ifStatic [ "~." ];
+        Domains = ifStatic (singleton "~.");
         DNSOverTLS = ifStatic "true";
       };
     };

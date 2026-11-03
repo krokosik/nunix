@@ -1,4 +1,8 @@
 { config, lib, ... }:
+let
+  inherit (lib.lists) last;
+  inherit (lib.strings) splitString toInt;
+in
 {
   services.victoriametrics = {
     enable = true;
@@ -10,9 +14,7 @@
 
   mkTraefikServices.victoriametrics = {
     host = "127.0.0.1";
-    port = lib.toInt (
-      lib.lists.last (lib.splitString ":" config.services.victoriametrics.listenAddress)
-    );
+    port = toInt (last (splitString ":" config.services.victoriametrics.listenAddress));
     chain = [
       "chain-tailscale"
       "chain-authentik"

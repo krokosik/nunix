@@ -52,10 +52,13 @@ in
         config.sops.templates."authentik-google.env".path;
 
     mkAuthentik.extraBlueprints = singleton (
-      pkgs.runCommandLocal "authentik-google-blueprint" { } /* bash */ ''
-        mkdir --parents "$out"
-        cp ${./authentik-blueprints/google-source.yaml} "$out/google-source.yaml"
-      ''
+      pkgs.callPackage (
+        { runCommandLocal }:
+        runCommandLocal "authentik-google-blueprint" { } /* bash */ ''
+          mkdir --parents "$out"
+          cp ${./authentik-blueprints/google-source.yaml} "$out/google-source.yaml"
+        ''
+      ) { }
     );
   };
 }

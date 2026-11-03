@@ -1,8 +1,12 @@
 {
   config,
+  lib,
   inputs,
   ...
 }:
+let
+  inherit (lib.lists) singleton;
+in
 {
   imports = [
     ./disko-config.nix
@@ -36,7 +40,7 @@
   hardware.nvidia.branch = "latest";
 
   # support building for anubis
-  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+  boot.binfmt.emulatedSystems = singleton "aarch64-linux";
 
   home-manager.users.${config.username} = {
     imports = [

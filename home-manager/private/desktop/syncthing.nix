@@ -6,6 +6,14 @@
 }:
 
 let
+  inherit (lib.attrsets)
+    filterAttrs
+    mapAttrs
+    mapAttrs'
+    nameValuePair
+    ;
+  inherit (lib.lists) singleton;
+  inherit (lib.strings) concatLines removePrefix;
   devices = [
     "lindbladian"
     "khonsu"
@@ -45,15 +53,15 @@ let
   };
 
   # Stable 26.05 HM doesn't know about ignorePatterns, evaluate on 26.11+.
-  syncthingFolders = lib.mapAttrs (_: folder: removeAttrs folder [ "ignorePatterns" ]) folders;
+  syncthingFolders = mapAttrs (_: folder: removeAttrs folder (singleton "ignorePatterns")) folders;
 
   # Generate .stignore for folders that define ignorePatterns.
-  ignoreFiles = lib.mapAttrs' (
+  ignoreFiles = mapAttrs' (
     _: folder:
-    lib.nameValuePair "${lib.removePrefix "${config.home.homeDirectory}/" folder.path}/.stignore" {
-      text = lib.concatLines folder.ignorePatterns;
+    nameValuePair "${removePrefix "${config.home.homeDirectory}/" folder.path}/.stignore" {
+      text = concatLines folder.ignorePatterns;
     }
-  ) (lib.filterAttrs (_: folder: folder ? ignorePatterns) folders);
+  ) (filterAttrs (_: folder: folder ? ignorePatterns) folders);
 in
 {
   sops.secrets = {

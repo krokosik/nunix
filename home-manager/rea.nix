@@ -6,29 +6,35 @@
   ...
 }:
 let
+  inherit (lib.lists) singleton;
+  inherit (lib.meta) getExe getExe';
+  inherit (lib.strings) makeBinPath;
   rea = config.programs.rea.package;
   reaSkill = "${rea}/lib/node_modules/rea-agents/skills/reverse-engineer-anything";
   codexConfigDir = config.home.sessionVariables.CODEX_HOME;
 in
 {
-  imports = lib.lists.singleton inputs.rea-flake.homeManagerModules.default;
+  imports = singleton inputs.rea-flake.homeManagerModules.default;
 
   programs.rea = {
     enable = true;
     # Provide child-process ownership checks and packet analysis, including under MCP.
     package = pkgs.symlinkJoin {
       name = "rea-with-tools";
-      paths = lib.lists.singleton inputs.rea-flake.packages.${pkgs.stdenv.hostPlatform.system}.rea;
-      nativeBuildInputs = lib.lists.singleton pkgs.makeWrapper;
+      paths = singleton inputs.rea-flake.packages.${pkgs.stdenv.hostPlatform.system}.rea;
+      nativeBuildInputs = singleton pkgs.makeWrapper;
       postBuild = /* bash */ ''
         for program in rea rea-agents; do
           wrapProgram "$out/bin/$program" \
-            --set-default REA_TSHARK_PRLIMIT_COMMAND ${lib.getExe' pkgs.util-linux "prlimit"} \
+            --set-default REA_TSHARK_PRLIMIT_COMMAND ${getExe' pkgs.util-linux "prlimit"} \
             --prefix PATH : ${
-              lib.makeBinPath [
-                pkgs.procps
-                pkgs.tshark
-              ]
+              makeBinPath (
+                with pkgs;
+                [
+                  procps
+                  tshark
+                ]
+              )
             }
         done
       '';
@@ -37,8 +43,8 @@ in
   };
 
   programs.mcp.servers.rea = {
-    command = lib.getExe rea;
-    args = lib.lists.singleton "--mcp";
+    command = getExe rea;
+    args = singleton "--mcp";
     enabled = false;
   };
 

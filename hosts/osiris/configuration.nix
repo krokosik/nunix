@@ -4,6 +4,10 @@
   lib,
   ...
 }:
+let
+  inherit (lib.lists) singleton;
+  inherit (lib.modules) mkForce;
+in
 {
   imports = [
     ./disko-config.nix
@@ -28,9 +32,7 @@
   latestZFSKernel = true; # Set to use latest available ZFS compatible kernel
 
   home-manager.users.${config.username} = {
-    imports = [
-      ../../home-manager/private/common
-    ];
+    imports = singleton ../../home-manager/private/common;
   };
 
   role = "server"; # Set role of the machine (desktop/server)
@@ -54,13 +56,15 @@
     ];
   };
 
-  networking.hostId = "aec20762"; # head -c4 /dev/urandom | od -A none -t x4
-  networking.useNetworkd = true;
+  networking = {
+    hostId = "aec20762"; # head --bytes=4 /dev/urandom | od --address-radix=none --format=x4
+    useNetworkd = true;
+  };
 
   # CrowdSec's hub setup and the VPN endpoint check need a usable uplink.
   # Ignore Wi-Fi and virtual interfaces when determining network readiness.
   systemd.network.wait-online = {
-    enable = lib.mkForce true;
+    enable = mkForce true;
     extraArgs = [
       "--interface=enp2s0:routable"
       "--ipv4"
@@ -74,9 +78,9 @@
     peerPublicKey = "W2u4RPtVhqDZVuEKUwr5ogPneM/5BLSwNeU96kiFuDM=";
   };
 
-  boot.zfs.extraPools = lib.lists.singleton "tank";
+  boot.zfs.extraPools = singleton "tank";
 
-  # Swap (zram)
+  # SWAP (ZRAM)
   zramSwap.enable = true;
 
   system.stateVersion = "26.05";

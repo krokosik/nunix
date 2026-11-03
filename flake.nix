@@ -100,6 +100,8 @@
     }@inputs:
     let
       inherit (self) outputs;
+      inherit (nixpkgs.lib) nixosSystem;
+      inherit (nixpkgs.lib.lists) singleton;
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
       # Helper function to create a nixos system configuration
       mkSystem =
@@ -107,11 +109,13 @@
           host,
           system ? "x86_64-linux",
         }:
-        nixpkgs.lib.nixosSystem {
+        nixosSystem {
           modules = [
             {
-              nixpkgs.hostPlatform = system;
-              nixpkgs.overlays = [ inputs.nix-vscode-extensions.overlays.default ];
+              nixpkgs = {
+                hostPlatform = system;
+                overlays = singleton inputs.nix-vscode-extensions.overlays.default;
+              };
               networking.hostName = host;
             }
             ./hosts/${host}/configuration.nix
@@ -120,9 +124,9 @@
             inherit inputs outputs;
           };
         };
-      rescueIso = nixpkgs.lib.nixosSystem {
+      rescueIso = nixosSystem {
         system = "x86_64-linux";
-        modules = [ ./iso/rescue.nix ];
+        modules = singleton ./iso/rescue.nix;
       };
     in
     {

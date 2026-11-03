@@ -7,6 +7,7 @@
 let
   inherit (lib.lists) singleton;
   inherit (lib.meta) getExe';
+  inherit (lib.modules) mkForce mkIf;
 in
 {
   services.vector = {
@@ -14,12 +15,14 @@ in
     journaldAccess = true;
     settings = {
       data_dir = "/var/lib/vector";
-      sources.traefik = {
-        type = "journald";
-        include_units = singleton "traefik.service";
-        since_now = true;
+      sources = {
+        traefik = {
+          type = "journald";
+          include_units = singleton "traefik.service";
+          since_now = true;
+        };
+        internal.type = "internal_metrics";
       };
-      sources.internal.type = "internal_metrics";
       enrichment_tables = {
         city = {
           type = "geoip";
@@ -91,7 +94,7 @@ in
     wants = singleton "geoipupdate.service";
     after = singleton "geoipupdate.service";
     serviceConfig = {
-      AmbientCapabilities = lib.mkForce "";
+      AmbientCapabilities = mkForce "";
       NoNewPrivileges = true;
       ProtectSystem = "strict";
       ProtectHome = true;
@@ -107,5 +110,5 @@ in
     metrics.url = "http://127.0.0.1:9598/metrics";
   };
 
-  mkObservability.inactiveAlertUnits = lib.mkIf config.services.vector.enable config.mkObservabilityServices.traefik-logs.units;
+  mkObservability.inactiveAlertUnits = mkIf config.services.vector.enable config.mkObservabilityServices.traefik-logs.units;
 }

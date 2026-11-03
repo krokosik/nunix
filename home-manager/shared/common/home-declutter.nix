@@ -1,11 +1,14 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 let
   inherit (lib.lists) singleton;
+  inherit (lib.meta) getExe;
   inherit (lib.strings) escapeShellArg;
+  wgetExe = getExe pkgs.wget;
 
   inherit (config.xdg)
     cacheHome
@@ -28,82 +31,82 @@ in
     AWS_CONFIG_FILE = "${configHome}/aws/config";
     AWS_SHARED_CREDENTIALS_FILE = "${configHome}/aws/credentials";
 
-    # Bash completion
+    # BASH COMPLETION
     BASH_COMPLETION_USER_FILE = "${configHome}/bash-completion/bash_completion";
 
     # CUDA
     CUDA_CACHE_PATH = "${cacheHome}/nv";
 
-    # Docker
+    # DOCKER
     DOCKER_CONFIG = "${configHome}/docker";
 
-    # FFmpeg
+    # FFMPEG
     FFMPEG_DATADIR = "${configHome}/ffmpeg";
 
-    # Cargo (Rust)
+    # CARGO (RUST)
     CARGO_HOME = "${dataHome}/cargo";
 
     # GDB
     GDBHISTFILE = "${stateHome}/gdb/history";
 
-    # PostgreSQL
+    # POSTGRESQL
     PSQL_HISTORY = "${stateHome}/psql/history";
 
-    # GnuPG
+    # GNUPG
     GNUPGHOME = "${dataHome}/gnupg";
 
-    # Java
+    # JAVA
     _JAVA_OPTIONS = "-Djava.util.prefs.userRoot=${configHome}/java";
 
-    # Gradle
+    # GRADLE
     GRADLE_USER_HOME = "${dataHome}/gradle";
 
-    # libX11
+    # LIBX11
     XCOMPOSEFILE = "${configHome}/X11/xcompose";
     XCOMPOSECACHE = "${cacheHome}/X11/xcompose";
 
-    # NPM & Node
+    # NPM & NODE
     NPM_CONFIG_USERCONFIG = "${configHome}/npm/npmrc";
     NPM_CONFIG_CACHE = "${cacheHome}/npm";
     NPM_CONFIG_PREFIX = "${dataHome}/npm";
     NODE_REPL_HISTORY = "${stateHome}/node_repl_history";
 
-    # Mathematica
+    # MATHEMATICA
     WOLFRAM_USERBASE = "${configHome}/Wolfram";
     WOLFRAM_LOCALBASE = "${configHome}/Wolfram/Objects";
 
-    # mypy
+    # MYPY
     MYPY_CACHE_DIR = "${cacheHome}/mypy";
 
-    # Python
+    # PYTHON
     PYTHON_HISTORY = "${stateHome}/python_history";
     PYTHONPYCACHEPREFIX = "${cacheHome}/python";
     PYTHONUSERBASE = "${dataHome}/python";
 
-    # IPython
+    # IPYTHON
     IPYTHONDIR = "${configHome}/ipython";
 
-    # Python setuptools
+    # PYTHON SETUPTOOLS
     PYTHON_EGG_CACHE = "${cacheHome}/python-eggs";
 
-    # Jupyter
+    # JUPYTER
     JUPYTER_CONFIG_DIR = "${configHome}/jupyter";
     JUPYTER_PLATFORM_DIRS = "1";
 
-    # Redis
+    # REDIS
     REDISCLI_HISTFILE = "${dataHome}/redis/rediscli_history";
     REDISCLI_RCFILE = "${configHome}/redis/redisclirc";
 
-    # Ruff
+    # RUFF
     RUFF_CACHE_DIR = "${cacheHome}/ruff";
 
-    # rustup
+    # RUSTUP
     RUSTUP_HOME = "${dataHome}/rustup";
 
-    # OpenAI Codex
+    # OPENAI CODEX
     CODEX_HOME = "${configHome}/codex";
 
-    # Wine
+    # WINE
     WINEPREFIX = "${dataHome}/wineprefixes/default";
   };
 
@@ -119,15 +122,17 @@ in
     historyFile = "${stateHome}/bash/history";
 
     shellAliases = {
+      # nvidia-settings and code resolve through PATH on purpose: the former is
+      # provided by the installed GPU driver, the latter by the user's editor.
       "nvidia-settings" = "nvidia-settings --config=${configHome}/nvidia/settings";
-      wget = "wget --hsts-file=${stateHome}/wget-hsts";
+      wget = "${wgetExe} --hsts-file=${stateHome}/wget-hsts";
       code = "code --extensions-dir ${dataHome}/vscode";
     };
   };
 
   programs.fish.shellAliases = {
     "nvidia-settings" = "nvidia-settings --config=${configHome}/nvidia/settings";
-    wget = "wget --hsts-file=${stateHome}/wget-hsts";
+    wget = "${wgetExe} --hsts-file=${stateHome}/wget-hsts";
     code = "code --extensions-dir ${dataHome}/vscode";
   };
 

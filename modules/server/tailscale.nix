@@ -4,8 +4,12 @@
   lib,
   ...
 }:
+let
+  inherit (lib.lists) singleton;
+  inherit (lib.modules) mkForce;
+in
 {
-  imports = [ ../common/tailscale.nix ];
+  imports = singleton ../common/tailscale.nix;
 
   services.tailscale = {
     authKeyFile = config.sops.secrets.tailscale_server_auth_key.path;
@@ -16,7 +20,7 @@
   };
 
   systemd.services.tailscaled-autoconnect = {
-    startLimitIntervalSec = lib.mkForce 0;
+    startLimitIntervalSec = mkForce 0;
     serviceConfig = {
       Restart = "on-failure";
       RestartSec = "30s";
@@ -30,18 +34,16 @@
   };
 
   # Never generate remediation decisions for authenticated tailnet peers.
-  services.crowdsec.localConfig.parsers.s02Enrich = [
-    {
-      name = "local/tailnet-whitelist";
-      description = "Whitelist authenticated tailnet traffic";
-      whitelist = {
-        reason = "Tailnet peer";
-        cidr = [
-          "100.64.0.0/10"
-          "fd7a:115c:a1e0::/48"
-        ];
-      };
-    }
-  ];
+  services.crowdsec.localConfig.parsers.s02Enrich = singleton {
+    name = "local/tailnet-whitelist";
+    description = "Whitelist authenticated tailnet traffic";
+    whitelist = {
+      reason = "Tailnet peer";
+      cidr = [
+        "100.64.0.0/10"
+        "fd7a:115c:a1e0::/48"
+      ];
+    };
+  };
 
 }

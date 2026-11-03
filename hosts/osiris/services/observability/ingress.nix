@@ -6,6 +6,9 @@
   ...
 }:
 let
+  inherit (lib.attrsets) genAttrs;
+  inherit (lib.lists) singleton;
+  inherit (lib.meta) getExe';
   names = [
     "metrics"
     "logs"
@@ -44,7 +47,7 @@ in
   # is no sops-install-secrets.service to order this unit after.
   systemd.services.observability-ingest-auth = {
     description = "Render observability ingestion Basic Auth users";
-    before = [ "traefik.service" ];
+    before = singleton "traefik.service";
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
@@ -58,13 +61,13 @@ in
         "logs:${config.sops.secrets.observability_logs_ingest_password.path}"
       ];
     };
-    script = ''
+    script = /* bash */ ''
       set -euo pipefail
       for name in metrics logs; do
         secret="$CREDENTIALS_DIRECTORY/$name"
         test -s "$secret"
-        ${lib.getExe' pkgs.apacheHttpd "htpasswd"} -niB "anubis-$name" < "$secret" > "/run/observability-ingest-auth/$name"
-        ${lib.getExe' pkgs.coreutils "chmod"} 0640 "/run/observability-ingest-auth/$name"
+        ${getExe' pkgs.apacheHttpd "htpasswd"} -niB "anubis-$name" < "$secret" > "/run/observability-ingest-auth/$name"
+        ${getExe' pkgs.coreutils "chmod"} 0640 "/run/observability-ingest-auth/$name"
       done
     '';
   };
@@ -72,21 +75,21 @@ in
   systemd.services.traefik = {
     # An ingest-auth failure must not bring down the reverse proxy for every
     # other service. The ingestion routes fail closed until usersFile exists.
-    wants = [ "observability-ingest-auth.service" ];
-    after = [ "observability-ingest-auth.service" ];
+    wants = singleton "observability-ingest-auth.service";
+    after = singleton "observability-ingest-auth.service";
   };
 
   users.groups.observability-ingest-auth = { };
 
-  users.users.traefik.extraGroups = [ "observability-ingest-auth" ];
+  users.users.traefik.extraGroups = singleton "observability-ingest-auth";
 
   services.traefik.dynamicConfigOptions.http = {
-    services = lib.genAttrs names (name: {
-      loadBalancer.servers = [ { url = "http://127.0.0.1:${toString ports.${name}}"; } ];
+    services = genAttrs names (name: {
+      loadBalancer.servers = singleton { url = "http://127.0.0.1:${toString ports.${name}}"; };
     });
-    routers = lib.genAttrs names (name: {
+    routers = genAttrs names (name: {
       rule = "Host(`${name}-ingest.${config.privateDomain}`) && Path(`${paths.${name}}`) && Method(`POST`)";
-      entryPoints = [ "websecure" ];
+      entryPoints = singleton "websecure";
       service = name;
       middlewares = [
         "observability-ingest-source"
@@ -94,9 +97,9 @@ in
       ];
     });
     middlewares = {
-      observability-ingest-source.ipAllowList.sourceRange = lib.lists.singleton "${config.tailscaleAddresses.anubis.ipv4}/32";
+      observability-ingest-source.ipAllowList.sourceRange = singleton "${config.tailscaleAddresses.anubis.ipv4}/32";
     }
-    // lib.genAttrs names (name: {
+    // genAttrs names (name: {
       basicAuth.usersFile = "/run/observability-ingest-auth/${name}";
     });
   };
