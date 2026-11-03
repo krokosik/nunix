@@ -130,13 +130,17 @@ Read by other modules — set per-host in `hosts/<name>/configuration.nix`:
   SSH-key sudo auth via `pam.rssh`.
 - Firewall: nftables-only; `tailscale0` trusted; tailscale `--ssh` +
   `tag:server` on server hosts.
-- Commit messages: short imperative, capitalized, no conventional-commit
-  prefix, no body (e.g. `Add ghostty terminfo`, `Fix password key typo`).
-- Prefer `lib.lists.singleton` over a single item list.
+- Commit messages: short imperative, capitalized, use prefixes for common tasks
+  like update:, vscode:, desktop:, slop:, no body (e.g. `Add ghostty terminfo`, `Fix password key typo`).
+- Prefer `singleton` over a single item list.
 - Always `let inherit (lib.<path>) foo;` with full paths like `lib.lists.head`,
   never `inherit (lib) foo` unless `foo` has no submodule path.
-- Always prefer `${getExe pkgs.something}` over bare command names in shell
-  aliases. Use `package = getExe pkgs.something` when there are multiple usages.
+- Use inherit for all lib functions, i.e. prefer `singleton` over `lib.lists.singleton`
+- Always prefer `${somePkg}` over bare command names or full calls in shell
+  aliases. Use `package = getExe somePkg` in let blocks. Remember
+  that for explicit binary names, there is getExe'.
+- For attr enumeration, such as specifying dependencies or vscode extensions, remember
+  to use `with`.
 - Leave an empty line between unrelated options.
 - Never put values in `let` bindings that duplicate module system options. If a
   value is set through `config.*`, always reference it through `config.*`. `let`
@@ -151,6 +155,10 @@ Read by other modules — set per-host in `hosts/<name>/configuration.nix`:
 - Prefer setting individual options with `mkIf` over wrapping entire attrsets.
   Use `foo.bar = mkIf condition value;` not
   `foo = mkIf condition { bar = value; };` when possible.
+- Use nested attrsets when setting several attrs under the same prefix.
+  Flat dot-based attrs (`foo.bar = ...;`) are allowed IF AND ONLY IF there is
+  exactly one attr under that prefix; otherwise nest:
+  `foo = { bar = ...; baz = ...; };`, not `foo.bar = ...; foo.baz = ...;`.
 - Inline package definitions should use `pkgs.callPackage` with destructured
   args, e.g. `pkgs.callPackage ({ stdenv, writeText }: ...) { }`.
 - For inline source code in packages, use `writeText` directly in the `src`

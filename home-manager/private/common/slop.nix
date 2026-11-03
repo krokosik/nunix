@@ -78,10 +78,12 @@ in
         # Command-backed bearer token: Codex runs this when it needs the key,
         # trims it, and caches it in memory. Keeps the key out of the
         # environment; mutually exclusive with env_key.
-        auth.command = "${lib.getExe' pkgs.coreutils "cat"}";
-        auth.args = lib.lists.singleton config.sops.secrets.strata_api_key.path;
-        auth.timeout_ms = 5000;
-        auth.refresh_interval_ms = 0;
+        auth = {
+          command = "${lib.getExe' pkgs.coreutils "cat"}";
+          args = lib.lists.singleton config.sops.secrets.strata_api_key.path;
+          timeout_ms = 5000;
+          refresh_interval_ms = 0;
+        };
         stream_idle_timeout_ms = 600000;
       };
 
