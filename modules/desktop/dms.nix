@@ -18,9 +18,13 @@
       restartIfChanged = true;
     };
 
-    plugins.quickCapture.enable = true;
+    plugins = {
+      quickCapture.enable = true;
+      voxTypeOsd.enable = true;
+      calculator.enable = true;
+      emojiLauncher.enable = true;
+    };
 
-    plugins.voxTypeOsd.enable = true;
   };
 
   # plugin deps
