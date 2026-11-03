@@ -13,6 +13,7 @@ let
   codexConfigTarget = lib.strings.removePrefix config.home.homeDirectory codexConfigPath;
   codexConfigSource = config.home.file.${codexConfigTarget}.source;
   codexConfigStateTarget = lib.strings.removePrefix config.home.homeDirectory "${config.xdg.stateHome}/nunix/codex-config.toml";
+  macierzBaseUrl = "http://macierz.qot.internal:11789/v1";
 in
 {
   home.packages = [ rtk ];
@@ -37,6 +38,7 @@ in
   sops.secrets = {
     opencode_go_api_key.sopsFile = "${inputs.my-secrets}/common/home.yaml";
     openai_api_key.sopsFile = "${inputs.my-secrets}/common/home.yaml";
+    strata_api_key.sopsFile = "${inputs.my-secrets}/common/home.yaml";
   };
 
   programs.codex = {
@@ -66,6 +68,22 @@ in
 
       hooks.state."${codexConfigDir}/hooks.json:pre_tool_use:0:0".trusted_hash =
         "sha256:be6c6fcb2978ea348dd05101efed0afcf00efcbfb5d7e78949108142c875a77d";
+
+      model_context_window = 131072;
+
+      model_providers.macierz = {
+        name = "Macierz";
+        base_url = macierzBaseUrl;
+        wire_api = "responses";
+        # Command-backed bearer token: Codex runs this when it needs the key,
+        # trims it, and caches it in memory. Keeps the key out of the
+        # environment; mutually exclusive with env_key.
+        auth.command = "${lib.getExe' pkgs.coreutils "cat"}";
+        auth.args = lib.lists.singleton config.sops.secrets.strata_api_key.path;
+        auth.timeout_ms = 5000;
+        auth.refresh_interval_ms = 0;
+        stream_idle_timeout_ms = 600000;
+      };
 
       tui = {
         status_line = [
@@ -124,6 +142,11 @@ in
         "openai"
         "macierz"
       ];
+      compaction = {
+        auto = true;
+        buffer = 13672;
+      };
+      share = "disabled";
       provider = {
         "opencode-go".options.apiKey = "{file:${config.sops.secrets.opencode_go_api_key.path}}";
         openai.options.apiKey = "{file:${config.sops.secrets.openai_api_key.path}}";
@@ -131,11 +154,20 @@ in
           npm = "@ai-sdk/openai-compatible";
           name = "Macierz";
           options = {
-            baseURL = "http://macierz.qot.internal:11789/v1";
-            apiKey = "123";
+            baseURL = macierzBaseUrl;
+            apiKey = "{file:${config.sops.secrets.strata_api_key.path}}";
           };
           models = {
-            "qwen3.8-flash-next-coder-iq1_m".name = "qwen3.8-flash-coder";
+            "qwen3.8-flash-next" = {
+              name = "Qwen3.8-Flash-Next";
+              "tool_call" = true;
+              reasoning = true;
+              limit = {
+                context = 131072;
+                input = 126976;
+                output = 4096;
+              };
+            };
           };
         };
       };
