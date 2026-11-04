@@ -1,13 +1,14 @@
 { config, lib, ... }:
 let
   inherit (lib.lists) singleton;
-  inherit (lib) stringAfter;
+  inherit (lib.strings) stringAfter;
   name = "psitransfer";
   containerUser = config.username; # UID/GID 1000 on osiris
   containerUnit = "${config.virtualisation.oci-containers.backend}-${name}.service";
   dataPath = "/var/lib/psitransfer";
 in
 {
+  # No NixOS module for psitransfer exists in nixpkgs yet, so it runs as a container.
   mkContainerServices.psitransfer = {
     port = 3039;
     manageUser = false;

@@ -4,6 +4,7 @@ let
 in
 {
   # ConvertX - Self-hosted file converter
+  # No NixOS module exists in nixpkgs for convertx yet, so it runs as a container.
   mkContainerServices.convertx = {
     port = 3024;
     manageUser = false;

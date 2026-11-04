@@ -21,7 +21,7 @@ in
   sops.secrets.smtp_token = {
     key = "proton/smtp_token";
     mode = "0400";
-    restartUnits = singleton "msmptd.service";
+    restartUnits = singleton "msmtpd.service";
   };
 
   programs.msmtp = {

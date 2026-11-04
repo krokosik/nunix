@@ -28,7 +28,7 @@ in
     jellyfin_api_key.key = "jellyfin/api_key";
     qbittorrent_password.key = "qbittorrent/password";
     seerr_api_key.key = "seerr/api_key";
-    wireguard_conf.key = "wireguard_conf";
+    nixflix_wireguard_conf.key = "wireguard/nixflix_conf";
     opensubtitles_password.key = "opensubtitles/password";
   };
 
@@ -229,7 +229,7 @@ in
 
     vpn = {
       enable = true;
-      wgConfFile = config.sops.secrets.wireguard_conf.path;
+      wgConfFile = config.sops.secrets.nixflix_wireguard_conf.path;
       accessibleFrom = [
         "192.168.1.0/24"
         "127.0.0.0/8"

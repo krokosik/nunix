@@ -16,6 +16,7 @@ in
     ../../modules/boot-limine.nix
     ../../modules/desktop
     ../../modules/desktop/cad.nix
+    # Horus is a development host; its containerized services are for development use.
     ../../modules/oci-containers.nix
     ../../modules/hibernation.nix
     ../../modules/media-share.nix

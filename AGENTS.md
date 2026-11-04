@@ -114,8 +114,7 @@ Read by other modules — set per-host in `hosts/<name>/configuration.nix`:
 - `latestZFSKernel` (bool, default false) — pulls `zfs_unstable` + latest
   compatible kernel (see `modules/zfs.nix`).
 - `username` (str, default `krokosik`).
-- `role` (enum `desktop|shared|server`, default `server` — least
-  privileged). `shared` = a workstation also used by others. Gate
+- `role` (enum `desktop|server`, default `server` — least privileged). Gate
   services on this (e.g. `docker.enableOnBoot = config.role == "server"`).
 
 ## Conventions
