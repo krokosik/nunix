@@ -21,13 +21,16 @@ in
     ../../modules/media-share.nix
   ];
 
-  # Generated on this Surface Pro 8 with run0 nix run github:numtide/nixos-facter.
-  hardware.facter.reportPath = ./facter.json;
+  hardware = {
+    # Generated on this Surface Pro 8 with run0 nix run github:numtide/nixos-facter.
+    facter.reportPath = ./facter.json;
+
+    microsoft-surface.kernelVersion = "stable";
+  };
 
   role = "desktop";
-  extraUsers = singleton "guest";
 
-  hardware.microsoft-surface.kernelVersion = "stable";
+  extraUsers = singleton "guest";
 
   # Suspend on a short press, like a tablet lock button.
   services.logind.settings.Login.HandlePowerKey = "suspend";

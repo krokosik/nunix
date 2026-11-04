@@ -1,12 +1,11 @@
 { config, lib, ... }:
 let
   inherit (lib.lists) singleton;
-  port = 3024;
 in
 {
   # ConvertX - Self-hosted file converter
   mkContainerServices.convertx = {
-    inherit port;
+    port = 3024;
     manageUser = false;
     containerPort = 3000;
   };
@@ -26,7 +25,7 @@ in
   };
 
   mkTraefikServices.convertx = {
-    inherit port;
+    port = config.mkContainerServices.convertx.port;
     public = true;
     # chain-authentik is the option default; authentik gates the
     # route via the embedded outpost's forward-auth flow.

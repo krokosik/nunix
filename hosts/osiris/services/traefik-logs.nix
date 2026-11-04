@@ -68,42 +68,45 @@ in
           }
         '';
       };
-      sinks.logs = {
-        type = "http";
-        inputs = singleton "access";
-        uri = "http://127.0.0.1:9429/insert/jsonline?_stream_fields=host,service,log_type&_time_field=timestamp&_msg_field=message";
-        encoding.codec = "json";
-        framing.method = "newline_delimited";
-        compression = "gzip";
-        healthcheck.enabled = false;
-        buffer = {
-          type = "disk";
-          max_size = 1073741824;
-          when_full = "block";
+      sinks = {
+        logs = {
+          type = "http";
+          inputs = singleton "access";
+          uri = "http://127.0.0.1:9429/insert/jsonline?_stream_fields=host,service,log_type&_time_field=timestamp&_msg_field=message";
+          encoding.codec = "json";
+          framing.method = "newline_delimited";
+          compression = "gzip";
+          healthcheck.enabled = false;
+          buffer = {
+            type = "disk";
+            max_size = 1073741824;
+            when_full = "block";
+          };
+        };
+        metrics = {
+          type = "prometheus_exporter";
+          inputs = singleton "internal";
+          address = "127.0.0.1:9598";
         };
       };
-      sinks.metrics = {
-        type = "prometheus_exporter";
-        inputs = singleton "internal";
-        address = "127.0.0.1:9598";
+    };
+  };
+
+  systemd.services = {
+    vector = {
+      wants = singleton "geoipupdate.service";
+      after = singleton "geoipupdate.service";
+      serviceConfig = {
+        AmbientCapabilities = mkForce "";
+        NoNewPrivileges = true;
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        PrivateTmp = true;
       };
     };
-  };
 
-  systemd.services.vector = {
-    wants = singleton "geoipupdate.service";
-    after = singleton "geoipupdate.service";
-    serviceConfig = {
-      AmbientCapabilities = mkForce "";
-      NoNewPrivileges = true;
-      ProtectSystem = "strict";
-      ProtectHome = true;
-      PrivateTmp = true;
-    };
+    geoipupdate.serviceConfig.ExecStartPost = singleton "+${getExe' pkgs.systemd "systemctl"} --no-block try-reload-or-restart vector.service";
   };
-
-  systemd.services.geoipupdate.serviceConfig.ExecStartPost =
-    singleton "+${getExe' pkgs.systemd "systemctl"} --no-block try-reload-or-restart vector.service";
 
   mkObservabilityServices.traefik-logs = {
     units = singleton "vector.service";

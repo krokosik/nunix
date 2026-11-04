@@ -25,7 +25,6 @@ let
     submodule
     ;
   rpc_port = 3901;
-  s3_port = 3900;
   buckets = config.mkGarageBucket;
 in
 {
@@ -120,23 +119,25 @@ in
         };
       };
 
-      sops.secrets = {
-        garage_rpc_secret = {
-          key = "garage/rpc_secret";
-          owner = "garage";
+      sops = {
+        secrets = {
+          garage_rpc_secret = {
+            key = "garage/rpc_secret";
+            owner = "garage";
+            restartUnits = singleton "garage.service";
+          };
+          garage_default_access_key.key = "garage/default_access_key";
+          garage_default_secret_key.key = "garage/default_secret_key";
+        };
+
+        templates."garage-default.env" = {
+          content = /* bash */ ''
+            GARAGE_DEFAULT_ACCESS_KEY=${config.sops.placeholder.garage_default_access_key}
+            GARAGE_DEFAULT_SECRET_KEY=${config.sops.placeholder.garage_default_secret_key}
+            GARAGE_DEFAULT_BUCKET=default
+          '';
           restartUnits = singleton "garage.service";
         };
-        garage_default_access_key.key = "garage/default_access_key";
-        garage_default_secret_key.key = "garage/default_secret_key";
-      };
-
-      sops.templates."garage-default.env" = {
-        content = /* bash */ ''
-          GARAGE_DEFAULT_ACCESS_KEY=${config.sops.placeholder.garage_default_access_key}
-          GARAGE_DEFAULT_SECRET_KEY=${config.sops.placeholder.garage_default_secret_key}
-          GARAGE_DEFAULT_BUCKET=default
-        '';
-        restartUnits = singleton "garage.service";
       };
 
       services.garage = {
@@ -160,23 +161,14 @@ in
           };
 
           s3_api = {
-            api_bind_addr = "127.0.0.1:${toString s3_port}";
+            api_bind_addr = "127.0.0.1:${toString config.mkTraefikServices.garage.port}";
             s3_region = "garage";
           };
         };
       };
 
-      systemd.services.garage.serviceConfig = {
-        DynamicUser = mkForce false;
-        User = "garage";
-        Group = "garage";
-        ExecStart = mkForce /* bash */ ''
-          ${getExe pkgs.garage_2} server --single-node --default-bucket
-        '';
-      };
-
       mkTraefikServices.garage = {
-        port = s3_port;
+        port = 3900;
         chain = singleton "chain-tailscale";
       };
 
@@ -220,77 +212,88 @@ in
         ) (attrNames buckets)
       );
 
-      systemd.services = mapAttrs' (
-        name: bucket:
-        let
-          permissionArgs =
-            optional bucket.permissions.read "--read"
-            ++ optional bucket.permissions.write "--write"
-            ++ optional bucket.permissions.owner "--owner";
-          deniedPermissionArgs =
-            optional (!bucket.permissions.read) "--read"
-            ++ optional (!bucket.permissions.write) "--write"
-            ++ optional (!bucket.permissions.owner) "--owner";
-        in
-        nameValuePair "${name}-garage-bucket" {
-          description = "Provision the ${bucket.bucketName} Garage bucket and access key";
-          after = singleton "garage.service";
-          requires = singleton "garage.service";
-          wants = singleton "sops-install-secrets.service";
-          requiredBy = bucket.consumerService;
-          before = bucket.consumerService;
-          unitConfig.ConditionPathExists = [
-            bucket.accessKeyFile
-            bucket.secretKeyFile
-          ];
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            LoadCredential = [
-              "s3_access_key:${bucket.accessKeyFile}"
-              "s3_secret_key:${bucket.secretKeyFile}"
+      systemd.services =
+        mapAttrs' (
+          name: bucket:
+          let
+            permissionArgs =
+              optional bucket.permissions.read "--read"
+              ++ optional bucket.permissions.write "--write"
+              ++ optional bucket.permissions.owner "--owner";
+            deniedPermissionArgs =
+              optional (!bucket.permissions.read) "--read"
+              ++ optional (!bucket.permissions.write) "--write"
+              ++ optional (!bucket.permissions.owner) "--owner";
+          in
+          nameValuePair "${name}-garage-bucket" {
+            description = "Provision the ${bucket.bucketName} Garage bucket and access key";
+            after = singleton "garage.service";
+            requires = singleton "garage.service";
+            wants = singleton "sops-install-secrets.service";
+            requiredBy = bucket.consumerService;
+            before = bucket.consumerService;
+            unitConfig.ConditionPathExists = [
+              bucket.accessKeyFile
+              bucket.secretKeyFile
             ];
-          };
-          script = /* bash */ ''
-            set -euo pipefail
+            serviceConfig = {
+              Type = "oneshot";
+              RemainAfterExit = true;
+              LoadCredential = [
+                "s3_access_key:${bucket.accessKeyFile}"
+                "s3_secret_key:${bucket.secretKeyFile}"
+              ];
+            };
+            script = /* bash */ ''
+              set -euo pipefail
 
-            if [ ! -s "$CREDENTIALS_DIRECTORY/s3_access_key" ] || [ ! -s "$CREDENTIALS_DIRECTORY/s3_secret_key" ]; then
-              echo "ERROR: Garage credentials for ${name} are empty" >&2
-              exit 1
-            fi
-
-            access_key="$(<"$CREDENTIALS_DIRECTORY/s3_access_key")"
-            secret_key="$(<"$CREDENTIALS_DIRECTORY/s3_secret_key")"
-            garage=${getExe config.services.garage.package}
-
-            for _ in {1..60}; do
-              if "$garage" status > /dev/null 2>&1; then
-                break
+              if [ ! -s "$CREDENTIALS_DIRECTORY/s3_access_key" ] || [ ! -s "$CREDENTIALS_DIRECTORY/s3_secret_key" ]; then
+                echo "ERROR: Garage credentials for ${name} are empty" >&2
+                exit 1
               fi
 
-              ${getExe' pkgs.coreutils "sleep"} 1
-            done
+              access_key="$(<"$CREDENTIALS_DIRECTORY/s3_access_key")"
+              secret_key="$(<"$CREDENTIALS_DIRECTORY/s3_secret_key")"
+              garage=${getExe config.services.garage.package}
 
-            if ! "$garage" status > /dev/null 2>&1; then
-              echo "ERROR: Garage did not become ready within 60 seconds" >&2
-              exit 1
-            fi
+              for _ in {1..60}; do
+                if "$garage" status > /dev/null 2>&1; then
+                  break
+                fi
 
-            if ! "$garage" key info "$access_key" > /dev/null 2>&1; then
-              "$garage" key import --yes "$access_key" "$secret_key"
-            fi
+                ${getExe' pkgs.coreutils "sleep"} 1
+              done
 
-            if ! "$garage" bucket info ${escapeShellArg bucket.bucketName} > /dev/null 2>&1; then
-              "$garage" bucket create ${escapeShellArg bucket.bucketName}
-            fi
+              if ! "$garage" status > /dev/null 2>&1; then
+                echo "ERROR: Garage did not become ready within 60 seconds" >&2
+                exit 1
+              fi
 
-            "$garage" bucket allow ${escapeShellArgs permissionArgs} ${escapeShellArg bucket.bucketName} --key "$access_key"
-            ${optionalString (deniedPermissionArgs != [ ]) /* bash */ ''
-              "$garage" bucket deny ${escapeShellArgs deniedPermissionArgs} ${escapeShellArg bucket.bucketName} --key "$access_key"
-            ''}
-          '';
-        }
-      ) buckets;
+              if ! "$garage" key info "$access_key" > /dev/null 2>&1; then
+                "$garage" key import --yes "$access_key" "$secret_key"
+              fi
+
+              if ! "$garage" bucket info ${escapeShellArg bucket.bucketName} > /dev/null 2>&1; then
+                "$garage" bucket create ${escapeShellArg bucket.bucketName}
+              fi
+
+              "$garage" bucket allow ${escapeShellArgs permissionArgs} ${escapeShellArg bucket.bucketName} --key "$access_key"
+              ${optionalString (deniedPermissionArgs != [ ]) /* bash */ ''
+                "$garage" bucket deny ${escapeShellArgs deniedPermissionArgs} ${escapeShellArg bucket.bucketName} --key "$access_key"
+              ''}
+            '';
+          }
+        ) buckets
+        // {
+          garage.serviceConfig = {
+            DynamicUser = mkForce false;
+            User = "garage";
+            Group = "garage";
+            ExecStart = mkForce /* bash */ ''
+              ${getExe pkgs.garage_2} server --single-node --default-bucket
+            '';
+          };
+        };
     })
   ];
 }

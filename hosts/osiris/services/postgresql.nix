@@ -7,6 +7,7 @@
 let
   inherit (lib.attrsets) mapAttrs' mapAttrsToList nameValuePair;
   inherit (lib.lists) map singleton;
+  inherit (lib.meta) getExe';
   inherit (lib.modules) mkIf mkMerge mkOverride;
   inherit (lib.options) mkOption;
   inherit (lib.strings) concatStringsSep replaceStrings;
@@ -17,6 +18,7 @@ let
     submodule
     ;
   svcs = config.mkPostgresServices;
+  psqlExe = getExe' config.services.postgresql.package "psql";
 in
 {
   options.mkPostgresServices = mkOption {
@@ -96,7 +98,7 @@ in
 
         # Peer auth for native services on the Unix socket; scram for TCP.
         # Container svcs connect from the default docker bridge.
-        authentication = mkOverride 10 ''
+        authentication = mkOverride 10 /* conf */ ''
           local all all                peer
           host  all all 127.0.0.1/32   scram-sha-256
           host  all all ::1/128        scram-sha-256
@@ -166,13 +168,12 @@ in
                 echo "ERROR: sops secret ${secretPath} is empty — refusing to clear ${svc.dbName} postgres password" >&2
                 exit 1
               fi
-              ${config.services.postgresql.package}/bin/psql -tAc \
+              ${psqlExe} --tuples-only --no-align --command \
                 "ALTER USER ${svc.dbName} WITH PASSWORD '$(cat ${secretPath})'"
             ''
             + (concatStringsSep "\n" (
               map (
-                cmd:
-                "${config.services.postgresql.package}/bin/psql --dbname=${svc.dbName} --tuples-only --no-align --command=\"${cmd}\""
+                cmd: "${psqlExe} --dbname=${svc.dbName} --tuples-only --no-align --command=\"${cmd}\""
               ) svc.extraCommands
             ));
         }

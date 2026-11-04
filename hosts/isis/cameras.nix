@@ -32,9 +32,11 @@ in
   hardware.facter.detected.camera.ipu6.enable = false;
 
   # Preserve the original calibration alongside the generated libcamera YAML.
-  environment.etc."libcamera/surface-pro-8/aiqb".source = tuning.blobs;
+  environment = {
+    etc."libcamera/surface-pro-8/aiqb".source = tuning.blobs;
 
-  environment.systemPackages = singleton surfaceLibcamera;
+    systemPackages = singleton surfaceLibcamera;
+  };
 
   boot.kernelPatches = mkAfter [
     {
@@ -63,12 +65,14 @@ in
   services.pipewire = {
     package = pkgs.pipewire.override { libcamera = surfaceLibcamera; };
 
-    wireplumber.package = pkgs.wireplumber.override {
-      pipewire = config.services.pipewire.package;
-    };
-  };
+    wireplumber = {
+      package = pkgs.wireplumber.override {
+        pipewire = config.services.pipewire.package;
+      };
 
-  services.pipewire.wireplumber.extraConfig."10-surface-camera" = {
-    "wireplumber.profiles".main."monitor.libcamera" = "wanted";
+      extraConfig."10-surface-camera" = {
+        "wireplumber.profiles".main."monitor.libcamera" = "wanted";
+      };
+    };
   };
 }

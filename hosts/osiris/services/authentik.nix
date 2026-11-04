@@ -44,6 +44,7 @@ let
     optionals
     singleton
     ;
+  inherit (lib.meta) getExe getExe';
   inherit (lib.modules) mkIf mkMerge;
   inherit (lib.options) mkOption;
   inherit (lib.trivial) mergeAttrs;
@@ -68,7 +69,9 @@ let
     str
     submodule
     ;
-  authentikPort = 9000;
+  chownExe = getExe' pkgs.coreutils "chown";
+  curlExe = getExe pkgs.curl;
+  manageExe = getExe' config.services.authentik.authentikComponents.manage "manage.py";
   restartAuthentik = [
     "authentik.service"
     "authentik-worker.service"
@@ -264,7 +267,7 @@ let
       export ${toUpper name}_USERNAME=${escapeShellArg basicAuthApps.${name}.basicAuth.username}
       export ${toUpper name}_PASSWORD="$(<"$CREDENTIALS_DIRECTORY/${name}_password")"
     '') (attrNames basicAuthApps)}
-    exec ${config.services.authentik.authentikComponents.manage}/bin/manage.py shell \
+    exec ${manageExe} shell \
       < ${adminBasicAuthCommand}
   '';
 
@@ -744,27 +747,29 @@ in
           message = "mkAuthentik.forwardAuthApps.${name}: cookieDomain is required only for forward_domain";
         }) fwApps;
 
-      sops.secrets = {
-        authentik_secret_key.key = "authentik/secret_key";
-        authentik_bootstrap_email.key = "authentik/bootstrap_email";
-        authentik_bootstrap_password.key = "authentik/bootstrap_password";
-        authentik_bootstrap_token.key = "authentik/bootstrap_token";
-      };
+      sops = {
+        secrets = {
+          authentik_secret_key.key = "authentik/secret_key";
+          authentik_bootstrap_email.key = "authentik/bootstrap_email";
+          authentik_bootstrap_password.key = "authentik/bootstrap_password";
+          authentik_bootstrap_token.key = "authentik/bootstrap_token";
+        };
 
-      sops.templates."authentik.env" = {
-        content = /* bash */ ''
-          AUTHENTIK_SECRET_KEY=${config.sops.placeholder.authentik_secret_key}
-          AUTHENTIK_BOOTSTRAP_EMAIL=${config.sops.placeholder.authentik_bootstrap_email}
-          AUTHENTIK_BOOTSTRAP_PASSWORD=${config.sops.placeholder.authentik_bootstrap_password}
-          AUTHENTIK_BOOTSTRAP_TOKEN=${config.sops.placeholder.authentik_bootstrap_token}
-          AUTHENTIK_EMAIL__HOST=127.0.0.1
-          AUTHENTIK_EMAIL__PORT=2500
-          AUTHENTIK_EMAIL__FROM=${config.networking.hostName}@${config.publicDomain}
-          AUTHENTIK_EMAIL__USE_TLS=false
-          AUTHENTIK_EMAIL__USE_SSL=false
-          AUTHENTIK_EMAIL__TIMEOUT=10
-        '';
-        restartUnits = restartAuthentik;
+        templates."authentik.env" = {
+          content = /* bash */ ''
+            AUTHENTIK_SECRET_KEY=${config.sops.placeholder.authentik_secret_key}
+            AUTHENTIK_BOOTSTRAP_EMAIL=${config.sops.placeholder.authentik_bootstrap_email}
+            AUTHENTIK_BOOTSTRAP_PASSWORD=${config.sops.placeholder.authentik_bootstrap_password}
+            AUTHENTIK_BOOTSTRAP_TOKEN=${config.sops.placeholder.authentik_bootstrap_token}
+            AUTHENTIK_EMAIL__HOST=127.0.0.1
+            AUTHENTIK_EMAIL__PORT=2500
+            AUTHENTIK_EMAIL__FROM=${config.networking.hostName}@${config.publicDomain}
+            AUTHENTIK_EMAIL__USE_TLS=false
+            AUTHENTIK_EMAIL__USE_SSL=false
+            AUTHENTIK_EMAIL__TIMEOUT=10
+          '';
+          restartUnits = restartAuthentik;
+        };
       };
 
       services.authentik = {
@@ -778,41 +783,45 @@ in
       };
 
       mkTraefikServices.authentik = {
-        port = authentikPort;
+        port = 9000;
         public = true;
         chain = singleton "chain-no-auth";
       };
 
-      mkObservabilityServices.authentik = {
-        metrics.url = "http://127.0.0.1:9300/metrics";
-        units = [
-          config.systemd.services.authentik.name
-          config.systemd.services.authentik-worker.name
-        ];
-        probes.public.url = "${config.mkTraefikServices.authentik.fullHostname}/-/health/ready/";
-        logAlerts = singleton {
-          alert = "AuthentikUserSignup";
-          interval = "30s";
-          # Overlap evaluations to tolerate ingestion delays. Group by username
-          # so each signup has its own Alertmanager notification identity.
-          expr = /* logsql */ ''
-            _time:5m _SYSTEMD_UNIT:in("authentik.service", "authentik-worker.service")
-            | unpack_json
-            | filter event:="Created Event" action:="user_write" context.created:="true"
-            | rename context.username as username
-            | stats by (_HOSTNAME, username) count() as signups
-            | filter signups:>0
-          '';
-          labels = {
-            severity = "info";
-            service = "authentik";
-          };
-          annotations = {
-            summary = "New Authentik signup: {{ $labels.username }}";
-            dashboard_url = "${config.mkTraefikServices.authentik.fullHostname}/if/admin/#/identity/users";
-            dashboard_label = "Users";
+      mkObservabilityServices = {
+        authentik = {
+          metrics.url = "http://127.0.0.1:9300/metrics";
+          units = [
+            config.systemd.services.authentik.name
+            config.systemd.services.authentik-worker.name
+          ];
+          probes.public.url = "${config.mkTraefikServices.authentik.fullHostname}/-/health/ready/";
+          logAlerts = singleton {
+            alert = "AuthentikUserSignup";
+            interval = "30s";
+            # Overlap evaluations to tolerate ingestion delays. Group by username
+            # so each signup has its own Alertmanager notification identity.
+            expr = /* logsql */ ''
+              _time:5m _SYSTEMD_UNIT:in("authentik.service", "authentik-worker.service")
+              | unpack_json
+              | filter event:="Created Event" action:="user_write" context.created:="true"
+              | rename context.username as username
+              | stats by (_HOSTNAME, username) count() as signups
+              | filter signups:>0
+            '';
+            labels = {
+              severity = "info";
+              service = "authentik";
+            };
+            annotations = {
+              summary = "New Authentik signup: {{ $labels.username }}";
+              dashboard_url = "${config.mkTraefikServices.authentik.fullHostname}/if/admin/#/identity/users";
+              dashboard_label = "Users";
+            };
           };
         };
+
+        authentik-worker.metrics.url = "http://[::1]:9301/metrics";
       };
 
       mkObservability = {
@@ -821,48 +830,48 @@ in
         inactiveAlertUnits = mkIf config.services.authentik.enable config.mkObservabilityServices.authentik.units;
       };
 
-      mkObservabilityServices.authentik-worker.metrics.url = "http://[::1]:9301/metrics";
+      systemd.services = {
+        # Heal DynamicUser+StateDirectory idmap and rsynced appdata ownership.
+        authentik-migrate.serviceConfig.ExecStartPre = singleton "+${
+          pkgs.writeShellScript "authentik-state-chown" /* bash */ ''
+            ${chownExe} --recursive authentik:authentik /var/lib/private/authentik
+          ''
+        }";
 
-      # Heal DynamicUser+StateDirectory idmap and rsynced appdata ownership.
-      systemd.services.authentik-migrate.serviceConfig.ExecStartPre = singleton "+${
-        pkgs.writeShellScript "authentik-state-chown" /* bash */ ''
-          ${pkgs.coreutils}/bin/chown --recursive authentik:authentik /var/lib/private/authentik
-        ''
-      }";
-
-      # Real readiness boundary for the authentik stack. The three
-      # native units are all Type=simple, so systemd considers them
-      # "active" long before Django answers HTTP. /-/health/ready/
-      # returns 200 only after Django can answer, so probing it gives
-      # dependents a real readiness gate. RemainAfterExit+PartOf
-      # propagates authentik's stop/restart here so the gate is torn
-      # down with authentik and re-runs its poll before dependents
-      # that restart in the same transaction proceed.
-      systemd.services.authentik-ready = {
-        description = "Wait for authentik to serve 200 on /-/health/ready/";
-        after = [
-          "authentik.service"
-          "authentik-worker.service"
-        ];
-        wants = [
-          "authentik.service"
-          "authentik-worker.service"
-        ];
-        partOf = [
-          "authentik.service"
-          "authentik-worker.service"
-        ];
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-          TimeoutStartSec = "180s";
+        # Real readiness boundary for the authentik stack. The three
+        # native units are all Type=simple, so systemd considers them
+        # "active" long before Django answers HTTP. /-/health/ready/
+        # returns 200 only after Django can answer, so probing it gives
+        # dependents a real readiness gate. RemainAfterExit+PartOf
+        # propagates authentik's stop/restart here so the gate is torn
+        # down with authentik and re-runs its poll before dependents
+        # that restart in the same transaction proceed.
+        authentik-ready = {
+          description = "Wait for authentik to serve 200 on /-/health/ready/";
+          after = [
+            "authentik.service"
+            "authentik-worker.service"
+          ];
+          wants = [
+            "authentik.service"
+            "authentik-worker.service"
+          ];
+          partOf = [
+            "authentik.service"
+            "authentik-worker.service"
+          ];
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            TimeoutStartSec = "180s";
+          };
+          script = /* bash */ ''
+            until ${curlExe} --fail --silent --show-error --output /dev/null \
+              --max-time 3 http://localhost:${toString config.mkTraefikServices.authentik.port}/-/health/ready/; do
+              sleep 2
+            done
+          '';
         };
-        script = /* bash */ ''
-          until ${pkgs.curl}/bin/curl --fail --silent --show-error --output /dev/null \
-            --max-time 3 http://localhost:${toString authentikPort}/-/health/ready/; do
-            sleep 2
-          done
-        '';
       };
     }
 
@@ -915,7 +924,7 @@ in
           User = "authentik";
           StateDirectory = "authentik";
           WorkingDirectory = "/var/lib/authentik";
-          EnvironmentFile = [ config.sops.templates."authentik.env".path ];
+          EnvironmentFile = singleton config.sops.templates."authentik.env".path;
           LoadCredential = mapAttrsToList (
             name: app: "${name}_password:${config.sops.secrets.${app.basicAuth.passwordSecretName}.path}"
           ) basicAuthApps;
@@ -925,32 +934,36 @@ in
     })
 
     (mkIf (oidcApps != { }) {
-      sops.secrets = foldl' mergeAttrs { } (
-        mapAttrsToList (
-          _: app:
-          {
-            ${app.credentials.clientId.secretName} = mkOidcSecret app.credentials.clientId;
-          }
-          // optionalAttrs (!app.publicClient) {
-            ${app.credentials.clientSecret.secretName} = mkOidcSecret app.credentials.clientSecret;
-          }
-        ) oidcApps
-      );
+      sops = {
+        secrets = foldl' mergeAttrs { } (
+          mapAttrsToList (
+            _: app:
+            {
+              ${app.credentials.clientId.secretName} = mkOidcSecret app.credentials.clientId;
+            }
+            // optionalAttrs (!app.publicClient) {
+              ${app.credentials.clientSecret.secretName} = mkOidcSecret app.credentials.clientSecret;
+            }
+          ) oidcApps
+        );
 
-      sops.templates."authentik-oidc-apps.env" = {
-        content = oidcWorkerEnvContent;
-        restartUnits = restartAuthentik;
+        templates."authentik-oidc-apps.env" = {
+          content = oidcWorkerEnvContent;
+          restartUnits = restartAuthentik;
+        };
       };
 
-      systemd.services.authentik.serviceConfig.EnvironmentFile = [
-        config.sops.templates."authentik-oidc-apps.env".path
-      ];
-      systemd.services.authentik-worker.serviceConfig.EnvironmentFile = [
-        config.sops.templates."authentik-oidc-apps.env".path
-      ];
-      systemd.services.authentik-migrate.serviceConfig.EnvironmentFile = [
-        config.sops.templates."authentik-oidc-apps.env".path
-      ];
+      systemd.services = {
+        authentik.serviceConfig.EnvironmentFile =
+          singleton
+            config.sops.templates."authentik-oidc-apps.env".path;
+        authentik-worker.serviceConfig.EnvironmentFile =
+          singleton
+            config.sops.templates."authentik-oidc-apps.env".path;
+        authentik-migrate.serviceConfig.EnvironmentFile =
+          singleton
+            config.sops.templates."authentik-oidc-apps.env".path;
+      };
 
       mkAuthentik.extraBlueprints = mapAttrsToList (appName: app: oidcBlueprintDir appName app) oidcApps;
     })

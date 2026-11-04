@@ -6,11 +6,13 @@
 }:
 let
   inherit (lib.lists) singleton;
+  inherit (lib.meta) getExe';
+  msmtpdExe = getExe' pkgs.msmtp "msmtpd";
 in
 {
   users.groups.msmtp = { };
 
-  environment.etc."aliases".text = ''
+  environment.etc."aliases".text = /* conf */ ''
     root: ${config.systemEmail}
     postmaster: root
     abuse: root
@@ -43,19 +45,20 @@ in
     };
   };
 
-  systemd.services.msmtp.serviceConfig.LoadCredential =
-    singleton "smtp_token:${config.sops.secrets.smtp_token.path}";
+  systemd.services = {
+    msmtp.serviceConfig.LoadCredential = singleton "smtp_token:${config.sops.secrets.smtp_token.path}";
 
-  # Local SMTP listener for apps that speak SMTP (e.g. authentik). Forwards
-  # to the protonmail relay configured above via the same `programs.msmtp`
-  systemd.services.msmtpd = {
-    description = "Local SMTP relay (msmtpd → protonmail)";
-    wantedBy = singleton "multi-user.target";
-    serviceConfig = {
-      Type = "simple";
-      ExecStart = "${pkgs.msmtp}/bin/msmtpd --port=2500";
-      Restart = "on-failure";
-      LoadCredential = singleton "smtp_token:${config.sops.secrets.smtp_token.path}";
+    # Local SMTP listener for apps that speak SMTP (e.g. authentik). Forwards
+    # to the protonmail relay configured above via the same `programs.msmtp`
+    msmtpd = {
+      description = "Local SMTP relay (msmtpd → protonmail)";
+      wantedBy = singleton "multi-user.target";
+      serviceConfig = {
+        Type = "simple";
+        ExecStart = "${msmtpdExe} --port=2500";
+        Restart = "on-failure";
+        LoadCredential = singleton "smtp_token:${config.sops.secrets.smtp_token.path}";
+      };
     };
   };
 }

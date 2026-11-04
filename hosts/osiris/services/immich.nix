@@ -13,34 +13,41 @@ in
   # ==========================================
   # IMMICH CONFIGURATION
   # ==========================================
-  services.immich = {
-    enable = true;
-
-    # Enable all devices
-    accelerationDevices = null;
-
-    package = pkgs.unstable.immich;
-
-    redis.enable = true;
-
-    machine-learning = {
+  services = {
+    immich = {
       enable = true;
-      environment = {
-        MACHINE_LEARNING_WORKERS = "1";
-        MACHINE_LEARNING_WORKER_TIMEOUT = "120";
+
+      # Enable all devices
+      accelerationDevices = null;
+
+      package = pkgs.unstable.immich;
+
+      redis.enable = true;
+
+      machine-learning = {
+        enable = true;
+        environment = {
+          MACHINE_LEARNING_WORKERS = "1";
+          MACHINE_LEARNING_WORKER_TIMEOUT = "120";
+        };
+      };
+
+      settings = {
+        server.externalDomain = config.mkTraefikServices.immich.fullHostname;
+        newVersionCheck.enabled = false;
+        oauth = {
+          enabled = true;
+          clientId._secret = config.sops.secrets.${oidc.credentials.clientId.secretName}.path;
+          clientSecret._secret = config.sops.secrets.${oidc.credentials.clientSecret.secretName}.path;
+          issuerUrl = oidc.issuerUrl;
+          buttonText = "Authentik";
+        };
       };
     };
 
-    settings = {
-      server.externalDomain = config.mkTraefikServices.immich.fullHostname;
-      newVersionCheck.enabled = false;
-      oauth = {
-        enabled = true;
-        clientId._secret = config.sops.secrets.${oidc.credentials.clientId.secretName}.path;
-        clientSecret._secret = config.sops.secrets.${oidc.credentials.clientSecret.secretName}.path;
-        issuerUrl = oidc.issuerUrl;
-        buttonText = "Authentik";
-      };
+    postgresql = {
+      extensions = ps: with ps; singleton vectorchord;
+      initdbArgs = singleton "--data-checksums";
     };
   };
 
@@ -62,11 +69,6 @@ in
     singleton config.services.immich.mediaLocation;
 
   mkPostgresServices.immich = { };
-
-  services.postgresql = {
-    extensions = ps: with ps; singleton vectorchord;
-    initdbArgs = singleton "--data-checksums";
-  };
 
   mkTraefikServices.immich = {
     public = true;

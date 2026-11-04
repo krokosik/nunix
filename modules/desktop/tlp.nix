@@ -4,13 +4,11 @@ let
 in
 {
   # One policy manager; thermald independently protects against overheating.
-  services.power-profiles-daemon.enable = mkForce false;
-
-  services.auto-cpufreq.enable = mkForce false;
-
   powerManagement.powertop.enable = mkForce false;
 
   services = {
+    power-profiles-daemon.enable = mkForce false;
+    auto-cpufreq.enable = mkForce false;
     thermald.enable = true;
 
     tlp = {

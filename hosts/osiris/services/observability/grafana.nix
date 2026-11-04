@@ -44,33 +44,38 @@ in
     chain = singleton "chain-no-auth";
   };
 
-  sops.secrets.grafana_secret_key = {
-    key = "grafana/secret_key";
-    owner = "grafana";
-    restartUnits = singleton "grafana.service";
-  };
-  sops.secrets.grafana_admin_password = {
-    key = "grafana/admin_password";
-    owner = "grafana";
-    restartUnits = singleton "grafana.service";
+  sops = {
+    secrets = {
+      grafana_secret_key = {
+        key = "grafana/secret_key";
+        owner = "grafana";
+        restartUnits = singleton "grafana.service";
+      };
+
+      grafana_admin_password = {
+        key = "grafana/admin_password";
+        owner = "grafana";
+        restartUnits = singleton "grafana.service";
+      };
+    };
+
+    templates."grafana-oauth.env" = {
+      content = /* bash */ ''
+        GF_AUTH_GENERIC_OAUTH_CLIENT_ID=${
+          config.sops.placeholder.${config.mkAuthentik.oidcApps.grafana.credentials.clientId.secretName}
+        }
+        GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET=${
+          config.sops.placeholder.${config.mkAuthentik.oidcApps.grafana.credentials.clientSecret.secretName}
+        }
+      '';
+      owner = "grafana";
+      restartUnits = singleton "grafana.service";
+    };
   };
 
-  sops.templates."grafana-oauth.env" = {
-    content = /* bash */ ''
-      GF_AUTH_GENERIC_OAUTH_CLIENT_ID=${
-        config.sops.placeholder.${config.mkAuthentik.oidcApps.grafana.credentials.clientId.secretName}
-      }
-      GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET=${
-        config.sops.placeholder.${config.mkAuthentik.oidcApps.grafana.credentials.clientSecret.secretName}
-      }
-    '';
-    owner = "grafana";
-    restartUnits = singleton "grafana.service";
-  };
-
-  systemd.services.grafana.serviceConfig.EnvironmentFile = [
-    config.sops.templates."grafana-oauth.env".path
-  ];
+  systemd.services.grafana.serviceConfig.EnvironmentFile =
+    singleton
+      config.sops.templates."grafana-oauth.env".path;
 
   services.grafana = {
     enable = true;

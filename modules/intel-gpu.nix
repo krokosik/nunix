@@ -8,7 +8,7 @@ let
   inherit (lib.modules) mkDefault;
 in
 {
-  ## Enable OpenGL accelerated video playback
+  ## ENABLE OPENGL ACCELERATED VIDEO PLAYBACK
   ## https://wiki.nixos.org/wiki/Intel_Graphics
   hardware = {
     graphics = {

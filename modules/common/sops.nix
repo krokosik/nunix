@@ -35,7 +35,7 @@ in
     };
   };
 
-  nix.extraOptions = ''
+  nix.extraOptions = /* conf */ ''
     !include ${config.sops.secrets.nix_access_token.path}
   '';
 

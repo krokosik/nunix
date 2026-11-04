@@ -57,16 +57,18 @@ in
   home-manager.users.${config.username} =
     { config, osConfig, ... }:
     {
-      wayland.windowManager.hyprland.plugins = [
-        hyprgrass
-        "${hyprgrass}/lib/libhyprgrass-pulse.so"
-        "${hyprgrass}/lib/libhyprgrass-backlight.so"
-      ];
+      wayland.windowManager.hyprland = {
+        plugins = [
+          hyprgrass
+          "${hyprgrass}/lib/libhyprgrass-pulse.so"
+          "${hyprgrass}/lib/libhyprgrass-backlight.so"
+        ];
 
-      # Load after DMS's dynamic Lua so laptop-mode values can be restored.
-      wayland.windowManager.hyprland.extraConfig = mkOrder 1501 /* lua */ ''
-        dofile("${./tablet-mode/gestures.lua}")
-      '';
+        # Load after DMS's dynamic Lua so laptop-mode values can be restored.
+        extraConfig = mkOrder 1501 /* lua */ ''
+          dofile("${./tablet-mode/gestures.lua}")
+        '';
+      };
 
       # The tablet watcher owns activation; no login enablement or layout changes.
       systemd.user.services.surface-tablet-rotation = {

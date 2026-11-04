@@ -1,6 +1,8 @@
 { lib, pkgs, ... }:
 let
   inherit (lib.lists) singleton;
+  inherit (lib.meta) getExe;
+  logidExe = getExe pkgs.logiops;
 in
 {
   environment.etc."logid.cfg".text = /* conf */ ''
@@ -85,7 +87,7 @@ in
     after = singleton "systemd-udev-settle.service";
 
     serviceConfig = {
-      ExecStart = "${pkgs.logiops}/bin/logid --config /etc/logid.cfg";
+      ExecStart = "${logidExe} --config /etc/logid.cfg";
       Restart = "on-failure";
       RestartSec = 2;
     };

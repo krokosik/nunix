@@ -5,6 +5,8 @@
 }:
 let
   inherit (lib.lists) singleton;
+  inherit (lib.meta) getExe;
+  tlpExe = getExe pkgs.tlp;
 in
 {
   # POWER MANAGEMENT
@@ -19,8 +21,8 @@ in
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${pkgs.tlp}/bin/tlp setcharge 75 80";
-      ExecStop = "${pkgs.tlp}/bin/tlp setcharge 96 100";
+      ExecStart = "${tlpExe} setcharge 75 80";
+      ExecStop = "${tlpExe} setcharge 96 100";
     };
   };
 }

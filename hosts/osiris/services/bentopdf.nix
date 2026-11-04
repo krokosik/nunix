@@ -1,13 +1,12 @@
 { config, lib, ... }:
 let
   inherit (lib.lists) singleton;
-  port = 3023;
 in
 {
   # BentoPDF - Privacy-first PDF toolkit
   # Container runs as UID 101 (image default)
   mkContainerServices.bentopdf = {
-    inherit port;
+    port = 3023;
     manageUser = false;
     containerPort = 8080;
   };
@@ -18,7 +17,7 @@ in
   };
 
   mkTraefikServices.bentopdf = {
-    inherit port;
+    port = config.mkContainerServices.bentopdf.port;
     public = true;
     subdomain = "pdf";
   };

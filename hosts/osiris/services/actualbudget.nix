@@ -7,9 +7,6 @@
 let
   inherit (lib.lists) singleton;
   inherit (lib.modules) mkForce mkIf;
-  port = 5006;
-  user = "actual";
-  group = "actual";
   oidc = config.mkAuthentik.oidcApps.actual;
 in
 {
@@ -21,12 +18,12 @@ in
     redirectUris = singleton "${config.mkTraefikServices.actual.fullHostname}/openid/callback";
     credentials = {
       clientId = {
-        inherit group;
-        owner = user;
+        group = config.services.actual.group;
+        owner = config.services.actual.user;
       };
       clientSecret = {
-        inherit group;
-        owner = user;
+        group = config.services.actual.group;
+        owner = config.services.actual.user;
       };
     };
   };
@@ -40,10 +37,11 @@ in
   };
 
   services.actual = {
-    inherit user group;
+    user = "actual";
+    group = "actual";
     enable = true;
     settings = {
-      inherit port;
+      port = config.mkTraefikServices.actual.port;
       loginMethod = "openid";
       openId = {
         discoveryURL = oidc.issuerUrl;
@@ -64,7 +62,7 @@ in
   );
 
   mkTraefikServices.actual = {
-    inherit port;
+    port = 5006;
     public = true;
     chain = singleton "chain-no-auth";
   };

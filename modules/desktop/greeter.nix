@@ -26,9 +26,11 @@ in
     };
   };
 
-  services.gnome.gnome-keyring.enable = true;
+  services = {
+    gnome.gnome-keyring.enable = true;
 
-  services.greetd.settings.default_session.user = "greeter";
+    greetd.settings.default_session.user = "greeter";
+  };
 
   systemd.services.greetd = {
     after = singleton "plymouth-quit.service";

@@ -100,9 +100,14 @@ in
       ${getExe' pkgs.gnused "sed"} "s/\"chat_id\":1/\"chat_id\":$chat_id/g" /tmp/alert-manager-substituted.yaml > /tmp/alert-manager-ready.yaml
       ${getExe' pkgs.coreutils "mv"} /tmp/alert-manager-ready.yaml /tmp/alert-manager-substituted.yaml
     '';
-    serviceConfig.LoadCredential = singleton "telegram_chat_id:${config.sops.secrets.alertmanager_telegram_chat_id.path}";
     wants = singleton "msmtpd.service";
     after = singleton "msmtpd.service";
+    serviceConfig = {
+      LoadCredential = singleton "telegram_chat_id:${config.sops.secrets.alertmanager_telegram_chat_id.path}";
+      DynamicUser = mkForce false;
+      User = "alertmanager";
+      Group = "alertmanager";
+    };
   };
 
   users = {
@@ -112,12 +117,6 @@ in
       isSystemUser = true;
       group = "alertmanager";
     };
-  };
-
-  systemd.services.alertmanager.serviceConfig = {
-    DynamicUser = mkForce false;
-    User = "alertmanager";
-    Group = "alertmanager";
   };
 
   services.prometheus.alertmanager = {

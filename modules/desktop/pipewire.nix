@@ -12,11 +12,13 @@ in
       support32Bit = true;
     };
     pulse.enable = true;
-    wireplumber.enable = true;
+    wireplumber = {
+      enable = true;
 
-    # Keep Bluetooth headsets on stereo playback without call-profile negotiation.
-    wireplumber.extraConfig."90-playback-only" = {
-      "monitor.bluez.properties"."bluez5.roles" = singleton "a2dp_source";
+      # Keep Bluetooth headsets on stereo playback without call-profile negotiation.
+      extraConfig."90-playback-only" = {
+        "monitor.bluez.properties"."bluez5.roles" = singleton "a2dp_source";
+      };
     };
 
     extraLadspaPackages = with pkgs; [
@@ -44,7 +46,7 @@ in
             "filter.graph" = {
               nodes = [
                 {
-                  # 1. High-pass filter: Cuts low-end fan rumble (<140Hz) before RNNoise processes it
+                  # 1. HIGH-PASS FILTER: CUTS LOW-END FAN RUMBLE (<140HZ) BEFORE RNNOISE PROCESSES IT
                   type = "builtin";
                   label = "bq_highpass";
                   name = "hpf";
@@ -53,13 +55,13 @@ in
                   };
                 }
                 {
-                  # 2. Splitter: Duplicates the signal for the dry/wet mixer
+                  # 2. SPLITTER: DUPLICATES THE SIGNAL FOR THE DRY/WET MIXER
                   type = "builtin";
                   label = "copy";
                   name = "split";
                 }
                 {
-                  # 3. RNNoise: The core AI denoiser
+                  # 3. RNNOISE: THE CORE AI DENOISER
                   type = "ladspa";
                   name = "rnnoise";
                   plugin = "librnnoise_ladspa";
@@ -71,7 +73,7 @@ in
                   };
                 }
                 {
-                  # 4. Mixer: Combines dry (Gain 1) and wet/filtered (Gain 2).
+                  # 4. MIXER: COMBINES DRY (GAIN 1) AND WET/FILTERED (GAIN 2)
                   # Default is set to 100% filtered.
                   type = "builtin";
                   label = "mixer";
@@ -82,7 +84,7 @@ in
                   };
                 }
                 {
-                  # 5. AGC (SC4 Compressor): Evens out volume so near/far speech sounds consistent
+                  # 5. AGC (SC4 COMPRESSOR): EVENS OUT VOLUME SO NEAR/FAR SPEECH SOUNDS CONSISTENT
                   type = "ladspa";
                   name = "agc";
                   plugin = "sc4m_1916";

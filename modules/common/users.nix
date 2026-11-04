@@ -25,50 +25,53 @@ in
     message = "The primary username must not also appear in extraUsers";
   };
 
-  users.mutableUsers = false;
-
   sops.secrets = {
     login_password_hash.neededForUsers = true;
   }
   // extraUserPasswordSecrets;
 
-  users.defaultUserShell = pkgs.fish;
   programs.fish.enable = true;
 
-  users.users = {
-    root = {
-      hashedPasswordFile = config.sops.secrets.login_password_hash.path; # Create with: echo -n "password" | mkpasswd -s
-    };
+  users = {
+    mutableUsers = false;
 
-    ${config.username} = {
+    defaultUserShell = pkgs.fish;
+
+    users = {
+      root = {
+        hashedPasswordFile = config.sops.secrets.login_password_hash.path; # Create with: echo -n "password" | mkpasswd -s
+      };
+
+      ${config.username} = {
+        isNormalUser = true;
+        group = config.username;
+        extraGroups = [
+          "libvirtd"
+          "networkmanager"
+          "users"
+          "wheel"
+          "input"
+        ];
+        uid = 1000;
+        hashedPasswordFile = config.sops.secrets.login_password_hash.path; # Create with: echo -n "password" | mkpasswd -s
+        # keys: id_ed25519.pub
+        openssh.authorizedKeys.keys = singleton "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMKb4VxsZXBODsfl98C8eP4ofNQxrDv//KhhAhOLyRd2 krokosik@legion";
+      };
+    }
+    // genAttrs config.extraUsers (username: {
       isNormalUser = true;
-      group = config.username;
+      group = username;
       extraGroups = [
-        "libvirtd"
         "networkmanager"
         "users"
-        "wheel"
-        "input"
       ];
-      uid = 1000;
-      hashedPasswordFile = config.sops.secrets.login_password_hash.path; # Create with: echo -n "password" | mkpasswd -s
-      # keys: id_ed25519.pub
-      openssh.authorizedKeys.keys = singleton "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMKb4VxsZXBODsfl98C8eP4ofNQxrDv//KhhAhOLyRd2 krokosik@legion";
-    };
-  }
-  // genAttrs config.extraUsers (username: {
-    isNormalUser = true;
-    group = username;
-    extraGroups = [
-      "networkmanager"
-      "users"
-    ];
-    hashedPasswordFile = config.sops.secrets.${extraUserPasswordSecret username}.path;
-  });
+      hashedPasswordFile = config.sops.secrets.${extraUserPasswordSecret username}.path;
+    });
 
-  users.groups = {
-    ${config.username}.gid = 1000;
-  }
-  // genAttrs config.extraUsers (_: { });
+    groups = {
+      ${config.username}.gid = 1000;
+    }
+    // genAttrs config.extraUsers (_: { });
+  };
 
 }

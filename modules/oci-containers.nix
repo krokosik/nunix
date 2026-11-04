@@ -148,39 +148,43 @@ in
         };
         enableOnBoot = config.role == "server";
       };
-      oci-containers.backend = "docker";
+      oci-containers = {
+        backend = "docker";
 
-      # Per-svc container fragments contributed via `mkContainerServices.<name>`.
-      # Each entry merges with the svc module's own container definition
-      # (image, volumes, extra env), which stays in the svc module.
-      oci-containers.containers = mapAttrs (
-        _: svc:
-        mkMerge [
-          (optionalAttrs (svc.port != null) {
-            ports = singleton "127.0.0.1:${toString svc.port}:${toString svc.containerPort}";
-          })
-          (optionalAttrs (svc.manageUser && svc.linuxServer) {
-            environment = {
-              PUID = toString serverUid;
-              PGID = toString serverGid;
-            };
-          })
-          (optionalAttrs (svc.manageUser && !svc.linuxServer) {
-            user = "${toString serverUid}:${toString serverGid}";
-          })
-          (optionalAttrs svc.tzEnv {
-            environment.TZ = config.time.timeZone;
-          })
-          {
-            extraOptions = singleton "--security-opt=no-new-privileges";
-          }
-        ]
-      ) config.mkContainerServices;
+        # Per-svc container fragments contributed via `mkContainerServices.<name>`.
+        # Each entry merges with the svc module's own container definition
+        # (image, volumes, extra env), which stays in the svc module.
+        containers = mapAttrs (
+          _: svc:
+          mkMerge [
+            (optionalAttrs (svc.port != null) {
+              ports = singleton "127.0.0.1:${toString svc.port}:${toString svc.containerPort}";
+            })
+            (optionalAttrs (svc.manageUser && svc.linuxServer) {
+              environment = {
+                PUID = toString serverUid;
+                PGID = toString serverGid;
+              };
+            })
+            (optionalAttrs (svc.manageUser && !svc.linuxServer) {
+              user = "${toString serverUid}:${toString serverGid}";
+            })
+            (optionalAttrs svc.tzEnv {
+              environment.TZ = config.time.timeZone;
+            })
+            {
+              extraOptions = singleton "--security-opt=no-new-privileges";
+            }
+          ]
+        ) config.mkContainerServices;
+      };
     };
 
     # docker isn't allowed to forward packets from docker0 to the actual NIC by default
-    boot.kernel.sysctl."net.ipv4.ip_forward" = mkForce 1;
-    boot.kernel.sysctl."net.ipv6.conf.all.forwarding" = mkForce 1;
+    boot.kernel.sysctl = {
+      "net.ipv4.ip_forward" = mkForce 1;
+      "net.ipv6.conf.all.forwarding" = mkForce 1;
+    };
 
     # add Docker DNS to resolved
     services.resolved.settings.Resolve.DNSStubListenerExtra = "172.17.0.1";

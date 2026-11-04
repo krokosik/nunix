@@ -6,7 +6,7 @@
 let
   inherit (lib.lists) singleton;
   name = "splitpro";
-  port = 3000;
+  db = config.mkPostgresServices.splitpro.dbName;
   oidc = config.mkAuthentik.oidcApps.splitpro;
   containerUser = config.username; # UID/GID 1000 on osiris
   containerUnit = "${config.virtualisation.oci-containers.backend}-${name}.service";
@@ -15,24 +15,24 @@ in
   mkPostgresServices.splitpro = {
     extraCommands = [
       "CREATE EXTENSION IF NOT EXISTS pg_cron;"
-      "GRANT USAGE ON SCHEMA cron TO \"${name}\";"
-      "GRANT ALL ON ALL TABLES IN SCHEMA cron TO \"${name}\";"
-      "GRANT ALL ON ALL SEQUENCES IN SCHEMA cron TO \"${name}\";"
+      "GRANT USAGE ON SCHEMA cron TO \"${db}\";"
+      "GRANT ALL ON ALL TABLES IN SCHEMA cron TO \"${db}\";"
+      "GRANT ALL ON ALL SEQUENCES IN SCHEMA cron TO \"${db}\";"
     ];
   };
 
-  # --- PostgreSQL extensions ---
+  # --- POSTGRESQL EXTENSIONS ---
   services.postgresql = {
     extensions = pp: singleton pp.pg_cron;
     settings = {
       shared_preload_libraries = singleton "pg_cron";
-      "cron.database_name" = name;
+      "cron.database_name" = db;
       "cron.timezone" = "UTC";
     };
   };
 
   mkContainerServices.splitpro = {
-    inherit port;
+    port = 3000;
     stateDirs = singleton "/var/lib/splitpro/uploads";
   };
 
@@ -56,9 +56,9 @@ in
     templates."splitpro.env" = {
       content = /* bash */ ''
         NEXTAUTH_SECRET=${config.sops.placeholder.nextauth_secret}
-        DATABASE_URL=postgresql://${name}:${
+        DATABASE_URL=postgresql://${db}:${
           config.sops.placeholder.${config.mkPostgresServices.splitpro.secretName}
-        }@host.docker.internal:5432/${name}
+        }@host.docker.internal:5432/${db}
         AUTHENTIK_ID=${config.sops.placeholder.${oidc.credentials.clientId.secretName}}
         AUTHENTIK_SECRET=${config.sops.placeholder.${oidc.credentials.clientSecret.secretName}}
         WEB_PUSH_PUBLIC_KEY=${config.sops.placeholder.webpush_public_key}
@@ -72,7 +72,7 @@ in
   };
 
   mkTraefikServices.splitpro = {
-    inherit port;
+    port = config.mkContainerServices.splitpro.port;
     public = true;
     chain = singleton "chain-no-auth";
   };
@@ -96,8 +96,6 @@ in
       CURRENCY_RATE_PROVIDER = "nbp";
       AUTHENTIK_ISSUER = oidc.issuerUrl;
     };
-    environmentFiles = [
-      config.sops.templates."splitpro.env".path
-    ];
+    environmentFiles = singleton config.sops.templates."splitpro.env".path;
   };
 }

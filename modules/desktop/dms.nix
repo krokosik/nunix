@@ -29,7 +29,7 @@
 
   # PLUGIN DEPS
   environment.systemPackages = with pkgs; [
-    # quick capture
+    # QUICK CAPTURE
     ffmpeg
     gpu-screen-recorder
     imagemagick

@@ -75,66 +75,68 @@ in
         follow_focus = true;
       };
 
-      systemd.user.services.surface-tablet-mode = {
-        Unit = {
-          Description = "Surface tablet-mode session watcher";
-          PartOf = singleton config.wayland.systemd.target;
-          After = singleton config.wayland.systemd.target;
+      systemd.user.services = {
+        surface-tablet-mode = {
+          Unit = {
+            Description = "Surface tablet-mode session watcher";
+            PartOf = singleton config.wayland.systemd.target;
+            After = singleton config.wayland.systemd.target;
+          };
+          Service = {
+            ExecStart = "${getExe python} ${./tablet-mode/watch.py} ${watcherConfig}";
+            Restart = "on-failure";
+            RestartSec = 2;
+            RuntimeDirectory = "surface-tablet";
+            NoNewPrivileges = true;
+            ProtectSystem = "strict";
+            ProtectHome = "read-only";
+            UMask = "0077";
+          };
+          Install.WantedBy = singleton config.wayland.systemd.target;
         };
-        Service = {
-          ExecStart = "${getExe python} ${./tablet-mode/watch.py} ${watcherConfig}";
-          Restart = "on-failure";
-          RestartSec = 2;
-          RuntimeDirectory = "surface-tablet";
-          NoNewPrivileges = true;
-          ProtectSystem = "strict";
-          ProtectHome = "read-only";
-          UMask = "0077";
-        };
-        Install.WantedBy = singleton config.wayland.systemd.target;
-      };
 
-      # Deliberately not WantedBy: the switch watcher owns activation.
-      systemd.user.services.surface-tablet-keyboard-space = {
-        Unit = {
-          Description = "Reserve keyboard space for fullscreen Surface applications";
-          PartOf = [
-            config.wayland.systemd.target
-            "surface-tablet-mode.service"
-          ];
-          After = singleton "surface-tablet-osk.service";
-          ConditionPathExists = "%t/surface-tablet/tablet";
+        # Deliberately not WantedBy: the switch watcher owns activation.
+        surface-tablet-keyboard-space = {
+          Unit = {
+            Description = "Reserve keyboard space for fullscreen Surface applications";
+            PartOf = [
+              config.wayland.systemd.target
+              "surface-tablet-mode.service"
+            ];
+            After = singleton "surface-tablet-osk.service";
+            ConditionPathExists = "%t/surface-tablet/tablet";
+          };
+          Service = {
+            ExecStart = "${getExe pkgs.python3} ${./tablet-mode/keyboard-space.py} ${getExe' pkgs.hyprland "hyprctl"}";
+            Restart = "on-failure";
+            RestartSec = 2;
+            NoNewPrivileges = true;
+            ProtectSystem = "strict";
+            ProtectHome = "read-only";
+            UMask = "0077";
+          };
         };
-        Service = {
-          ExecStart = "${getExe pkgs.python3} ${./tablet-mode/keyboard-space.py} ${getExe' pkgs.hyprland "hyprctl"}";
-          Restart = "on-failure";
-          RestartSec = 2;
-          NoNewPrivileges = true;
-          ProtectSystem = "strict";
-          ProtectHome = "read-only";
-          UMask = "0077";
-        };
-      };
 
-      # Deliberately not WantedBy: the switch watcher owns activation.
-      systemd.user.services.surface-tablet-osk = {
-        Unit = {
-          Description = "Surface automatic text-input keyboard";
-          PartOf = [
-            config.wayland.systemd.target
-            "surface-tablet-mode.service"
-          ];
-          ConditionPathExists = "%t/surface-tablet/tablet";
-        };
-        Service = {
-          ExecStart = "${getExe wvkbd} --auto --hidden";
-          Environment = [
-            "WVKBD_HEIGHT=360"
-            "WVKBD_LANDSCAPE_HEIGHT=300"
-          ];
-          Restart = "on-failure";
-          RestartSec = 2;
-          NoNewPrivileges = true;
+        # Deliberately not WantedBy: the switch watcher owns activation.
+        surface-tablet-osk = {
+          Unit = {
+            Description = "Surface automatic text-input keyboard";
+            PartOf = [
+              config.wayland.systemd.target
+              "surface-tablet-mode.service"
+            ];
+            ConditionPathExists = "%t/surface-tablet/tablet";
+          };
+          Service = {
+            ExecStart = "${getExe wvkbd} --auto --hidden";
+            Environment = [
+              "WVKBD_HEIGHT=360"
+              "WVKBD_LANDSCAPE_HEIGHT=300"
+            ];
+            Restart = "on-failure";
+            RestartSec = 2;
+            NoNewPrivileges = true;
+          };
         };
       };
     };

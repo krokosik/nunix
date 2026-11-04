@@ -3,14 +3,13 @@ let
   inherit (lib.lists) singleton;
   inherit (lib) stringAfter;
   name = "psitransfer";
-  port = 3039;
   containerUser = config.username; # UID/GID 1000 on osiris
   containerUnit = "${config.virtualisation.oci-containers.backend}-${name}.service";
   dataPath = "/var/lib/psitransfer";
 in
 {
   mkContainerServices.psitransfer = {
-    inherit port;
+    port = 3039;
     manageUser = false;
     containerPort = 3000;
   };
@@ -39,7 +38,7 @@ in
   '';
 
   mkTraefikServices.psitransfer = {
-    inherit port;
+    port = config.mkContainerServices.psitransfer.port;
     public = true;
   };
 

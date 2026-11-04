@@ -45,43 +45,47 @@ in
   # The rendered htpasswd file must stay out of the Nix store. sops-nix installs
   # secrets during system activation (useSystemdActivation = false), so there
   # is no sops-install-secrets.service to order this unit after.
-  systemd.services.observability-ingest-auth = {
-    description = "Render observability ingestion Basic Auth users";
-    before = singleton "traefik.service";
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      User = "root";
-      Group = "observability-ingest-auth";
-      RuntimeDirectory = "observability-ingest-auth";
-      RuntimeDirectoryMode = "0750";
-      UMask = "0027";
-      LoadCredential = [
-        "metrics:${config.sops.secrets.observability_metrics_ingest_password.path}"
-        "logs:${config.sops.secrets.observability_logs_ingest_password.path}"
-      ];
+  systemd.services = {
+    observability-ingest-auth = {
+      description = "Render observability ingestion Basic Auth users";
+      before = singleton "traefik.service";
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        User = "root";
+        Group = "observability-ingest-auth";
+        RuntimeDirectory = "observability-ingest-auth";
+        RuntimeDirectoryMode = "0750";
+        UMask = "0027";
+        LoadCredential = [
+          "metrics:${config.sops.secrets.observability_metrics_ingest_password.path}"
+          "logs:${config.sops.secrets.observability_logs_ingest_password.path}"
+        ];
+      };
+      script = /* bash */ ''
+        set -euo pipefail
+        for name in metrics logs; do
+          secret="$CREDENTIALS_DIRECTORY/$name"
+          test -s "$secret"
+          ${getExe' pkgs.apacheHttpd "htpasswd"} -niB "anubis-$name" < "$secret" > "/run/observability-ingest-auth/$name"
+          ${getExe' pkgs.coreutils "chmod"} 0640 "/run/observability-ingest-auth/$name"
+        done
+      '';
     };
-    script = /* bash */ ''
-      set -euo pipefail
-      for name in metrics logs; do
-        secret="$CREDENTIALS_DIRECTORY/$name"
-        test -s "$secret"
-        ${getExe' pkgs.apacheHttpd "htpasswd"} -niB "anubis-$name" < "$secret" > "/run/observability-ingest-auth/$name"
-        ${getExe' pkgs.coreutils "chmod"} 0640 "/run/observability-ingest-auth/$name"
-      done
-    '';
+
+    traefik = {
+      # An ingest-auth failure must not bring down the reverse proxy for every
+      # other service. The ingestion routes fail closed until usersFile exists.
+      wants = singleton "observability-ingest-auth.service";
+      after = singleton "observability-ingest-auth.service";
+    };
   };
 
-  systemd.services.traefik = {
-    # An ingest-auth failure must not bring down the reverse proxy for every
-    # other service. The ingestion routes fail closed until usersFile exists.
-    wants = singleton "observability-ingest-auth.service";
-    after = singleton "observability-ingest-auth.service";
+  users = {
+    groups.observability-ingest-auth = { };
+
+    users.traefik.extraGroups = singleton "observability-ingest-auth";
   };
-
-  users.groups.observability-ingest-auth = { };
-
-  users.users.traefik.extraGroups = singleton "observability-ingest-auth";
 
   services.traefik.dynamicConfigOptions.http = {
     services = genAttrs names (name: {

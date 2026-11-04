@@ -428,27 +428,29 @@ in
       );
     };
 
-    services.prometheus.exporters.blackbox = mkIf (probes != { }) {
-      enable = true;
-      listenAddress = loopback;
-      configFile = (pkgs.formats.yaml { }).generate "blackbox.yaml" {
-        modules = blackboxModules;
-      };
+    services.prometheus.exporters.blackbox = {
+      enable = mkIf (probes != { }) true;
+      listenAddress = mkIf (probes != { }) loopback;
+      configFile = mkIf (probes != { }) (
+        (pkgs.formats.yaml { }).generate "blackbox.yaml" {
+          modules = blackboxModules;
+        }
+      );
     };
 
-    services.prometheus.exporters.postgres = mkIf config.services.postgresql.enable {
-      enable = true;
-      listenAddress = loopback;
-      runAsLocalSuperUser = true;
-      extraFlags = [
+    services.prometheus.exporters.postgres = {
+      enable = mkIf config.services.postgresql.enable true;
+      listenAddress = mkIf config.services.postgresql.enable loopback;
+      runAsLocalSuperUser = mkIf config.services.postgresql.enable true;
+      extraFlags = mkIf config.services.postgresql.enable [
         "--collector.postmaster"
         "--collector.stat_checkpointer"
       ];
     };
 
-    services.prometheus.exporters.smartctl = mkIf (!config.isVirtual) {
-      enable = true;
-      listenAddress = loopback;
+    services.prometheus.exporters.smartctl = {
+      enable = mkIf (!config.isVirtual) true;
+      listenAddress = mkIf (!config.isVirtual) loopback;
     };
 
     mkObservability.hostMetrics = {
@@ -485,18 +487,23 @@ in
       ];
     };
 
-    networking.hosts = mkIf (!cfg.central) {
-      ${config.tailscaleAddresses.osiris.ipv4} = [
-        "metrics-ingest.${config.privateDomain}"
-        "logs-ingest.${config.privateDomain}"
-      ];
-    };
+    networking.hosts.${config.tailscaleAddresses.osiris.ipv4} = mkIf (!cfg.central) [
+      "metrics-ingest.${config.privateDomain}"
+      "logs-ingest.${config.privateDomain}"
+    ];
 
-    services.journald.upload = {
-      enable = true;
-      # journal-upload keeps the structured journal format; local vlagent
-      # handles disk-backed retries when the central VictoriaLogs is offline.
-      settings.Upload.URL = "http://${loopback}:9429/insert/journald";
+    services.journald = {
+      upload = {
+        enable = true;
+        # journal-upload keeps the structured journal format; local vlagent
+        # handles disk-backed retries when the central VictoriaLogs is offline.
+        settings.Upload.URL = "http://${loopback}:9429/insert/journald";
+      };
+
+      extraConfig = /* ini */ ''
+        SystemMaxUse=2G
+        SystemKeepFree=2G
+      '';
     };
 
     services.vlagent = {
@@ -516,18 +523,14 @@ in
     # module; the queue must survive a restart and stay bounded.
     systemd.services.vmagent.serviceConfig.CacheDirectory = "vmagent";
 
-    services.journald.extraConfig = /* ini */ ''
-      SystemMaxUse=2G
-      SystemKeepFree=2G
-    '';
-
-    sops.secrets = mkIf (!cfg.central) {
-      observability_metrics_ingest_password = {
+    sops.secrets = {
+      observability_metrics_ingest_password = mkIf (!cfg.central) {
         key = "observability/metrics_ingest_password";
         restartUnits = singleton "vmagent.service";
         sopsFile = "${inputs.my-secrets}/common/secrets.yaml";
       };
-      observability_logs_ingest_password = {
+
+      observability_logs_ingest_password = mkIf (!cfg.central) {
         key = "observability/logs_ingest_password";
         restartUnits = singleton "vlagent.service";
         sopsFile = "${inputs.my-secrets}/common/secrets.yaml";

@@ -21,8 +21,8 @@
     ./tlp.nix
   ];
 
-  services.accounts-daemon.enable = true;
   services = {
+    accounts-daemon.enable = true;
     printing.enable = true;
     upower.enable = true;
   };

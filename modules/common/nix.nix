@@ -14,6 +14,7 @@ let
   cutExe = getExe' pkgs.coreutils "cut";
   gawkExe = getExe pkgs.gawk;
   gitExe = getExe config.programs.git.package;
+  hostExe = getExe' pkgs.host "host";
   lessExe = getExe pkgs.less;
   nixExe = getExe config.nix.package;
   nixStoreExe = getExe' config.nix.package "nix-store";
@@ -144,7 +145,7 @@ in
 
   # Allow nixos-upgrade to restart on failure (e.g. when laptop wakes up before network connection is set)
   systemd.services.nixos-upgrade = {
-    preStart = "${pkgs.host}/bin/host ${config.publicDomain}"; # Check network connectivity
+    preStart = "${hostExe} ${config.publicDomain}"; # Check network connectivity
     serviceConfig = {
       Restart = "on-failure";
       RestartSec = "120";

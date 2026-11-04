@@ -47,6 +47,9 @@ in
 
     # The default also includes --firmware-builtin
     loader.limine.secureBoot.autoEnrollKeys.extraArgs = singleton "--microsoft";
+
+    # Capture firmware-enforced CPU limits during the first minute after boot.
+    kernelModules = singleton "msr";
   };
 
   # FIRMWARE AND TOOLS
@@ -54,10 +57,10 @@ in
     cpu.intel.updateMicrocode = true;
 
     enableRedistributableFirmware = true;
-  };
 
-  # Capture firmware-enforced CPU limits during the first minute after boot.
-  boot.kernelModules = singleton "msr";
+    # iio-hyprland consumes accelerometer orientation from iio-sensor-proxy.
+    sensor.iio.enable = true;
+  };
 
   systemd.services.surface-power-diagnostics = {
     description = "Record Surface CPU power and throttle state after boot";
@@ -150,9 +153,6 @@ in
       };
     }
   );
-
-  # iio-hyprland consumes accelerometer orientation from iio-sensor-proxy.
-  hardware.sensor.iio.enable = true;
 
   environment.systemPackages = with pkgs; [
     surface-control

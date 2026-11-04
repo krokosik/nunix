@@ -12,13 +12,13 @@ in
 
   # Allow fwupd-refresh to restart if failed (after resume)
   systemd.services.fwupd-refresh = {
-    serviceConfig = mkIf (!config.isVirtual) {
-      Restart = "on-failure";
-      RestartSec = "20";
+    serviceConfig = {
+      Restart = mkIf (!config.isVirtual) "on-failure";
+      RestartSec = mkIf (!config.isVirtual) "20";
     };
-    unitConfig = mkIf (!config.isVirtual) {
-      StartLimitIntervalSec = 100;
-      StartLimitBurst = 5;
+    unitConfig = {
+      StartLimitIntervalSec = mkIf (!config.isVirtual) 100;
+      StartLimitBurst = mkIf (!config.isVirtual) 5;
     };
   };
 }

@@ -23,24 +23,30 @@ in
 
   # Add the report generated with `run0 nix run github:numtide/nixos-facter --
   # --output hosts/horus/facter.json` before evaluating or deploying this host.
-  hardware.facter.reportPath = ./facter.json;
+  hardware = {
+    # Add the report generated with `run0 nix run github:numtide/nixos-facter --
+    # --output hosts/horus/facter.json` before evaluating or deploying this host.
+    facter.reportPath = ./facter.json;
+
+    nvidia.branch = "latest";
+  };
 
   role = "desktop";
 
-  boot.initrd = {
-    # we don't use nvidia gpu module, as we let nixos-hardware set the configs
-    kernelModules = [
-      "nvidia"
-      "nvidia_modeset"
-      "nvidia_uvm"
-      "nvidia_drm"
-    ];
+  boot = {
+    initrd = {
+      # we don't use nvidia gpu module, as we let nixos-hardware set the configs
+      kernelModules = [
+        "nvidia"
+        "nvidia_modeset"
+        "nvidia_uvm"
+        "nvidia_drm"
+      ];
+    };
+
+    # support building for anubis
+    binfmt.emulatedSystems = singleton "aarch64-linux";
   };
-
-  hardware.nvidia.branch = "latest";
-
-  # support building for anubis
-  boot.binfmt.emulatedSystems = singleton "aarch64-linux";
 
   home-manager.users.${config.username} = {
     imports = [

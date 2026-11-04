@@ -1,6 +1,12 @@
 { lib, pkgs, ... }:
 let
   inherit (lib.lists) singleton;
+  inherit (lib.meta) getExe getExe';
+  catExe = getExe' pkgs.coreutils "cat";
+  fbsetExe = getExe pkgs.fbset;
+  grepExe = getExe pkgs.gnugrep;
+  seqExe = getExe' pkgs.coreutils "seq";
+  sleepExe = getExe' pkgs.coreutils "sleep";
 in
 {
   systemd.services.fbcon-native-resolution = {
@@ -18,16 +24,16 @@ in
     script = /* bash */ ''
       # fb0 starts as simpledrm, then AMD, and eventually becomes NVIDIA.
       # Do not touch it until NVIDIA owns it.
-      for _ in $(${pkgs.coreutils}/bin/seq 1 100); do
-        if [ "$(${pkgs.coreutils}/bin/cat /sys/class/graphics/fb0/name 2>/dev/null || true)" = \
+      for _ in $(${seqExe} 1 100); do
+        if [ "$(${catExe} /sys/class/graphics/fb0/name 2>/dev/null || true)" = \
              "nvidia-drmdrmfb" ]; then
           break
         fi
-        ${pkgs.coreutils}/bin/sleep 0.05
+        ${sleepExe} 0.05
       done
 
       # If NVIDIA never became fb0, leave everything alone.
-      if [ "$(${pkgs.coreutils}/bin/cat /sys/class/graphics/fb0/name 2>/dev/null || true)" != \
+      if [ "$(${catExe} /sys/class/graphics/fb0/name 2>/dev/null || true)" != \
            "nvidia-drmdrmfb" ]; then
         exit 0
       fi
@@ -39,16 +45,16 @@ in
       for connector in /sys/class/drm/card*-*; do
         [ -r "$connector/status" ] || continue
         [ -r "$connector/modes" ] || continue
-        [ "$(${pkgs.coreutils}/bin/cat "$connector/status")" = "connected" ] || continue
+        [ "$(${catExe} "$connector/status")" = "connected" ] || continue
 
-        if ${pkgs.gnugrep}/bin/grep -qx '3840x2160' "$connector/modes"; then
+        if ${grepExe} --quiet --line-regexp '3840x2160' "$connector/modes"; then
           has_4k=true
           break
         fi
       done
 
       if "$has_4k"; then
-        ${pkgs.fbset}/bin/fbset \
+        ${fbsetExe} \
           -fb /dev/fb0 \
           -xres 3840 \
           -yres 2160 \

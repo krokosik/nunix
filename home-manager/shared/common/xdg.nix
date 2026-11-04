@@ -15,22 +15,25 @@ let
   videoPlayer = "vlc.desktop";
 in
 {
-  xdg.enable = true;
-
   home.packages = with pkgs; [
     xdg-utils
     xdg-terminal-exec
   ];
-  xdg.mime.enable = true;
-
-  xdg."terminal-exec".enable = true;
-  xdg."terminal-exec".settings.default = [
-    "ghostty.desktop"
-    "alacritty.desktop"
-    "kitty.desktop"
-  ];
 
   xdg = {
+    enable = true;
+
+    mime.enable = true;
+
+    "terminal-exec" = {
+      enable = true;
+      settings.default = [
+        "ghostty.desktop"
+        "alacritty.desktop"
+        "kitty.desktop"
+      ];
+    };
+
     mimeApps = {
       enable = true;
       defaultApplications = {

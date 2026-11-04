@@ -7,6 +7,7 @@ let
   inherit (lib.lists) singleton;
   inherit (lib.meta) getExe';
   inherit (lib.modules) mkForce;
+  printfExe = getExe' pkgs.coreutils "printf";
 in
 {
   # LIMINE CONFIGURATION WITH PLYMOUTH
@@ -55,7 +56,7 @@ in
       serviceConfig = {
         Type = "oneshot";
         # \033[2J clears the screen, \033[3J clears the scrollback, \033[H moves cursor to 0,0
-        ExecStart = "${pkgs.coreutils}/bin/printf '\\033[2J\\033[3J\\033[H'";
+        ExecStart = "${printfExe} '\\033[2J\\033[3J\\033[H'";
         StandardOutput = "tty";
         TTYPath = "/dev/tty1";
       };

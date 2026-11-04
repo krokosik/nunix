@@ -118,7 +118,7 @@ in
             sendAnonymousUsage = false;
           };
 
-          # 2. Entrypoints & Proxy Protocol
+          # 2. ENTRYPOINTS & PROXY PROTOCOL
           entryPoints = {
             web = {
               address = ":80";

@@ -6,10 +6,10 @@
     # nix-ld includes a strong sane-default as well
     # in addition to these
     libraries = with pkgs; [
-      # Some binary Python extensions / ctypes users
+      # SOME BINARY PYTHON EXTENSIONS / CTYPES USERS
       libffi
 
-      # --- Qt / PyQt runtime dependencies ---
+      # --- QT / PYQT RUNTIME DEPENDENCIES ---
       glib
       dbus
 
@@ -19,10 +19,10 @@
       libglvnd
       libxkbcommon
 
-      # Wayland platform plugin
+      # WAYLAND PLATFORM PLUGIN
       wayland
 
-      # X11 / XCB platform plugin and fallback
+      # X11 / XCB PLATFORM PLUGIN AND FALLBACK
       libx11
       libxext
       libxi

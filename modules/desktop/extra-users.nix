@@ -62,7 +62,7 @@ let
       "/home/${config.username}/.config" \
       "/home/${config.username}/.config/hypr"
 
-    ${concatMapStringsSep "\n" (file: ''
+    ${concatMapStringsSep "\n" (file: /* bash */ ''
       copy_if_missing \
         "${dmsHyprlandConfig}/${file}" \
         "/home/${config.username}/.config/hypr/dms/${file}" \
@@ -82,7 +82,7 @@ let
       "/home/${username}/.config" \
       "/home/${username}/.config/hypr"
 
-    ${concatMapStringsSep "\n" (file: ''
+    ${concatMapStringsSep "\n" (file: /* bash */ ''
       copy_if_missing \
         "/home/${config.username}/.config/${file}" \
         "/home/${username}/.config/${file}" \

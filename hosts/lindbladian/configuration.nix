@@ -23,22 +23,28 @@ in
     ../../modules/mathematica.nix
   ];
 
-  # Generated on lindbladian with `run0 nix run github:numtide/nixos-facter`.
-  hardware.facter.reportPath = ./facter.json;
-
   role = "desktop";
+
   extraUsers = singleton "lab";
 
   desktop.sambaMounts.allUsers = true;
 
-  boot.initrd.kernelModules = [
-    "nvidia"
-    "nvidia_modeset"
-    "nvidia_uvm"
-    "nvidia_drm"
-  ];
+  boot = {
+    initrd.kernelModules = [
+      "nvidia"
+      "nvidia_modeset"
+      "nvidia_uvm"
+      "nvidia_drm"
+    ];
+
+    # support building for anubis
+    binfmt.emulatedSystems = singleton "aarch64-linux";
+  };
 
   hardware = {
+    # Generated on lindbladian with `run0 nix run github:numtide/nixos-facter`.
+    facter.reportPath = ./facter.json;
+
     graphics = {
       enable = true;
       enable32Bit = true;
@@ -55,9 +61,6 @@ in
 
   username = "wkrokosz";
 
-  # support building for anubis
-  boot.binfmt.emulatedSystems = singleton "aarch64-linux";
-
   home-manager.users.${config.username} = {
     imports = [
       ../../home-manager/private/desktop
@@ -67,10 +70,12 @@ in
     ];
   };
 
-  services.sunshine.enable = true;
+  services = {
+    sunshine.enable = true;
 
-  # COMPUTER USE ACCESSIBILITY
-  services.gnome.at-spi2-core.enable = true;
+    # COMPUTER USE ACCESSIBILITY
+    gnome.at-spi2-core.enable = true;
+  };
 
   system.stateVersion = "26.05";
 }
