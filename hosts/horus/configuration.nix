@@ -53,6 +53,9 @@ in
     imports = [
       ../../home-manager/private/desktop
       ./apps
+      ../../home-manager/rea.nix
+      ../../home-manager/computer-use.nix
+      ../../home-manager/agent-workspace.nix
     ];
   };
 
