@@ -1,7 +1,7 @@
 { config, lib, ... }:
 let
   inherit (lib.lists) singleton;
-  inherit (lib.strings) stringAfter;
+  inherit (lib) stringAfter;
   name = "psitransfer";
   containerUser = config.username; # UID/GID 1000 on osiris
   containerUnit = "${config.virtualisation.oci-containers.backend}-${name}.service";
