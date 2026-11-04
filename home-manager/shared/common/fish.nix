@@ -7,21 +7,16 @@
 let
   inherit (lib.lists) singleton;
   inherit (lib.meta) getExe getExe';
-  inherit (lib.strings) optionalString;
-  isServer = osConfig.role == "server";
   batExe = getExe pkgs.bat;
   dirExe = getExe' pkgs.coreutils "dir";
-  dockerExe = getExe pkgs.docker;
   ezaExe = getExe pkgs.eza;
   egrepExe = getExe' pkgs.gnugrep "egrep";
   fgrepExe = getExe' pkgs.gnugrep "fgrep";
   fzfExe = getExe pkgs.fzf;
-  gitExe = getExe osConfig.programs.git.package;
   grepExe = getExe pkgs.gnugrep;
   hwinfoExe = getExe pkgs.hwinfo;
   journalctlExe = getExe' osConfig.systemd.package "journalctl";
   ncExe = getExe pkgs.netcat;
-  nhExe = getExe osConfig.programs.nh.package;
   run0Exe = getExe' osConfig.systemd.package "run0";
   vdirExe = getExe' pkgs.coreutils "vdir";
 in
@@ -48,10 +43,10 @@ in
         # `systemctl` resolves to the fish wrapper function defined below.
         sc = "systemctl";
         scu = "systemctl --user";
-        jr = "${journalctlExe} --no-pager";
-        jru = "${journalctlExe} --user --no-pager";
-        nl = "${gitExe} -C $NH_FLAKE pull";
-        nos = "${nhExe} os switch";
+        jr = "journalctl --no-pager";
+        jru = "journalctl --user --no-pager";
+        nl = "git -C $NH_FLAKE pull";
+        nos = "nh os switch";
       };
       shellAliases = {
         ls = "${ezaExe} --all --long --color=always --group-directories-first --icons";
@@ -69,8 +64,8 @@ in
         fgrep = "${fgrepExe} --color=auto";
         egrep = "${egrepExe} --color=auto";
         hw = "${hwinfoExe} --short";
-        d = dockerExe;
-        dc = "${dockerExe} compose";
+        d = "docker";
+        dc = "docker compose";
         smbup = "${run0Exe} systemctl start smb";
         smbdown = "${run0Exe} systemctl stop smb";
         please = run0Exe;
@@ -209,46 +204,42 @@ in
           description = "Evaluate a Home Manager configuration option";
         };
       };
-      interactiveShellInit =
-        /* fish */ ''
-          set --global --export MANROFFOPT -c
-          set --global --export MANPAGER "sh -c 'col --no-backspaces --spaces | bat --language man --plain'"
+      interactiveShellInit = /* fish */ ''
+        set --global --export MANROFFOPT -c
+        set --global --export MANPAGER "sh -c 'col --no-backspaces --spaces | bat --language man --plain'"
 
-          if test -f ~/.fish_profile
-              source ~/.fish_profile
-          end
+        if test -f ~/.fish_profile
+            source ~/.fish_profile
+        end
 
-          if test -d ~/.cargo/bin
-              if not contains -- ~/.cargo/bin $PATH
-                  set --prepend PATH ~/.cargo/bin
-              end
-          end
+        if test -d ~/.cargo/bin
+            if not contains -- ~/.cargo/bin $PATH
+                set --prepend PATH ~/.cargo/bin
+            end
+        end
 
-          if test -d ~/Applications/depot_tools
-              if not contains -- ~/Applications/depot_tools $PATH
-                  set --prepend PATH ~/Applications/depot_tools
-              end
-          end
+        if test -d ~/Applications/depot_tools
+            if not contains -- ~/Applications/depot_tools $PATH
+                set --prepend PATH ~/Applications/depot_tools
+            end
+        end
 
-          if test -f ~/expost-esp.sh
-              . ~/expost-esp.sh
-          end
+        if test -f ~/expost-esp.sh
+            . ~/expost-esp.sh
+        end
 
-          if [ "$fish_key_bindings" = fish_vi_key_bindings ]
-              bind --mode insert ! __history_previous_command
-              bind --mode insert '$' __history_previous_command_arguments
-          else
-              bind ! __history_previous_command
-              bind '$' __history_previous_command_arguments
-          end
+        if [ "$fish_key_bindings" = fish_vi_key_bindings ]
+            bind --mode insert ! __history_previous_command
+            bind --mode insert '$' __history_previous_command_arguments
+        else
+            bind ! __history_previous_command
+            bind '$' __history_previous_command_arguments
+        end
 
-          if command --search zoxide >/dev/null
-              alias cd="zd"
-          end
-        ''
-        + optionalString isServer /* fish */ ''
-          set --global --export DOCKER_PATH $HOME/krokosik-web-services
-        '';
+        if command --search zoxide >/dev/null
+            alias cd="zd"
+        end
+      '';
     };
 
     zoxide = {

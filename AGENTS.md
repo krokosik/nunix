@@ -135,9 +135,10 @@ Read by other modules — set per-host in `hosts/<name>/configuration.nix`:
 - Always `let inherit (lib.<path>) foo;` with full paths like `lib.lists.head`,
   never `inherit (lib) foo` unless `foo` has no submodule path.
 - Use inherit for all lib functions, i.e. prefer `singleton` over `lib.lists.singleton`
-- Always prefer `${somePkg}` over bare command names or full calls in shell
-  aliases. Use `package = getExe somePkg` in let blocks. Remember
-  that for explicit binary names, there is getExe'.
+- Always prefer `${somePkg}` over bare command names or full calls in scripts and shell aliases. Remember
+  that for explicit binary names, there is getExe'. Use `package = getExe somePkg` in let blocks.
+  Note that for shell abreviations, it is expected for the program to be in path, so always use
+  bare command names.
 - For attr enumeration, such as specifying dependencies or vscode extensions, remember
   to use `with`.
 - Leave an empty line between unrelated options.
