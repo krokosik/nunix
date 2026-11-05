@@ -8,7 +8,7 @@
     localsend
     mattermost-desktop
     moonlight-qt
-    obsidian
+    unstable.obsidian
     pinta
     proton-vpn
     zotero
