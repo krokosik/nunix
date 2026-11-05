@@ -201,8 +201,8 @@ in
               };
               limit = {
                 context = 131072;
-                input = 126976;
-                output = 4096;
+                input = 122880;
+                output = 8192;
               };
             };
           };
