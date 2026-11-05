@@ -140,7 +140,7 @@ in
       skills = skillsPath;
       enableMcpIntegration = config.programs.mcp.enable;
       settings = {
-        autoupdate = false;
+        update = "disable";
 
         # Preserve V1's prompt before accessing paths outside the project.
         permissions = singleton {
@@ -149,37 +149,60 @@ in
           effect = "ask";
         };
 
-        small_model = "openai/gpt-6-luna";
-        enabled_providers = [
-          # "opencode-go"
-          "openai"
-          "macierz"
-        ];
+        # Provider allowlist, the V2 form of enabled_providers: deny all,
+        # then allow. The opencode provider needs no credential here; it is
+        # connected with /connect and its free models show up automatically.
+        policies =
+          singleton {
+            action = "provider.use";
+            resource = "*";
+            effect = "deny";
+          }
+          ++
+            map
+              (resource: {
+                action = "provider.use";
+                inherit resource;
+                effect = "allow";
+              })
+              [
+                # "opencode-go"
+                "opencode"
+                "openai"
+                "macierz"
+              ];
+
         compaction = {
           auto = true;
-          buffer = 13672;
+          buffer = "20%";
         };
+
         share = "disabled";
-        provider = {
-          "opencode-go".options.apiKey = "{file:${config.sops.secrets.opencode_go_api_key.path}}";
-          openai.options.apiKey = "{file:${config.sops.secrets.openai_api_key.path}}";
+
+        providers = {
+          "opencode-go".settings.apiKey = "{file:${config.sops.secrets.opencode_go_api_key.path}}";
+
+          openai.settings.apiKey = "{file:${config.sops.secrets.openai_api_key.path}}";
+
           macierz = {
-            npm = "@ai-sdk/openai-compatible";
             name = "Macierz";
-            options = {
+            package = "aisdk:@ai-sdk/openai-compatible";
+            settings = {
               baseURL = macierzBaseUrl;
               apiKey = "{file:${config.sops.secrets.strata_api_key.path}}";
             };
-            models = {
-              "qwen3.8-flash-next" = {
-                name = "Qwen3.8-Flash-Next";
-                "tool_call" = true;
-                reasoning = true;
-                limit = {
-                  context = 131072;
-                  input = 126976;
-                  output = 4096;
+            models."qwen3.8-flash-next" = {
+              name = "Qwen3.8-Flash-Next";
+              capabilities = {
+                tools = true;
+                reasoning = {
+                  supported = true;
                 };
+              };
+              limit = {
+                context = 131072;
+                input = 126976;
+                output = 4096;
               };
             };
           };
