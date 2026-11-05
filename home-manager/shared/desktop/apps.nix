@@ -8,9 +8,14 @@
     localsend
     mattermost-desktop
     moonlight-qt
-    unstable.obsidian
     pinta
     proton-vpn
     zotero
   ];
+
+  programs.obsidian = {
+    enable = true;
+    package = pkgs.unstable.obsidian;
+    cli.enable = true;
+  };
 }
