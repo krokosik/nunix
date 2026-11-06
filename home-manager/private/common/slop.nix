@@ -59,6 +59,8 @@ in
       enableMcpIntegration = config.programs.mcp.enable;
       settings = {
         approvals_reviewer = "auto_review";
+        model = "qwen3.8-flash-next";
+        model_provider = "macierz";
 
         projects =
           genAttrs
