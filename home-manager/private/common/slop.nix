@@ -12,7 +12,8 @@ let
   inherit (lib.meta) getExe getExe';
   inherit (lib.modules) mkForce;
   inherit (lib.strings) escapeShellArg removePrefix;
-  rtk = pkgs.unstable.rtk;
+  agentPackages = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+  inherit (agentPackages) rtk;
   skillsPath = "${../../../ai/skills}";
   codexConfigDir = config.home.sessionVariables.CODEX_HOME;
   codexConfigPath = "${codexConfigDir}/config.toml";
@@ -29,7 +30,12 @@ in
   };
 
   home = {
-    packages = singleton rtk;
+    packages =
+      (with agentPackages; [
+        rtk
+        skills
+      ])
+      ++ singleton pkgs.bubblewrap;
 
     # Codex records project trust in config.toml, so install a writable copy.
     file = {
@@ -52,15 +58,41 @@ in
   programs = {
     ripgrep.enable = true;
 
+    claude-code = {
+      enable = true;
+      package = agentPackages.claude-code;
+      configDir = "${config.xdg.configHome}/claude";
+      context = /* markdown */ ''
+        @${rtk}/libexec/rtk/hooks/rtk-awareness.md
+      '';
+      skills = skillsPath;
+      enableMcpIntegration = config.programs.mcp.enable;
+      settings = {
+        env = {
+          DISABLE_AUTOUPDATER = "1";
+          DISABLE_TELEMETRY = "1";
+          DISABLE_ERROR_REPORTING = "1";
+        };
+
+        permissions.defaultMode = "default";
+
+        hooks.PreToolUse = singleton {
+          matcher = "Bash";
+          hooks = singleton {
+            type = "command";
+            command = "${rtk}/libexec/rtk/hooks/claude/rtk-rewrite.sh";
+          };
+        };
+      };
+    };
+
     codex = {
       enable = true;
-      package = inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      package = agentPackages.codex;
       skills = skillsPath;
       enableMcpIntegration = config.programs.mcp.enable;
       settings = {
         approvals_reviewer = "auto_review";
-        model = "qwen3.8-flash-next";
-        model_provider = "macierz";
 
         projects =
           genAttrs
@@ -81,8 +113,6 @@ in
 
         hooks.state."${codexConfigDir}/hooks.json:pre_tool_use:0:0".trusted_hash =
           "sha256:be6c6fcb2978ea348dd05101efed0afcf00efcbfb5d7e78949108142c875a77d";
-
-        model_context_window = 131072;
 
         model_providers.macierz = {
           name = "Macierz";
@@ -122,16 +152,14 @@ in
     opencode = {
       enable = true;
       # Home Manager and shell aliases expect the unversioned executable.
-      package =
-        (inputs.opencode-flake.packages.${pkgs.stdenv.hostPlatform.system}.opencode2-avx).overrideAttrs
-          (old: {
-            postInstall = (old.postInstall or "") + /* bash */ ''
-              ln --symbolic opencode2 "$out/bin/opencode"
-            '';
-            meta = old.meta // {
-              mainProgram = "opencode";
-            };
-          });
+      package = agentPackages.opencode2.overrideAttrs (old: {
+        postInstall = (old.postInstall or "") + /* bash */ ''
+          ln --symbolic opencode2 "$out/bin/opencode"
+        '';
+        meta = old.meta // {
+          mainProgram = "opencode";
+        };
+      });
       extraPackages = with pkgs; [
         uv
         nixd

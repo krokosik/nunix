@@ -171,8 +171,12 @@ in
     ];
   };
 
-  home.file."${config.home.sessionVariables.CODEX_HOME}/skills/agent-workspace-linux".source =
-    "${agentWorkspace}/share/agent-workspace-linux/skill";
+  home.file = {
+    "${config.home.sessionVariables.CODEX_HOME}/skills/agent-workspace-linux".source =
+      "${agentWorkspace}/share/agent-workspace-linux/skill";
+    "${config.programs.claude-code.configDir}/skills/agent-workspace-linux".source =
+      "${agentWorkspace}/share/agent-workspace-linux/skill";
+  };
   xdg.configFile."opencode/skills/agent-workspace-linux".source =
     "${agentWorkspace}/share/agent-workspace-linux/skill";
 }

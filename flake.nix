@@ -10,8 +10,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    opencode-flake.url = "github:noblepayne/opencode-flake";
-    codex-cli-nix.url = "github:sadjow/codex-cli-nix";
+    llm-agents = {
+      url = "github:numtide/llm-agents.nix";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     rea-flake.url = "github:Fractal-Tess/rea-flake";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";

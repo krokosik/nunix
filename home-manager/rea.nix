@@ -50,6 +50,9 @@ in
     };
   };
 
-  home.file."${codexConfigDir}/skills/reverse-engineer-anything".source = reaSkill;
+  home.file = {
+    "${codexConfigDir}/skills/reverse-engineer-anything".source = reaSkill;
+    "${config.programs.claude-code.configDir}/skills/reverse-engineer-anything".source = reaSkill;
+  };
   xdg.configFile."opencode/skills/reverse-engineer-anything".source = reaSkill;
 }

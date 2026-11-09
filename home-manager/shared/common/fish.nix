@@ -72,7 +72,7 @@ in
         tb = "${ncExe} termbin.com 9999";
         jctl = "${journalctlExe} --priority=3 --catalog --boot";
         ff = "${fzfExe} --preview '${batExe} --style=numbers --color=always {}'";
-        # opencode is installed via the private opencode-flake override; the
+        # opencode is installed via the private llm-agents override; the
         # alias intentionally keeps the PATH lookup.
         c = "opencode";
         # In-file fish function defined below.
