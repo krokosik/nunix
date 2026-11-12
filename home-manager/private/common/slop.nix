@@ -76,6 +76,12 @@ in
       skills = skillsPath;
       enableMcpIntegration = config.programs.mcp.enable;
       settings = {
+        attribution = {
+          commit = "";
+          pr = "";
+          sessionUrl = false;
+        };
+
         env = {
           DISABLE_AUTOUPDATER = "1";
           DISABLE_TELEMETRY = "1";
