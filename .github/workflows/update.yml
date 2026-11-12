@@ -2,7 +2,7 @@ name: Update dependencies
 
 on:
   schedule:
-    - cron: "0 2 * * *"
+    - cron: "0 2 * * 0"
   workflow_dispatch:
 
 permissions:
@@ -22,8 +22,16 @@ jobs:
             experimental-features = nix-command flakes
 
       - name: Update dependencies
-        run: nix flake update
-
+        run: |
+          inputs_json=$(nix eval --json --file flake.nix \
+            --apply 'flake: builtins.attrNames (builtins.removeAttrs flake.inputs [ "my-secrets" ])')
+          mapfile -t inputs < <(jq --raw-output '.[]' <<< "$inputs_json")
+          # With no arguments, Nix would update every input, including my-secrets.
+          if (( ${#inputs[@]} == 0 )); then
+            echo "No public inputs to update."
+            exit 0
+          fi
+          nix flake update "${inputs[@]}"
 
       - name: Commit lockfile update
         run: |
@@ -35,5 +43,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add flake.lock
-          git commit -m "Update stable nixpkgs"
+          git commit -m "update: Update flake inputs"
           git push
