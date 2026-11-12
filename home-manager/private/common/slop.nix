@@ -21,6 +21,7 @@ let
   codexConfigSource = config.home.file.${codexConfigTarget}.source;
   codexConfigStateTarget = removePrefix config.home.homeDirectory "${config.xdg.stateHome}/nunix/codex-config.toml";
   macierzBaseUrl = "http://macierz.qot.internal:11789/v1";
+  claudeConfigDir = "${config.xdg.configHome}/claude";
 in
 {
   sops.secrets = {
@@ -28,7 +29,6 @@ in
     openai_api_key.sopsFile = "${inputs.my-secrets}/common/home.yaml";
     strata_api_key.sopsFile = "${inputs.my-secrets}/common/home.yaml";
   };
-
   home = {
     packages =
       (with agentPackages; [
@@ -47,12 +47,23 @@ in
           run ${getExe' pkgs.coreutils "install"} --mode=0600 ${escapeShellArg codexConfigSource} ${escapeShellArg codexConfigPath}
         '';
       };
+
+      # Symlink the RTK instructions directly instead of `@`-importing a
+      # store path, which Claude Code treats as an external import.
+      "${claudeConfigDir}/CLAUDE.md".source = "${rtk}/libexec/rtk/hooks/rtk-awareness.md";
     };
 
-    activation.rtkInit = entryAfter (singleton "writeBoundary") /* bash */ ''
-      ${getExe rtk} init --global --opencode
-      CODEX_HOME=${escapeShellArg codexConfigDir} ${getExe rtk} init --global --codex
-    '';
+    activation = {
+      # `rtk init --opencode` also installs the Claude Code integration, which
+      # is managed declaratively below; send that part to a throwaway dir so
+      # it neither pollutes ~/.claude nor clobbers the managed config.
+      rtkInit = entryAfter (singleton "writeBoundary") /* bash */ ''
+        rtkClaudeScratch=$(${getExe' pkgs.coreutils "mktemp"} --directory)
+        CLAUDE_CONFIG_DIR="$rtkClaudeScratch" ${getExe rtk} init --global --opencode
+        ${getExe' pkgs.coreutils "rm"} --recursive --force "$rtkClaudeScratch"
+        CODEX_HOME=${escapeShellArg codexConfigDir} ${getExe rtk} init --global --codex
+      '';
+    };
   };
 
   programs = {
@@ -61,10 +72,7 @@ in
     claude-code = {
       enable = true;
       package = agentPackages.claude-code;
-      configDir = "${config.xdg.configHome}/claude";
-      context = /* markdown */ ''
-        @${rtk}/libexec/rtk/hooks/rtk-awareness.md
-      '';
+      configDir = claudeConfigDir;
       skills = skillsPath;
       enableMcpIntegration = config.programs.mcp.enable;
       settings = {

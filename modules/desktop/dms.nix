@@ -1,4 +1,9 @@
-{ inputs, pkgs, ... }:
+{
+  config,
+  inputs,
+  pkgs,
+  ...
+}:
 
 {
   imports = [
@@ -26,6 +31,13 @@
       aiOverviewControl.enable = true;
     };
 
+  };
+
+  systemd.user.services.dms.environment = {
+    inherit (config.home-manager.users.${config.username}.home.sessionVariables)
+      CODEX_HOME
+      CLAUDE_CONFIG_DIR
+      ;
   };
 
   # PLUGIN DEPS

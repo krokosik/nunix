@@ -128,6 +128,9 @@ in
       # OPENAI CODEX
       CODEX_HOME = "${configHome}/codex";
 
+      # CLAUDE CODE
+      CLAUDE_CONFIG_DIR = "${configHome}/claude";
+
       # WINE
       WINEPREFIX = "${dataHome}/wineprefixes/default";
     };
