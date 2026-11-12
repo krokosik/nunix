@@ -155,9 +155,9 @@ let
 
   pythonExtensions = with vscode-extensions; [
     charliermarsh.ruff
+    astral-sh.ty
     ms-python.python
     ms-python.debugpy
-    detachhead.basedpyright
     njpwerner.autodocstring
     ms-toolsai.jupyter
     ms-toolsai.vscode-jupyter-slideshow
