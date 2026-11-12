@@ -8,13 +8,18 @@ let
   inherit (lib.lists) singleton;
   inherit (lib.meta) getExe';
   inherit (config.home-manager.users.${config.username}.home) sessionVariables;
-  mathematica = pkgs.unstable.mathematica.override {
+  # Use stable dependencies to reduce installer repackaging after unstable updates.
+  mathematica = pkgs.stable.mathematica.override {
+    versionInfo = {
+      version = "15.0.1";
+      lang = "en";
+    };
     source = pkgs.requireFile {
-      name = "Wolfram_${pkgs.unstable.mathematica.version}.sh";
+      name = "Wolfram_15.0.1.sh";
       sha256 = "sha256:0nq3mb0s797xdf4yi8fca3yybw1p1cxp9pqh9zjfzg627h60588l";
       message = /* bash */ ''
         Add the Mathematica installer to the Nix store:
-        nix store add --mode nar --name Wolfram_${pkgs.unstable.mathematica.version}.sh ~/downloads/Wolfram_${pkgs.unstable.mathematica.version}.sh
+        nix store add --mode nar --name Wolfram_15.0.1.sh ~/downloads/Wolfram_15.0.1.sh
       '';
       hashMode = "recursive";
     };

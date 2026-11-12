@@ -10,10 +10,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    llm-agents = {
-      url = "github:numtide/llm-agents.nix";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
+    # Keep upstream's nixpkgs pin so packages match Numtide's binary cache.
+    llm-agents.url = "github:numtide/llm-agents.nix";
     rea-flake.url = "github:Fractal-Tess/rea-flake";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";

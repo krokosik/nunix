@@ -39,11 +39,13 @@ in
 
       # add extra cache substituters for binary cache access (e.g. cachix)
       substituters = [
+        "https://cache.numtide.com"
         "https://nix-community.cachix.org/"
         "https://niks3.${config.privateDomain}"
       ];
       # add extra cache signing keys for binary cache access (e.g. cachix)
       trusted-public-keys = [
+        "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
         "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
         "niks3-1:hTt2LKPgxvboGPM2ZNZYLhuAkUQVJz9SmxDZh6vWqtw="
       ];
