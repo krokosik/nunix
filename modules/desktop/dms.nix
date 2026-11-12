@@ -23,6 +23,7 @@
       voxTypeOsd.enable = true;
       calculator.enable = true;
       emojiLauncher.enable = true;
+      aiOverviewControl.enable = true;
     };
 
   };
