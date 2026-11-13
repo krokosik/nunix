@@ -176,6 +176,8 @@ let
   latexExtensions = with vscode-extensions; [
     james-yu.latex-workshop
     tecosaur.latex-utilities
+    myriad-dreamin.tinymist
+    tomoki1207.pdf
   ];
 
   profiles = {
