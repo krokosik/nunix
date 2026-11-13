@@ -49,10 +49,10 @@ in
         nos = "nh os switch";
       };
       shellAliases = {
-        ls = "${ezaExe} --all --long --color=always --group-directories-first --icons";
-        la = "${ezaExe} --all --color=always --group-directories-first --icons";
-        ll = "${ezaExe} --long --color=always --group-directories-first --icons";
-        lt = "${ezaExe} --all --tree --color=always --group-directories-first --icons";
+        ls = "${ezaExe} --all --long --color=always --group-directories-first --icons auto";
+        la = "${ezaExe} --all --color=always --group-directories-first --icons auto";
+        ll = "${ezaExe} --long --color=always --group-directories-first --icons auto";
+        lt = "${ezaExe} --all --tree --color=always --group-directories-first --icons auto";
         ".." = "cd ..";
         "..." = "cd ../..";
         "...." = "cd ../../..";
