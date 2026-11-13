@@ -9,6 +9,8 @@ let
   inherit (lib.meta) getExe';
   inherit (config.home-manager.users.${config.username}.home) sessionVariables;
   # Use stable dependencies to reduce installer repackaging after unstable updates.
+  # TODO: Separate installation from runtime patching to reuse the large payload.
+  # A native-app adaptation of ../nix-overlayfs could share it across runtime updates.
   mathematica = pkgs.stable.mathematica.override {
     versionInfo = {
       version = "15.0.1";
