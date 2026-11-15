@@ -63,6 +63,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    dsearch = {
+      url = "github:duxlabs-dev/dux-search/v2.1.1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     dank-greeter = {
       url = "github:duxlabs-dev/dux-greeter/v2.1.2";
       inputs.nixpkgs.follows = "nixpkgs";

@@ -296,6 +296,27 @@
         "type": "github"
       }
     },
+    "dsearch": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793984466,
+        "narHash": "sha256-/zbzTMX+LW5tUin2BkflxNx80I/dXywlr0b0j5xEtMk=",
+        "owner": "duxlabs-dev",
+        "repo": "dux-search",
+        "rev": "c6be234e35eec5f9c867fd7588ce793e1d5dc03b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "duxlabs-dev",
+        "ref": "v2.1.1",
+        "repo": "dux-search",
+        "type": "github"
+      }
+    },
     "dux-files": {
       "inputs": {
         "dank-qml-common": "dank-qml-common_3",
@@ -1218,6 +1239,7 @@
         "disko": "disko",
         "dms": "dms",
         "dms-plugin-registry": "dms-plugin-registry",
+        "dsearch": "dsearch",
         "dux-files": "dux-files",
         "home-manager": "home-manager",
         "inventor": "inventor",
