@@ -47,7 +47,7 @@ let
   ) 10;
 in
 {
-  wayland.windowManager.hyprland.settings.bind = [
+  desktop.hyprland.bindings = [
     # APPLICATION LAUNCHERS
     (mkExecBind "SUPER + SHIFT + F" "uwsm-app -- ${xdgOpen} ${config.home.homeDirectory}"
       "File manager"

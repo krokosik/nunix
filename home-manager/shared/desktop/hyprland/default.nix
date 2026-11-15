@@ -6,6 +6,7 @@ in
   imports = [
     ./animations.nix
     ./bindings.nix
+    ./dms-integration.nix
     ./input.nix
     ./looknfeel.nix
     ./shell-utils.nix
@@ -25,7 +26,7 @@ in
     settings.config.master.mfact = 0.5;
 
     extraConfig = mkAfter /* lua */ ''
-      -- DMS-generated files intentionally load last and remain dynamic.
+      -- DMS stays dynamic; declarative bindings and rules take precedence.
       require("dms.colors")
       require("dms.outputs")
       require("dms.layout")
@@ -33,6 +34,8 @@ in
       require("dms.binds")
       require("dms.binds-user")
       require("dms.windowrules")
+      require("nunix.binds")
+      require("nunix.windowrules")
     '';
   };
 }

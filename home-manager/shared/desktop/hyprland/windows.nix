@@ -1,5 +1,5 @@
 {
-  wayland.windowManager.hyprland.settings.window_rule = [
+  desktop.hyprland.windowRules = [
     {
       match.class = ".*";
       suppress_event = "maximize";
