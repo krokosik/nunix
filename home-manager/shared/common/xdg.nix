@@ -13,6 +13,7 @@ let
   mailClient = "HEY.desktop";
   vectorEditor = "org.inkscape.Inkscape.desktop";
   videoPlayer = "vlc.desktop";
+  torrent = "qbittorrent.desktop";
 in
 {
   home.packages = with pkgs; [
@@ -99,6 +100,9 @@ in
         "x-scheme-handler/mailto" = mailClient;
 
         "x-scheme-handler/adskidmgr" = "autodesk-inventor.desktop";
+
+        "application/x-bittorrent" = torrent;
+        "x-scheme-handler/magnet" = torrent;
       };
       associations.added = {
         "x-scheme-handler/http" = singleton browser;
@@ -118,8 +122,8 @@ in
       download = "${config.home.homeDirectory}/downloads";
       music = "${config.home.homeDirectory}/media/music";
       pictures = "${config.home.homeDirectory}/media/pictures";
-      publicShare = "${config.home.homeDirectory}";
       videos = "${config.home.homeDirectory}/media/videos";
+      publicShare = "${config.home.homeDirectory}";
       templates = "${config.home.homeDirectory}";
       projects = "${config.home.homeDirectory}/work";
       extraConfig = {

@@ -4,5 +4,6 @@
     gparted
     kdePackages.kdenlive
     vlc
+    qbittorrent
   ];
 }
