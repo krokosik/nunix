@@ -11,6 +11,7 @@ in
 {
   imports = [
     ./build-host.nix
+    ./dsearch.nix
     ./whisper-server.nix
     ./disko-config.nix
     ./windows.nix

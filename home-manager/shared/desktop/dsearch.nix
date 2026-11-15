@@ -23,6 +23,9 @@ in
         extract_exif = false;
         merge_default_exclude_dirs = true;
         exclude_dirs = [
+          # Share aliases are indexed separately on hosts with permanent access.
+          "data"
+          "assets"
           "secrets"
           "nunix-secrets"
           "result"
