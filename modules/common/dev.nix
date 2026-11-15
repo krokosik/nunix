@@ -36,6 +36,9 @@
       libxcb-keysyms
       libxcb-render-util
       libxcb-wm
+
+      # gpu
+      vulkan-loader
     ];
   };
 
