@@ -2,7 +2,6 @@
   imports = [
     ./base.nix
     ./btop.nix
-    ./dev.nix
     ./fastfetch.nix
     ./fish.nix
     ./git.nix
