@@ -45,6 +45,17 @@ let
       id = "e3hvo-mqvsu";
     };
 
+    dfiles = {
+      path = "${config.xdg.configHome}/dfiles";
+      inherit devices;
+      id = "dfiles-ui-settings";
+
+      ignorePatterns = [
+        "!/ui-settings.json"
+        "*"
+      ];
+    };
+
     zotmoov = {
       path = "${config.xdg.userDirs.documents}/zotmoov";
       inherit devices;
