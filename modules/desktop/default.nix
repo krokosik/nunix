@@ -6,7 +6,7 @@
     ./desktop-packages.nix
     ./dms.nix
     ./extra-users.nix
-    ./file-manager.nix
+    ./file-manager
     ./flatpak.nix
     ./hyprland.nix
     ./greeter.nix

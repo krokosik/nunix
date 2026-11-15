@@ -8,7 +8,6 @@ let
   inherit (lib.lists) singleton;
   browser = "zen-beta.desktop";
   editor = "codium.desktop";
-  fileManager = "org.gnome.Nautilus.desktop";
   imageViewer = "imv.desktop";
   mailClient = "HEY.desktop";
   vectorEditor = "org.inkscape.Inkscape.desktop";
@@ -96,7 +95,6 @@ in
         "application/json" = editor;
 
         "image/svg+xml" = vectorEditor;
-        "inode/directory" = fileManager;
         "x-scheme-handler/mailto" = mailClient;
 
         "x-scheme-handler/adskidmgr" = "autodesk-inventor.desktop";

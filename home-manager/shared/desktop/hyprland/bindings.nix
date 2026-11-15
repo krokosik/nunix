@@ -1,10 +1,16 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   inherit (lib.generators) mkLuaInline toLua;
   inherit (lib.lists) genList;
-  inherit (lib.meta) getExe;
+  inherit (lib.meta) getExe getExe';
 
   voxtype = getExe config.programs.voxtype.package;
+  xdgOpen = getExe' pkgs.xdg-utils "xdg-open";
   browser = "zen-beta";
   editor = "codium";
   lua = mkLuaInline;
@@ -43,7 +49,9 @@ in
 {
   wayland.windowManager.hyprland.settings.bind = [
     # APPLICATION LAUNCHERS
-    (mkExecBind "SUPER + SHIFT + F" "uwsm-app -- nautilus --new-window" "File manager")
+    (mkExecBind "SUPER + SHIFT + F" "uwsm-app -- ${xdgOpen} ${config.home.homeDirectory}"
+      "File manager"
+    )
     (mkExecBind "SUPER + SHIFT + B" "uwsm-app -- ${browser}" "Browser")
     (mkExecBind "SUPER + SHIFT + ALT + B" "setsid uwsm-app -- ${browser} --private-window"
       "Browser (private)"

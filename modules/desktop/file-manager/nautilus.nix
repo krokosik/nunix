@@ -15,4 +15,6 @@ in
     nautilus
     sushi
   ];
+
+  desktop.fileManager.desktopFile = "org.gnome.Nautilus.desktop";
 }
