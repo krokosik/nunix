@@ -164,6 +164,13 @@
         tag = "+floating-window";
       }
       {
+        match = {
+          class = "^dev\\.duxlabs\\.files$";
+          title = "^(Open|Save|Select|Upload|Export|Import).*";
+        };
+        tag = "+floating-window";
+      }
+      {
         match.class = "(zenity|kdialog)";
         float = true;
       }
