@@ -47,10 +47,11 @@ shading, noise reduction, or sharpening pipeline.
   flips from linux-surface PR
   [2227](https://github.com/linux-surface/linux-surface/pull/2227), patch commit
   `3d5baacb32a70d974c5617b7f11911bdc5bb1565`.
+  The DMI iteration hunk is omitted because Linux 7.3.1 already includes it.
 - `ov13858-surface-black-level.patch`: zero BLC target from the pinned camera
   repository, matching its generated rear tuning.
 
-These apply after nixos-hardware's Surface patches for Linux 6.19.8. Recheck
+These apply after nixos-hardware's Surface patches for Linux 7.3.1. Recheck
 them when updating the Surface kernel; remove local changes once upstream
 includes equivalent fixes. The old driver's missing OV13858 selection API is
 not repaired here; libcamera currently supplies fallback crop properties.

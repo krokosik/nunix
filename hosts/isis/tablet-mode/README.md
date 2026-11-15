@@ -39,10 +39,12 @@ reload serializes them. No tablet-specific state or plugin is installed in the
 Syncthing folders. An upstream QML change that invalidates the patch fails the
 build rather than silently omitting an override.
 
-The DMS 2.0 patch projects each saved dock into a runtime configuration before
+The DMS 2.1.2 patch projects each saved dock into a runtime configuration before
 screen assignment, rendering and space reservation. Settings editors and IPC
 setters still access the original dock configurations. Island rendering and the
 shared layout resolver use the same runtime sizing, including frame bars.
+Bar padding follows upstream's `barInnerPaddingDefault` when a bar has no
+explicit padding; tablet mode applies its minimum on top of that default.
 
 ## KEYBOARD AND FUTURE GESTURES
 

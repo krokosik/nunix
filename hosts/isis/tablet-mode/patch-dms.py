@@ -29,7 +29,8 @@ replace("Common/SettingsData.qml", "    property var dockConfigs: Spec.SPEC.dock
     }
 
     function effectiveBarPadding(padding) {
-        return tabletModeEnabled ? Math.max(20, padding ?? 2) : (padding ?? 2);
+        const savedPadding = padding ?? barInnerPaddingDefault;
+        return tabletModeEnabled ? Math.max(20, savedPadding) : savedPadding;
     }
 
     function effectiveIslandSettings(bc) {
@@ -72,7 +73,7 @@ replace("Modules/Dock/Dock.qml", "SettingsData.getDockConfig(identity[1])", "Set
 for function in ["barWidgetThickness", "barThickness"]:
     old = f"    function {function}(innerPadding, dpr) {{"
     replace("Common/Theme.qml", old, old + "\n        innerPadding = SettingsData.effectiveBarPadding(innerPadding);")
-replace("Modules/DBar/DBarContent.qml", "readonly property real innerPadding: barConfig?.innerPadding ?? 2", "readonly property real innerPadding: SettingsData.effectiveBarPadding(barConfig?.innerPadding)")
+replace("Modules/DBar/DBarContent.qml", "readonly property real innerPadding: barConfig?.innerPadding ?? SettingsData.barInnerPaddingDefault", "readonly property real innerPadding: SettingsData.effectiveBarPadding(barConfig?.innerPadding)")
 for path, count in {
     "Common/ShellLayout.qml": 1,
     "Modules/DBar/DBarBody.qml": 1,

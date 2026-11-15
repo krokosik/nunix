@@ -1,3 +1,6 @@
+Local adaptation: Linux 7.3.1 already walks all matching sensor DMI entries;
+omit that upstreamed hunk while retaining the rear sensor quirks and flips.
+
 From 3d5baacb32a70d974c5617b7f11911bdc5bb1565 Mon Sep 17 00:00:00 2001
 From: Eva Dixon <eva@dixon.solutions>
 Date: Wed, 12 Aug 2026 08:20:00 +1000
@@ -30,8 +33,8 @@ Patchset: cameras
 Signed-off-by: Eva Dixon <eva@dixon.solutions>
 ---
  drivers/media/i2c/ov13858.c          | 119 ++++++++++++++++++++++++++-
- drivers/media/pci/intel/ipu-bridge.c |  26 +++++-
- 2 files changed, 141 insertions(+), 4 deletions(-)
+ drivers/media/pci/intel/ipu-bridge.c |  14 ++++
+ 2 files changed, 132 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/media/i2c/ov13858.c b/drivers/media/i2c/ov13858.c
 index 85cd0c9..67532c5 100644
@@ -258,25 +261,6 @@ index 3418ff4..b8018e5 100644
  	{} /* Terminating entry */
  };
  
-@@ -291,9 +305,15 @@ static u32 ipu_bridge_parse_rotation(struct acpi_device *adev,
- {
- 	const struct dmi_system_id *dmi_id;
- 
--	dmi_id = dmi_first_match(upside_down_sensor_dmi_ids);
--	if (dmi_id && acpi_dev_hid_match(adev, dmi_id->driver_data))
--		return 180;
-+	/*
-+	 * A machine can have more than one upside-down sensor (the Surface
-+	 * Pro 8 and 9 have both the front and the rear one), so keep walking
-+	 * the table past the first DMI match until the HID matches too.
-+	 */
-+	for (dmi_id = dmi_first_match(upside_down_sensor_dmi_ids); dmi_id;
-+	     dmi_id = dmi_first_match(dmi_id + 1))
-+		if (acpi_dev_hid_match(adev, dmi_id->driver_data))
-+			return 180;
- 
- 	switch (ssdb->degree) {
- 	case IPU_SENSOR_ROTATION_NORMAL:
 -- 
 2.53.0
 
