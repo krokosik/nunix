@@ -19,6 +19,7 @@
     ./tailscale.nix
     ./theme.nix
     ./tlp.nix
+    ./wine.nix
   ];
 
   services = {

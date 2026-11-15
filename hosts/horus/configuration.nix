@@ -9,6 +9,7 @@ let
 in
 {
   imports = [
+    ./udmabuf.nix
     ./disko-config.nix
     ./windows.nix
     ./fbcon-fix.nix

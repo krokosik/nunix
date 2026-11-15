@@ -6,9 +6,10 @@
 }:
 let
   inherit (lib.lists) singleton;
-  inherit (lib.meta) getExe;
+  inherit (lib.meta) getExe getExe';
   inherit (lib.strings) escapeShellArg;
   wgetExe = getExe pkgs.wget;
+  mkdirExe = getExe' pkgs.coreutils "mkdir";
 
   inherit (config.xdg)
     cacheHome
@@ -135,10 +136,16 @@ in
       WINEPREFIX = "${dataHome}/wineprefixes/default";
     };
 
-    activation.createPsqlHistoryDirectory = config.lib.dag.entryAfter (singleton "writeBoundary") /* bash */ ''
-      run mkdir --parents ${escapeShellArg "${stateHome}/psql"}
-      run chmod 0700 ${escapeShellArg "${stateHome}/psql"}
-    '';
+    activation = {
+      createPsqlHistoryDirectory = config.lib.dag.entryAfter (singleton "writeBoundary") /* bash */ ''
+        run mkdir --parents ${escapeShellArg "${stateHome}/psql"}
+        run chmod 0700 ${escapeShellArg "${stateHome}/psql"}
+      '';
+
+      createWinePrefixDirectory = config.lib.dag.entryAfter (singleton "writeBoundary") /* bash */ ''
+        run ${mkdirExe} --parents --mode=0700 ${escapeShellArg "${dataHome}/wineprefixes"}
+      '';
+    };
 
     sessionPath = [
       "${dataHome}/cargo/bin"
