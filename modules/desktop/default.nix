@@ -3,6 +3,7 @@
     ./aptos.nix
     ../common
     ./bluetooth.nix
+    ./brightness.nix
     ./desktop-packages.nix
     ./dms.nix
     ./extra-users.nix
