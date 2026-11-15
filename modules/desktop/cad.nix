@@ -17,7 +17,7 @@ in
   imports = singleton inputs.inventor.nixosModules.default;
 
   programs.autodesk-inventor = {
-    enable = true;
+    enable = false;
     versions = singleton "2027";
   };
 
