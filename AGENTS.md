@@ -36,12 +36,13 @@ skill for the full migration runbook and postgres patterns.
 
 ## Critical gotchas
 
-- **Secrets are a separate local repo.** `my-secrets` flake input points at
-  `~/work/nunix-secrets` (`flake = false`, path input) — the flake does not
-  build without it. Per-host `secrets.yaml` + `common/` + `server/`.
-- **`flake.lock` must be bumped when `my-secrets` changes.** Run
-  `nix flake update my-secrets` after editing secrets, then
-  commit `flake.lock`. Otherwise the nix build uses a stale secrets hash
+- **Secrets are a separate private repo.** `my-secrets` flake input is
+  `git+ssh://git@github-secrets/krokosik/nunix-secrets.git` (`flake = false`),
+  checked out locally at `~/work/nunix-secrets` — the flake does not build
+  without it. Per-host `secrets.yaml` + `common/` + `server/`.
+- **`flake.lock` must be bumped when `my-secrets` changes.** Edit in
+  `~/work/nunix-secrets`, commit and push to `main`, then run
+  `nix flake update my-secrets` and commit `flake.lock`. Otherwise the nix build uses a stale secrets hash
   and sops-install-secrets fails with "key not found".
 - **Hardware is via nixos-facter, not `hardware-configuration.nix`.** Each
   host sets `hardware.facter.reportPath = ./facter.json` (committed).
