@@ -642,20 +642,22 @@
     "inventor": {
       "inputs": {
         "nix-overlayfs": "nix-overlayfs",
-        "nixpkgs": "nixpkgs_4"
+        "nixpkgs": "nixpkgs_4",
+        "winum": "winum",
+        "winum-candidates": "winum-candidates"
       },
       "locked": {
-        "lastModified": 1792670834,
-        "narHash": "sha256-wn2oqKmb5CfLD3vx5qXPZWmZQ0yh/O8PyshccpKZL+Q=",
-        "owner": "Harvi654",
-        "repo": "Autodesk-Inventor-for-Linux",
-        "rev": "bd22120e2abd3ac9b1695fef11ab8330eae9f08e",
+        "lastModified": 1794830701,
+        "narHash": "sha256-WXgl75R+G5s2QsLIGGw7Jldy6gtET4wsEbANI8GoW/0=",
+        "owner": "krokosik",
+        "repo": "Autodesk-Inventor-for-Nix",
+        "rev": "052769baf0d4e6b41bb378e64c2f00ae88c4f60d",
         "type": "github"
       },
       "original": {
-        "owner": "Harvi654",
-        "ref": "v0.3.1",
-        "repo": "Autodesk-Inventor-for-Linux",
+        "owner": "krokosik",
+        "repo": "Autodesk-Inventor-for-Nix",
+        "rev": "052769baf0d4e6b41bb378e64c2f00ae88c4f60d",
         "type": "github"
       }
     },
@@ -841,17 +843,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1792510549,
-        "narHash": "sha256-duAogbTfRSP9B5tW+CM8RKFEJi/BXlrej1BcHltmZoo=",
+        "lastModified": 1794830249,
+        "narHash": "sha256-lce5BrZVJN3wjjxcGiSobquoe05+UUca7GSUA+9GlaI=",
         "owner": "krokosik",
         "repo": "nix-overlayfs",
-        "rev": "8bf7c5cfa2541cf1478b87b519dcdc4c75831407",
+        "rev": "0a00454d018d61414c97fb8042cc86a925932067",
         "type": "github"
       },
       "original": {
         "owner": "krokosik",
         "repo": "nix-overlayfs",
-        "rev": "8bf7c5cfa2541cf1478b87b519dcdc4c75831407",
+        "rev": "0a00454d018d61414c97fb8042cc86a925932067",
         "type": "github"
       }
     },
@@ -1574,6 +1576,40 @@
       "original": {
         "owner": "Maroka-chan",
         "repo": "VPN-Confinement",
+        "type": "github"
+      }
+    },
+    "winum": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794502212,
+        "narHash": "sha256-K+jZcFdBcg4gqD38Y/d6o5NSv/6afSwgqi7goSt/4hU=",
+        "owner": "Harvi654",
+        "repo": "winum",
+        "rev": "98a6feda5d55b739c9fdfd363b060631a2004447",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Harvi654",
+        "repo": "winum",
+        "rev": "98a6feda5d55b739c9fdfd363b060631a2004447",
+        "type": "github"
+      }
+    },
+    "winum-candidates": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794502212,
+        "narHash": "sha256-K+jZcFdBcg4gqD38Y/d6o5NSv/6afSwgqi7goSt/4hU=",
+        "owner": "Harvi654",
+        "repo": "winum",
+        "rev": "98a6feda5d55b739c9fdfd363b060631a2004447",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Harvi654",
+        "repo": "winum",
+        "rev": "98a6feda5d55b739c9fdfd363b060631a2004447",
         "type": "github"
       }
     },

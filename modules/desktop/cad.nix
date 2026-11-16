@@ -17,8 +17,10 @@ in
   imports = singleton inputs.inventor.nixosModules.default;
 
   programs.autodesk-inventor = {
-    enable = false;
-    versions = singleton "2027";
+    enable = true;
+    versions = [
+      "2027"
+    ];
   };
 
   services.flatpak = {

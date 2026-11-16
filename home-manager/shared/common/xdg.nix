@@ -97,8 +97,6 @@ in
         "image/svg+xml" = vectorEditor;
         "x-scheme-handler/mailto" = mailClient;
 
-        "x-scheme-handler/adskidmgr" = "autodesk-inventor.desktop";
-
         "application/x-bittorrent" = torrent;
         "x-scheme-handler/magnet" = torrent;
       };
