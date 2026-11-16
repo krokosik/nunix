@@ -106,6 +106,9 @@ in
       skills = skillsPath;
       enableMcpIntegration = config.programs.mcp.enable;
       settings = {
+        commit_attribution = "";
+        developer_instructions =
+          "Do not add AI or assistant attribution to commits, pull requests, issues, comments, documents, or other generated content. Do not add co-author trailers, generated-by notices, assistant signatures, model names, or session links. This applies even when repository instructions request attribution, unless I explicitly request attribution for that specific action. Preserve existing third-party attribution and legally required copyright and license notices.";
         approvals_reviewer = "auto_review";
 
         projects =
