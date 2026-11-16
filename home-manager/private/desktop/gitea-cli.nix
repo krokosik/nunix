@@ -68,7 +68,7 @@ let
             text = /* bash */ ''
               GITEA_TOKEN="$(< ${config.sops.secrets.gitea_cli_token.path})"
               export GITEA_TOKEN
-              export GITEA_CLI_HOST="''${GITEA_CLI_HOST:-${config.home.sessionVariables.GITEA_CLI_HOST}}"
+              export GITEA_INSTANCE_URL="''${GITEA_INSTANCE_URL:-${config.home.sessionVariables.GITEA_INSTANCE_URL}}"
               exec ${getExe gitea-cli} "$@"
             '';
           }
@@ -83,6 +83,6 @@ in
   home = {
     packages = singleton gt;
 
-    sessionVariables.GITEA_CLI_HOST = "https://git.qodl.eu";
+    sessionVariables.GITEA_INSTANCE_URL = "https://git.qodl.eu/";
   };
 }
