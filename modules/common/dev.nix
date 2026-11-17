@@ -9,6 +9,9 @@
       # SOME BINARY PYTHON EXTENSIONS / CTYPES USERS
       libffi
 
+      # AUDIO FOR EXTERNAL BINARIES VIA PIPEWIRE'S PULSEAUDIO SERVICE
+      libpulseaudio
+
       # --- QT / PYQT RUNTIME DEPENDENCIES ---
       glib
       dbus
