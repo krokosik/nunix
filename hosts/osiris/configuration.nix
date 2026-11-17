@@ -13,6 +13,7 @@ in
     ./disko-config.nix
     ./storage-disko.nix
     ./services
+    ./tv
     ../../modules/server
     ../../modules/server/ingress-wireguard.nix
     ../../modules/boot.nix
