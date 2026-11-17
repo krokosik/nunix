@@ -216,7 +216,7 @@ in
         {
           alert = "HttpProbeFailed";
           expr = ''probe_success{job=~"probe/.*"} == 0'';
-          for = "2m";
+          for = "5m";
           labels.severity = "critical";
           annotations = {
             summary = "{{ $labels.check }} IPv{{ $labels.ip_family }} check for {{ $labels.service }} failed from {{ $labels.vantage }}";
