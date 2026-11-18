@@ -30,3 +30,19 @@ Before deployment, build on lindbladian and confirm deployment separately.
 After deployment test server health with the display manager stopped and HDMI
 unplugged. Test hardware decoding, audio, navigation and client exit behavior.
 Immich, HDR, surround passthrough and unattended headless Horus capture are deferred.
+
+Moonlight TV is packaged from a pinned upstream revision, including submodules.
+Its Linux frontend launches the bundled Moonlight Embedded backend. Moonlight Qt
+remains installed as a fallback; verify decoding performance and remote controls
+in a real streaming session before choosing a preferred client.
+
+The TV uses its own Stylix module with Tokyo Night Dark, the desktop wallpaper,
+Bibata cursor, and Inter font. Only the TV user's KDE and GTK targets are enabled;
+the desktop Flatpak overrides and additional font collections are not imported.
+Moonlight TV's SDL/LVGL interface has its own theme rather than using KDE colours.
+
+The experimental backend explicitly enables X11/EGL/VA-API dependencies and uses
+FFmpeg's default VA-API device selection instead of hardcoding X display `:0`.
+Hardware decoding runs through XWayland, not native Wayland. Confirm that the
+streaming session selects VA-API and monitor Intel video-engine activity before
+relying on it; successful compilation does not establish runtime support.
