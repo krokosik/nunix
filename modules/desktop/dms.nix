@@ -29,9 +29,12 @@
       calculator.enable = true;
       emojiLauncher.enable = true;
       aiOverviewControl.enable = true;
+      dankKDEConnect.enable = true;
     };
 
   };
+
+  home-manager.sharedModules = [ { services.kdeconnect.enable = true; } ];
 
   systemd.user.services.dms.environment = {
     inherit (config.home-manager.users.${config.username}.home.sessionVariables)
