@@ -1,17 +1,12 @@
-# 1. Download the ZIP: https://www.microsoft.com/en-us/download/details.aspx?id=106087&utm_source=chatgpt.com
-# 2. Rename to remove illegal characters: mv ~/downloads/"Microsoft Aptos Fonts.zip" ~/downloads/aptos.zip
-# 2. Get its hash: nix hash file ~/downloads/aptos.zip
-# 3. Add the file to the store: nix-store --add-fixed sha256 ~/downloads/aptos.zip
-
 { lib, pkgs, ... }:
 
 let
   inherit (lib.lists) singleton;
   aptosFonts = pkgs.callPackage (
     {
-      lib,
       stdenvNoCC,
       fetchurl,
+      installFonts,
       unzip,
     }:
     stdenvNoCC.mkDerivation {
@@ -23,18 +18,16 @@ let
         hash = "sha256-ZSj9Eg5xmp+YXpQhTspoh9FlO4hFaRankqYwsC6VsCU=";
       };
 
-      nativeBuildInputs = singleton unzip;
+      nativeBuildInputs = [
+        unzip
+        installFonts
+      ];
 
-      dontUnpack = true;
+      sourceRoot = ".";
 
-      installPhase = /* bash */ ''
-        mkdir --parents $out/share/fonts/truetype
-        unzip "$src" -d unpacked
-
-        find unpacked \
-          -type f \
-          -iname '*.ttf' \
-          -exec install --directory --mode=444 {} --target-directory=$out/share/fonts/truetype \;
+      dontInstallFonts = true;
+      postInstall = /* bash */ ''
+        installFont ttf "$out/share/fonts/truetype"
       '';
     }
   ) { };
