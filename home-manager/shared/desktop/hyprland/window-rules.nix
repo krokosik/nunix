@@ -277,15 +277,17 @@
       float = true;
     }
 
-    # Tile the main Inventor window.
+    # Warnings can share the product name but omit the release year.
     {
       name = "inventor-main";
       match = {
         class = "^inventor\\.exe$";
-        title = "^Autodesk Inventor.*";
+        initial_title = "^Autodesk Inventor Professional 20[0-9]{2}( - .*)?$";
       };
 
       tile = true;
+      # XWayland activation can warp the pointer to the window center.
+      focus_on_activate = false;
     }
 
     # ZOTERO POPUP AND MAIN-WINDOW TAGGING
