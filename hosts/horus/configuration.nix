@@ -39,25 +39,11 @@ in
     guid = "45957aa2-3cc2-4a30-a487-ecb327670d56";
   };
 
-  services.sunshine = {
-    enable = true;
-    openFirewall = lib.modules.mkForce false;
-  };
+  services = {
+    sunshine.enable = true;
 
-  networking.nftables.tables.sunshine = {
-    family = "inet";
-    content = /* nft */ ''
-      chain input {
-      type filter hook input priority -10; policy accept;
-      iifname "lo" accept
-      iifname "tailscale0" ip saddr ${config.tailscaleAddresses.osiris.ipv4} tcp dport { 47984, 47989, 48010 } accept
-      iifname "tailscale0" ip saddr ${config.tailscaleAddresses.osiris.ipv4} udp dport { 47998, 47999, 48000 } accept
-      iifname "tailscale0" ip6 saddr ${config.tailscaleAddresses.osiris.ipv6} tcp dport { 47984, 47989, 48010 } accept
-      iifname "tailscale0" ip6 saddr ${config.tailscaleAddresses.osiris.ipv6} udp dport { 47998, 47999, 48000 } accept
-      tcp dport { 47984, 47989, 47990, 48010 } drop
-      udp dport { 47998, 47999, 48000 } drop
-      }
-    '';
+    # COMPUTER USE ACCESSIBILITY
+    gnome.at-spi2-core.enable = true;
   };
 
   boot = {
