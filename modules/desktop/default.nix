@@ -11,6 +11,7 @@
     ./flatpak.nix
     ./hyprland.nix
     ./greeter.nix
+    ./kdeconnect.nix
     ./network-manager.nix
     ./peripherals.nix
     ./pipewire.nix

@@ -34,8 +34,6 @@
 
   };
 
-  home-manager.sharedModules = [ { services.kdeconnect.enable = true; } ];
-
   systemd.user.services.dms.environment = {
     inherit (config.home-manager.users.${config.username}.home.sessionVariables)
       CODEX_HOME
