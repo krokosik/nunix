@@ -14,7 +14,6 @@ in
     ./dsearch.nix
     ./whisper-server.nix
     ./disko-config.nix
-    ./windows.nix
     inputs.nixos-hardware.nixosModules.common-cpu-intel-cpu-only
     inputs.nixos-hardware.nixosModules.common-gpu-nvidia-nonprime
     inputs.nixos-hardware.nixosModules.common-pc-ssd
@@ -25,6 +24,11 @@ in
   ];
 
   role = "desktop";
+
+  desktop.windows.partition = {
+    device = "/dev/disk/by-uuid/40A886D1A886C53E";
+    guid = "2fa87be4-5c65-11ee-94c6-c44e12b486e6";
+  };
 
   extraUsers = singleton "lab";
 

@@ -11,7 +11,6 @@ in
   imports = [
     ./udmabuf.nix
     ./disko-config.nix
-    ./windows.nix
     ./fbcon-fix.nix
     inputs.nixos-hardware.nixosModules.lenovo-legion-15ach6h-nvidia
     ../../modules/boot-limine.nix
@@ -34,6 +33,11 @@ in
   };
 
   role = "desktop";
+
+  desktop.windows.partition = {
+    device = "/dev/disk/by-uuid/54E87E4BE87E2AFE";
+    guid = "45957aa2-3cc2-4a30-a487-ecb327670d56";
+  };
 
   services.sunshine = {
     enable = true;

@@ -20,6 +20,7 @@
     ./tailscale.nix
     ./theme.nix
     ./tlp.nix
+    ./windows-partition.nix
     ./wine.nix
   ];
 
