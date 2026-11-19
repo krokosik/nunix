@@ -32,5 +32,6 @@ in
     port = 8088;
     public = true;
     chain = [ ];
+    subdomain = "home";
   };
 }
