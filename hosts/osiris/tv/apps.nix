@@ -8,9 +8,6 @@ let
 in
 {
   environment.systemPackages = with tvPkgs; [
-    (callPackage ./moonlight-tv.nix {
-      moonlight-embedded = callPackage ./moonlight-embedded.nix { };
-    })
     moonlight-qt
     jellyfin-desktop
   ];
