@@ -54,7 +54,7 @@ in
     };
   };
 
-  home-manager.users.${config.username} =
+  home-manager.users.${config.nunix.self.user} =
     { config, osConfig, ... }:
     {
       wayland.windowManager.hyprland = {

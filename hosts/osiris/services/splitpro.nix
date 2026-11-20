@@ -8,7 +8,7 @@ let
   name = "splitpro";
   db = config.mkPostgresServices.splitpro.dbName;
   oidc = config.mkAuthentik.oidcApps.splitpro;
-  containerUser = config.username; # UID/GID 1000 on osiris
+  containerUser = config.nunix.self.user; # UID/GID 1000 on osiris
   containerUnit = "${config.virtualisation.oci-containers.backend}-${name}.service";
 in
 {

@@ -24,7 +24,7 @@ in
       # It decrypts only the host's home.yaml and the intentionally shared home file.
       home_manager_age_key = {
         sopsFile = "${inputs.my-secrets}/${config.networking.hostName}/secrets.yaml";
-        owner = config.username;
+        owner = config.nunix.self.user;
         mode = "0400";
       };
 

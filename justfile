@@ -1,5 +1,4 @@
 localhost := `hostname`
-username := env('USER')
 system := env('system', "x86_64-linux")
 
 default:
@@ -13,10 +12,10 @@ default:
 deploy-local:
     nh os switch --elevation-strategy run0 .
 
-# Deploy a remote host using the local flake configuration. If no IP is provided, it will default to using the hostname.
+# Deploy a remote host using the local flake configuration. Without an IP, the generated ssh_config supplies address and user.
 [group("nixos deploy")]    
 deploy-remote host ip="":
-    nh os switch --hostname {{host}} --target-host {{username}}@{{ if ip == "" { host } else { ip } }} --elevation-strategy passwordless .
+    nh os switch --hostname {{host}} --target-host {{ if ip == "" { host } else { "\"$(nix eval --raw .#nixosConfigurations." + host + ".config.nunix.self.user)@" + ip + "\"" } }} --elevation-strategy passwordless .
 
 # Deploy servers with deploy-rs, rolling back on failed units or lost SSH. Run `nix flake check` for pre-deploy checks.
 [group("nixos deploy")]
@@ -30,7 +29,7 @@ reboot-needed *hosts="anubis osiris":
     set -euo pipefail
     for host in {{hosts}}; do
       status=0
-      ssh -o BatchMode=yes "{{username}}@$host" 'for part in kernel initrd kernel-modules; do [ "$(readlink /run/booted-system/$part)" = "$(readlink /run/current-system/$part)" ] || exit 3; done' || status=$?
+      ssh -o BatchMode=yes "$host" 'for part in kernel initrd kernel-modules; do [ "$(readlink /run/booted-system/$part)" = "$(readlink /run/current-system/$part)" ] || exit 3; done' || status=$?
       case "$status" in
         0) printf '%s: up to date\n' "$host" ;;
         3) printf '%s: reboot needed\n' "$host" ;;

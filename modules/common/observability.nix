@@ -487,7 +487,7 @@ in
       ];
     };
 
-    networking.hosts.${config.tailscaleAddresses.osiris.ipv4} = mkIf (!cfg.central) [
+    networking.hosts.${config.nunix.hosts.osiris.tailscale.ipv4} = mkIf (!cfg.central) [
       "metrics-ingest.${config.privateDomain}"
       "logs-ingest.${config.privateDomain}"
     ];

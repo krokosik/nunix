@@ -43,9 +43,9 @@ let
         targetPkgs = deploymentPkgs config.nixpkgs.hostPlatform.system;
       in
       {
-        # MagicDNS name, matching existing known_hosts entries and `just deploy-remote`
+        # Resolved through the generated ssh_config and pinned known_hosts
         hostname = config.networking.hostName;
-        sshUser = config.username;
+        sshUser = config.nunix.self.user;
         profiles.system = {
           user = "root";
           path = targetPkgs.deploy-rs.lib.activate.nixos system;

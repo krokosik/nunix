@@ -10,7 +10,7 @@ let
 in
 {
   mkGarageBucket.livesync = {
-    credentialOwner = config.username;
+    credentialOwner = config.nunix.self.user;
     consumerService = singleton "livesync-garage-bucket.target";
   };
 

@@ -22,7 +22,7 @@ in
     wants = singleton "tailscaled.service";
     after = singleton "tailscaled.service";
     serviceConfig = {
-      ExecStart = "${getExe' whisper "whisper-server"} --model ${model} --host ${config.tailscaleAddresses.lindbladian.ipv4} --port 18080 --language auto";
+      ExecStart = "${getExe' whisper "whisper-server"} --model ${model} --host ${config.nunix.hosts.lindbladian.tailscale.ipv4} --port 18080 --language auto";
       Restart = "on-failure";
       RestartSec = 5;
       DynamicUser = true;
@@ -35,7 +35,7 @@ in
       ProtectHome = true;
       ProtectSystem = "strict";
       IPAddressDeny = "any";
-      IPAddressAllow = "${config.tailscaleAddresses.isis.ipv4}/32";
+      IPAddressAllow = "${config.nunix.hosts.isis.tailscale.ipv4}/32";
       RestrictAddressFamilies = [
         "AF_UNIX"
         "AF_INET"

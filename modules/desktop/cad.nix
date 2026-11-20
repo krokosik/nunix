@@ -25,7 +25,7 @@ in
     ];
   };
 
-  home-manager.users.${config.username}.wayland.windowManager.hyprland.extraConfig = mkAfter /* lua */ ''
+  home-manager.users.${config.nunix.self.user}.wayland.windowManager.hyprland.extraConfig = mkAfter /* lua */ ''
     -- Inventor tool windows can trigger a center warp during various operation like fillet edge selection.
     -- See if hyprland 0.56 and higher help with this
     do

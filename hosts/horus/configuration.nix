@@ -61,7 +61,7 @@ in
     binfmt.emulatedSystems = singleton "aarch64-linux";
   };
 
-  home-manager.users.${config.username} = {
+  home-manager.users.${config.nunix.self.user} = {
     imports = [
       ../../home-manager/private/desktop
       ./apps

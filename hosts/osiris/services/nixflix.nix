@@ -36,7 +36,7 @@ in
     enable = true;
     mediaDir = "/srv/media";
     downloadsDir = "${config.nixflix.mediaDir}/downloads";
-    mediaUsers = singleton config.username;
+    mediaUsers = singleton config.nunix.self.user;
 
     theme = {
       enable = true;
@@ -92,7 +92,7 @@ in
       enable = true;
       apiKey._secret = config.sops.secrets.jellyfin_api_key.path;
       users = {
-        "${config.username}" = {
+        "${config.nunix.self.user}" = {
           mutable = true;
           policy.isAdministrator = true;
           password._secret = config.sops.secrets.jellyfin_admin_password.path;
@@ -244,7 +244,7 @@ in
       serverConfig = {
         LegalNotice.Accepted = true;
         Preferences.WebUI = {
-          Username = config.username;
+          Username = config.nunix.self.user;
           # nix run git+https://codeberg.org/feathecutie/qbittorrent_password -- -p <password>
           Password_PBKDF2 = "@ByteArray(zSiUF/IfzUjMGRs9AoMx7w==:Gmn3y62e6Md7R/Cjn9P5CDiVKBB4YrCXtGa+lHpV8rytNcOn097rUbpMJ32z/LVOdJVBPc233/QztLzY871zfQ==)";
         };
@@ -423,7 +423,7 @@ in
 
           # 2. Authenticate securely: curl reads the password directly from the SOPS file
           ${curlExe} --silent --cookie-jar /tmp/qbit_cookie.txt \
-            --data-urlencode "username=${config.username}" \
+            --data-urlencode "username=${config.nunix.self.user}" \
             --data-urlencode "password@${config.sops.secrets.qbittorrent_password.path}" \
             "$QBIT_URL/api/v2/auth/login"
 

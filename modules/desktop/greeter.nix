@@ -14,7 +14,7 @@ in
   programs.dms-greeter = {
     enable = true;
     compositor.name = "hyprland";
-    configHome = "/home/${config.username}";
+    configHome = "/home/${config.nunix.self.user}";
   };
 
   security.pam.services.greetd = {

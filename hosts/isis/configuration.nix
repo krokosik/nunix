@@ -41,7 +41,7 @@ in
     cores = 2;
   };
 
-  home-manager.users.${config.username} = {
+  home-manager.users.${config.nunix.self.user} = {
     imports = [
       ../../home-manager/private/desktop
       ./voxtype-remote.nix

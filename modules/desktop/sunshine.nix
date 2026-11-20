@@ -13,7 +13,7 @@ in
     settings.capture = "wlr";
   };
 
-  users.users.${config.username}.extraGroups = optionals (config.services.sunshine.enable) (
+  users.users.${config.nunix.self.user}.extraGroups = optionals (config.services.sunshine.enable) (
     singleton "uinput"
   );
 }

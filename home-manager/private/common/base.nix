@@ -1,8 +1,11 @@
 { osConfig, inputs, ... }:
+let
+  user = osConfig.nunix.self.user;
+in
 {
   home = {
-    username = osConfig.username;
-    homeDirectory = "/home/${osConfig.username}";
+    username = user;
+    homeDirectory = "/home/${user}";
   };
 
   sops = {

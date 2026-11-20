@@ -23,7 +23,7 @@ in
   isVirtual = true; # Define if a VPS/VM or container
   latestZFSKernel = true; # Set to use latest available ZFS compatible kernel
 
-  home-manager.users.${config.username} = {
+  home-manager.users.${config.nunix.self.user} = {
     imports = singleton ../../home-manager/shared/common;
   };
 

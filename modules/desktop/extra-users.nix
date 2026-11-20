@@ -52,21 +52,21 @@ let
   initializePrimaryDms = /* bash */ ''
     ${install} \
       --directory \
-      --owner=${config.username} \
-      --group=${config.username} \
+      --owner=${config.nunix.self.user} \
+      --group=${config.nunix.self.user} \
       --mode=0700 \
-      "/home/${config.username}/.config/hypr/dms"
+      "/home/${config.nunix.self.user}/.config/hypr/dms"
 
     # install --directory owns the final directory, but not parents it creates.
-    ${chown} --no-dereference ${config.username}:${config.username} \
-      "/home/${config.username}/.config" \
-      "/home/${config.username}/.config/hypr"
+    ${chown} --no-dereference ${config.nunix.self.user}:${config.nunix.self.user} \
+      "/home/${config.nunix.self.user}/.config" \
+      "/home/${config.nunix.self.user}/.config/hypr"
 
     ${concatMapStringsSep "\n" (file: /* bash */ ''
       copy_if_missing \
         "${dmsHyprlandConfig}/${file}" \
-        "/home/${config.username}/.config/hypr/dms/${file}" \
-        "${config.username}"
+        "/home/${config.nunix.self.user}/.config/hypr/dms/${file}" \
+        "${config.nunix.self.user}"
     '') dmsLuaFiles}
   '';
   seedDmsConfig = username: /* bash */ ''
@@ -84,7 +84,7 @@ let
 
     ${concatMapStringsSep "\n" (file: /* bash */ ''
       copy_if_missing \
-        "/home/${config.username}/.config/${file}" \
+        "/home/${config.nunix.self.user}/.config/${file}" \
         "/home/${username}/.config/${file}" \
         "${username}"
     '') dmsFiles}

@@ -40,9 +40,9 @@ in
         "x-systemd.mount-timeout=10s"
         "credentials=${config.sops.secrets.samba_qot_credentials.path}"
         "vers=3"
-        "uid=${config.username}"
+        "uid=${config.nunix.self.user}"
         "gid=${
-          if config.desktop.sambaMounts.allUsers then "users" else config.users.users.${config.username}.group
+          if config.desktop.sambaMounts.allUsers then "users" else config.users.users.${config.nunix.self.user}.group
         }"
         "forceuid"
         "forcegid"
@@ -55,7 +55,7 @@ in
       ];
     });
 
-    home-manager.users.${config.username} = { config, ... }: {
+    home-manager.users.${config.nunix.self.user} = { config, ... }: {
       home.file = genAttrs [ "data" "assets" ] (share: {
         source = config.lib.file.mkOutOfStoreSymlink "/mnt/${share}";
       });

@@ -101,7 +101,7 @@ in
       ];
     });
     middlewares = {
-      observability-ingest-source.ipAllowList.sourceRange = singleton "${config.tailscaleAddresses.anubis.ipv4}/32";
+      observability-ingest-source.ipAllowList.sourceRange = singleton "${config.nunix.hosts.anubis.tailscale.ipv4}/32";
     }
     // genAttrs names (name: {
       basicAuth.usersFile = "/run/observability-ingest-auth/${name}";

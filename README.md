@@ -19,7 +19,7 @@ To add a host:
 3. Available options:
     a. isVirtual (bool) - set for virtual hardware (VPS or VM). Default false.
     b. latestZFSKernel (bool) - set to use latest available ZFS compatible kernel. Default false.
-    c. username (string) - set to override default username. Default krokosik.
+    c. user - set `user` in its `nunix.hosts` entry (`modules/common/hosts.nix`) to override the default krokosik.
     d. role (desktop|server|shared) - set host role. Shared stands for a workstation also used by others. Default server.
 4. For hosts with automatic secure boot setup (limine), disable secure boot before hand and make sure it is in setup mode if available in UEFI.
 5. You can enroll the cryptroot passphrase in TPM2 via if SB is enabled. You should then switch from autologin to greeter auth (also do cryptswap if used). The id can be read by checking which partition is needed using `lsblk -f` and then comparing to symlinks in `/dev/disk/by-id`:

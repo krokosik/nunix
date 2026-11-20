@@ -11,7 +11,7 @@ let
   # Shared by the builder and the deployer, which reuses the builder's checkout and caches
   hardening = {
     Type = "oneshot";
-    User = config.username;
+    User = config.nunix.self.user;
     UMask = "0077";
     TimeoutStartSec = "infinity";
     NoNewPrivileges = true;
@@ -135,10 +135,7 @@ in
       serviceConfig = hardening // {
         Restart = "on-failure";
         RestartSec = "2min";
-        StateDirectory = [
-          StateDirectory
-          "nunix-deploy-servers"
-        ];
+        inherit StateDirectory;
         StateDirectoryMode = "0700";
         inherit CacheDirectory;
         CacheDirectoryMode = "0700";
@@ -151,10 +148,7 @@ in
         checkout="$XDG_STATE_HOME/checkout"
         printf 'Deploying nunix revision %s\n' "$(git -C "$checkout" rev-parse HEAD)"
 
-        # Overrides the flake's sshOpts; known hosts are pinned on first contact
-        deploy --skip-checks \
-          --ssh-opts "-o BatchMode=yes -o ConnectTimeout=15 -o ServerAliveInterval=15 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/var/lib/nunix-deploy-servers/known_hosts" \
-          --targets "$checkout#anubis" "$checkout#osiris"
+        deploy --skip-checks --targets "$checkout#anubis" "$checkout#osiris"
       '';
     };
   };

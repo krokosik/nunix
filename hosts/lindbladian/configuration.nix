@@ -64,9 +64,7 @@ in
 
   stylix.image = mkForce ../../wallpapers/wallpaper_thz.jpg;
 
-  username = "wkrokosz";
-
-  home-manager.users.${config.username} = {
+  home-manager.users.${config.nunix.self.user} = {
     imports = [
       ../../home-manager/private/desktop
       ../../home-manager/rea.nix

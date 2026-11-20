@@ -130,7 +130,7 @@ in
     }) config.mkContainerServices;
 
     # Backend specific configuration for the container runtime.
-    users.users.${config.username}.extraGroups = singleton "docker";
+    users.users.${config.nunix.self.user}.extraGroups = singleton "docker";
 
     # Containers on the default docker bridge reach host services
     # (postgres, etc.) via host.containers.internal -> 10.88.0.1.

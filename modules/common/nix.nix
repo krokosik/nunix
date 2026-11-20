@@ -9,7 +9,7 @@ let
   inherit (lib.lists) elem singleton;
   inherit (lib.meta) getExe getExe';
   inherit (lib.strings) getName;
-  user = config.username;
+  user = config.nunix.self.user;
   flakePath = "/home/${user}/work/nunix";
   cutExe = getExe' pkgs.coreutils "cut";
   gawkExe = getExe pkgs.gawk;

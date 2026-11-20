@@ -5,12 +5,13 @@
   ...
 }:
 let
+  inherit (lib.attrsets) mapAttrs;
   inherit (lib.generators) toJSON;
   inherit (lib.lists) singleton;
   inherit (lib.meta) getExe getExe';
   inherit (lib.strings) removePrefix;
   tailscaleAddresses = pkgs.writeText "tailscale-addresses.json" (
-    toJSON { } config.tailscaleAddresses
+    toJSON { } (mapAttrs (_: { tailscale, ... }: tailscale) config.nunix.hosts)
   );
   dashboards = pkgs.callPackage (
     { runCommand }:

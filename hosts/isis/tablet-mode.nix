@@ -50,7 +50,7 @@ in
       ''
   ) { };
 
-  home-manager.users.${config.username} =
+  home-manager.users.${config.nunix.self.user} =
     { config, osConfig, ... }:
     let
       watcherConfig = (pkgs.formats.json { }).generate "surface-tablet-mode.json" {

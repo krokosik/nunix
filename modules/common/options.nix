@@ -25,11 +25,6 @@ in
       default = false;
       description = "Use latest available ZFS compatible kernel";
     };
-    username = mkOption {
-      type = str;
-      default = "krokosik";
-      description = "Username for the main user account";
-    };
     extraUsers = mkOption {
       type = listOf (strMatching "^[a-z_][a-z0-9_-]*$");
       default = [ ];

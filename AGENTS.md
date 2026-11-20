@@ -114,7 +114,7 @@ Read by other modules — set per-host in `hosts/<name>/configuration.nix`:
 - `isVirtual` (bool, default false) — VPS/VM/container.
 - `latestZFSKernel` (bool, default false) — pulls `zfs_unstable` + latest
   compatible kernel (see `modules/zfs.nix`).
-- `username` (str, default `krokosik`).
+- `nunix.hosts.<name>` (in `modules/common/hosts.nix`) — shared device inventory: `user` (default `krokosik`), `tailscale.{ipv4,ipv6}`, `hostKey`, `userKey`. Generates ssh_config + known_hosts. Read the current host via read-only `config.nunix.self` (e.g. `config.nunix.self.user`); set values only in the inventory.
 - `role` (enum `desktop|server`, default `server` — least privileged). Gate
   services on this (e.g. `docker.enableOnBoot = config.role == "server"`).
 

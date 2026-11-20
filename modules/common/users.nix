@@ -21,7 +21,7 @@ let
 in
 {
   assertions = singleton {
-    assertion = !(elem config.username config.extraUsers);
+    assertion = !(elem config.nunix.self.user config.extraUsers);
     message = "The primary username must not also appear in extraUsers";
   };
 
@@ -42,9 +42,9 @@ in
         hashedPasswordFile = config.sops.secrets.login_password_hash.path; # Create with: echo -n "password" | mkpasswd -s
       };
 
-      ${config.username} = {
+      ${config.nunix.self.user} = {
         isNormalUser = true;
-        group = config.username;
+        group = config.nunix.self.user;
         extraGroups = [
           "libvirtd"
           "networkmanager"
@@ -69,7 +69,7 @@ in
     });
 
     groups = {
-      ${config.username}.gid = 1000;
+      ${config.nunix.self.user}.gid = 1000;
     }
     // genAttrs config.extraUsers (_: { });
   };

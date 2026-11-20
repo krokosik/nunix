@@ -7,7 +7,7 @@
 let
   inherit (lib.lists) singleton;
   inherit (lib.meta) getExe';
-  inherit (config.home-manager.users.${config.username}.home) sessionVariables;
+  inherit (config.home-manager.users.${config.nunix.self.user}.home) sessionVariables;
   # Use stable dependencies to reduce installer repackaging after unstable updates.
   # TODO: Separate installation from runtime patching to reuse the large payload.
   # A native-app adaptation of ../nix-overlayfs could share it across runtime updates.
@@ -31,7 +31,7 @@ in
   # Keep the installer reachable from system generations after the build finishes.
   system.extraDependencies = singleton mathematica.src;
 
-  home-manager.users.${config.username} = {
+  home-manager.users.${config.nunix.self.user} = {
     home.packages = singleton mathematica;
 
     xdg.dataFile."applications/com.wolfram.Wolfram.15.0.desktop".source = pkgs.callPackage (

@@ -15,7 +15,7 @@ let
       jq
     ];
     runtimeEnv = {
-      VOXTYPE_REMOTE_ENDPOINT = "http://${osConfig.tailscaleAddresses.lindbladian.ipv4}:18080";
+      VOXTYPE_REMOTE_ENDPOINT = "http://${osConfig.nunix.hosts.lindbladian.tailscale.ipv4}:18080";
       VOXTYPE_LOCAL_CLI = getExe' (pkgs.whisper-cpp.override { vulkanSupport = true; }) "whisper-cli";
     };
     text = fileContents ./voxtype-fallback.sh;
