@@ -28,6 +28,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    deploy-rs = {
+      url = "github:serokell/deploy-rs/v1.0.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -140,6 +145,10 @@
         system = "x86_64-linux";
         modules = singleton ./iso/rescue.nix;
       };
+      deployment = import ./deploy.nix {
+        inherit inputs;
+        inherit (self) nixosConfigurations;
+      };
     in
     {
       nixosConfigurations = {
@@ -155,10 +164,15 @@
 
       formatter.x86_64-linux = pkgs.nixfmt;
 
+      inherit (deployment) deploy;
+
+      checks.x86_64-linux = deployment.checks;
+
       packages.x86_64-linux.rescue-iso = rescueIso.config.system.build.isoImage;
 
       devShells.x86_64-linux.default = pkgs.mkShell {
         packages = with pkgs; [
+          deploy-rs
           nixfmt
           nixd
           nh

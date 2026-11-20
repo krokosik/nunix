@@ -18,6 +18,26 @@ deploy-local:
 deploy-remote host ip="":
     nh os switch --hostname {{host}} --target-host {{username}}@{{ if ip == "" { host } else { ip } }} --elevation-strategy passwordless .
 
+# Deploy servers with deploy-rs, rolling back on failed units or lost SSH. Run `nix flake check` for pre-deploy checks.
+[group("nixos deploy")]
+deploy *hosts="anubis osiris":
+    deploy --skip-checks --targets {{ prepend(".#", hosts) }}
+
+# Report which servers booted an older kernel, initrd or modules than their current generation.
+[group("nixos deploy")]
+reboot-needed *hosts="anubis osiris":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    for host in {{hosts}}; do
+      status=0
+      ssh -o BatchMode=yes "{{username}}@$host" 'for part in kernel initrd kernel-modules; do [ "$(readlink /run/booted-system/$part)" = "$(readlink /run/current-system/$part)" ] || exit 3; done' || status=$?
+      case "$status" in
+        0) printf '%s: up to date\n' "$host" ;;
+        3) printf '%s: reboot needed\n' "$host" ;;
+        *) printf '%s: check failed (ssh exit %s)\n' "$host" "$status" >&2 ;;
+      esac
+    done
+
 # Open REPL for a particular host configuration.
 [group("utils")]
 repl host=localhost:

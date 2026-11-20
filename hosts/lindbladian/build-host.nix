@@ -7,6 +7,30 @@
 let
   inherit (lib.lists) singleton;
   inherit (lib.meta) getExe';
+  inherit (config.systemd.services.nunix-build-all.serviceConfig) StateDirectory CacheDirectory;
+  # Shared by the builder and the deployer, which reuses the builder's checkout and caches
+  hardening = {
+    Type = "oneshot";
+    User = config.username;
+    UMask = "0077";
+    TimeoutStartSec = "infinity";
+    NoNewPrivileges = true;
+    PrivateTmp = true;
+    PrivateDevices = true;
+    ProtectHome = "read-only";
+    ProtectSystem = "strict";
+    RestrictAddressFamilies = [
+      "AF_UNIX"
+      "AF_INET"
+      "AF_INET6"
+    ];
+  };
+  environment = {
+    NUNIX_REPOSITORY = "https://github.com/krokosik/nunix";
+    NUNIX_BRANCH = "main";
+    GIT_TERMINAL_PROMPT = "0";
+    GIT_SSH_COMMAND = "${getExe' pkgs.openssh "ssh"} -o BatchMode=yes -o StrictHostKeyChecking=yes";
+  };
 in
 {
   systemd = {
@@ -26,6 +50,7 @@ in
         "network-online.target"
         "generate-user-ssh-key.service"
       ];
+      onSuccess = singleton "nunix-deploy-servers.service";
       path =
         singleton config.nix.package
         ++ (with pkgs; [
@@ -34,31 +59,12 @@ in
           openssh
           coreutils
         ]);
-      environment = {
-        NUNIX_REPOSITORY = "https://github.com/krokosik/nunix";
-        NUNIX_BRANCH = "main";
-        GIT_TERMINAL_PROMPT = "0";
-        GIT_SSH_COMMAND = "${getExe' pkgs.openssh "ssh"} -o BatchMode=yes -o StrictHostKeyChecking=yes";
-      };
-      serviceConfig = {
-        Type = "oneshot";
-        User = config.username;
+      inherit environment;
+      serviceConfig = hardening // {
         StateDirectory = "nunix-build-all";
         StateDirectoryMode = "0700";
         CacheDirectory = "nunix-build-all";
         CacheDirectoryMode = "0700";
-        UMask = "0077";
-        TimeoutStartSec = "infinity";
-        NoNewPrivileges = true;
-        PrivateTmp = true;
-        PrivateDevices = true;
-        ProtectHome = "read-only";
-        ProtectSystem = "strict";
-        RestrictAddressFamilies = [
-          "AF_UNIX"
-          "AF_INET"
-          "AF_INET6"
-        ];
       };
       script = /* bash */ ''
         set -euo pipefail
@@ -80,7 +86,8 @@ in
         hostNames=$(nix eval --json --no-update-lock-file --accept-flake-config \
           "$checkout#nixosConfigurations" --apply 'hosts: builtins.attrNames hosts')
         hostLines=$(jq --exit-status --raw-output '.[]' <<< "$hostNames")
-        mapfile --tab-separated hosts <<< "$hostLines"
+        # Bash builtin; mapfile has no long options
+        mapfile -t hosts <<< "$hostLines"
 
         failed=()
         for host in "''${hosts[@]}"; do
@@ -100,6 +107,54 @@ in
           exit 1
         fi
         printf '\nAll host builds succeeded.\n'
+      '';
+    };
+
+    # Runs only after every host built; deploy-rs rolls back failed activations
+    services.nunix-deploy-servers = {
+      description = "Deploy the freshly built nunix revision to the servers";
+      wants = singleton "network-online.target";
+      after = [
+        "network-online.target"
+        "nunix-build-all.service"
+      ];
+      # Only reachable via a fresh successful build; a manual start could deploy a stale checkout
+      unitConfig.RefuseManualStart = true;
+
+      # 1 attempt + 3 retries; the window outlasts all attempts so the counter never resets mid-run
+      startLimitBurst = 4;
+      startLimitIntervalSec = 6 * 60 * 60;
+      path =
+        singleton config.nix.package
+        ++ (with pkgs; [
+          deploy-rs
+          git
+          openssh
+        ]);
+      inherit environment;
+      serviceConfig = hardening // {
+        Restart = "on-failure";
+        RestartSec = "2min";
+        StateDirectory = [
+          StateDirectory
+          "nunix-deploy-servers"
+        ];
+        StateDirectoryMode = "0700";
+        inherit CacheDirectory;
+        CacheDirectoryMode = "0700";
+      };
+      script = /* bash */ ''
+        set -euo pipefail
+        export XDG_CACHE_HOME=/var/cache/${CacheDirectory}
+        export XDG_STATE_HOME=/var/lib/${StateDirectory}
+        export XDG_DATA_HOME="$XDG_STATE_HOME/data"
+        checkout="$XDG_STATE_HOME/checkout"
+        printf 'Deploying nunix revision %s\n' "$(git -C "$checkout" rev-parse HEAD)"
+
+        # Overrides the flake's sshOpts; known hosts are pinned on first contact
+        deploy --skip-checks \
+          --ssh-opts "-o BatchMode=yes -o ConnectTimeout=15 -o ServerAliveInterval=15 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/var/lib/nunix-deploy-servers/known_hosts" \
+          --targets "$checkout#anubis" "$checkout#osiris"
       '';
     };
   };
