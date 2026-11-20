@@ -58,5 +58,9 @@ in
     };
   };
 
-  environment.systemPackages = singleton tvPkgs.kdePackages.plasma-bigscreen;
+  environment.systemPackages = with tvPkgs.kdePackages; [
+    plasma-bigscreen
+    # Bigscreen imports plasma-nm's QML module even without NetworkManager.
+    plasma-nm
+  ];
 }
