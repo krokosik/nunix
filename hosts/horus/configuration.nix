@@ -10,6 +10,7 @@ in
 {
   imports = [
     ./udmabuf.nix
+    ./sunshine.nix
     ./disko-config.nix
     ./fbcon-fix.nix
     inputs.nixos-hardware.nixosModules.lenovo-legion-15ach6h-nvidia
@@ -40,8 +41,6 @@ in
   };
 
   services = {
-    sunshine.enable = true;
-
     # COMPUTER USE ACCESSIBILITY
     gnome.at-spi2-core.enable = true;
   };
