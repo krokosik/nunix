@@ -53,6 +53,21 @@ in
             annotations.summary = "Filesystem {{ $labels.mountpoint }} on {{ $labels.host }} almost full";
           }
           {
+            # Activated kernel, initrd or modules differ from the booted ones; paths are
+            # aggregated away so each host keeps one stable alert while a reboot is pending
+            alert = "HostRebootRequired";
+            expr = /* promql */ ''
+              max by (host, environment, instance) (
+                node_expected_system_info{job="host/node"}
+                unless on (host, environment, instance, kernel, initrd, modules)
+                  node_booted_system_info{job="host/node"}
+              )
+            '';
+            for = "1h";
+            labels.severity = "warning";
+            annotations.summary = "{{ $labels.host }} activated a new kernel, initrd or modules; reboot required";
+          }
+          {
             alert = "HostOomKill";
             expr = ''increase(node_vmstat_oom_kill{job="host/node"}[10m]) > 0'';
             labels.severity = "warning";

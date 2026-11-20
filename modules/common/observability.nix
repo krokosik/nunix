@@ -294,7 +294,28 @@ let
     + concatMapStrings (unit: /* prometheus */ ''
       node_expected_systemd_unit_active{name=${toJSON unit}} 1
     '') cfg.inactiveAlertUnits
+    + /* prometheus */ ''
+      # HELP node_expected_system_info Boot components of the activated system generation.
+      # TYPE node_expected_system_info gauge
+      node_expected_system_info{${bootLabels}} 1
+    ''
   );
+  # Same paths /run/current-system/{kernel,initrd,kernel-modules} link to
+  bootLabels = concatStringsSep "," [
+    "kernel=${toJSON "${config.boot.kernelPackages.kernel}/${config.system.boot.loader.kernelFile}"}"
+    "initrd=${toJSON "${config.system.build.initialRamdisk}/${config.system.boot.loader.initrdFile}"}"
+    "modules=${toJSON "${config.system.modulesTree}"}"
+  ];
+  # Copied to /run only if absent, so it keeps describing the booted generation
+  # across switches until the next reboot clears /run
+  bootedMetrics = pkgs.writeText "booted.prom" (
+    /* prometheus */ ''
+      # HELP node_booted_system_info Boot components of the generation this host booted.
+      # TYPE node_booted_system_info gauge
+      node_booted_system_info{${bootLabels}} 1
+    ''
+  );
+  bootedMetricsDirectory = "/run/nunix-booted-system";
   remoteMetricsUrl = "https://metrics-ingest.${config.privateDomain}/api/v1/write";
   remoteLogsUrl = "https://logs-ingest.${config.privateDomain}/insert/native";
 in
@@ -422,10 +443,17 @@ in
       extraFlags = [
         "--collector.systemd.enable-start-time-metrics"
         "--collector.textfile.directory=${expectationMetrics}"
+        "--collector.textfile.directory=${bootedMetricsDirectory}"
       ]
       ++ optionals (monitoredUnits != [ ]) (
         singleton "--collector.systemd.unit-include=^(${concatStringsSep "|" (map escapeRegex monitoredUnits)})$"
       );
+    };
+
+    # `C` never overwrites, so switches keep the booted generation's file
+    systemd.tmpfiles.settings.nunix-booted-system = {
+      ${bootedMetricsDirectory}.d.mode = "0755";
+      "${bootedMetricsDirectory}/booted.prom".C.argument = "${bootedMetrics}";
     };
 
     services.prometheus.exporters.blackbox = {

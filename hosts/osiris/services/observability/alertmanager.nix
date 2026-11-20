@@ -8,6 +8,9 @@ let
   inherit (lib.lists) singleton;
   inherit (lib.meta) getExe';
   inherit (lib.modules) mkAfter mkForce;
+  # Alertmanager forgets sent notifications after its retention and would notify again,
+  # so a one-off repeat_interval only holds while retention is at least as long
+  notificationRetention = "8760h";
   configuration = {
     global.telegram_bot_token_file = config.sops.secrets.alertmanager_telegram_token.path;
     templates = singleton "${./telegram.tmpl}";
@@ -23,7 +26,7 @@ let
       repeat_interval = "4h";
       routes = [
         {
-          receiver = "telegram-signups";
+          receiver = "telegram-once";
           matchers = singleton ''alertname="AuthentikUserSignup"'';
           group_by = [
             "alertname"
@@ -35,6 +38,16 @@ let
           repeat_interval = "24h";
         }
         {
+          # Notify once per pending reboot: no repeats, no resolved message
+          receiver = "telegram-once";
+          matchers = singleton ''alertname="HostRebootRequired"'';
+          group_by = [
+            "alertname"
+            "host"
+          ];
+          repeat_interval = notificationRetention;
+        }
+        {
           receiver = "email";
           matchers = singleton ''channel="email"'';
         }
@@ -42,7 +55,7 @@ let
     };
     receivers = [
       {
-        name = "telegram-signups";
+        name = "telegram-once";
         telegram_configs = singleton {
           chat_id = 1;
           send_resolved = false;
@@ -123,6 +136,7 @@ in
     enable = true;
     listenAddress = "127.0.0.1";
     checkConfig = true;
+    extraFlags = singleton "--data.retention=${notificationRetention}";
     webExternalUrl = config.mkTraefikServices.alertmanager.fullHostname;
     inherit configuration;
   };
