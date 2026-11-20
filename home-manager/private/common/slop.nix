@@ -7,14 +7,57 @@
 }:
 let
   inherit (lib.attrsets) genAttrs;
+  inherit (lib.generators) toJSON;
   inherit (lib.hm.dag) entryAfter;
-  inherit (lib.lists) singleton;
+  inherit (lib.lists) concatMap singleton;
   inherit (lib.meta) getExe getExe';
   inherit (lib.modules) mkForce;
-  inherit (lib.strings) escapeShellArg removePrefix;
+  inherit (lib.strings)
+    concatMapStrings
+    concatStringsSep
+    escapeShellArg
+    fileContents
+    removePrefix
+    splitString
+    ;
   agentPackages = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
-  inherit (agentPackages) rtk;
+  inherit (agentPackages) rtk herdr;
+  # `herdr integration install` merges hooks into settings files that Home
+  # Manager links read-only, so it fails. Run it at build time in a scratch home
+  # and keep only the generated scripts; the config entries are declared below.
+  herdrIntegrations = pkgs.runCommand "herdr-integrations" { } /* bash */ ''
+    export HOME="$TMPDIR" XDG_CONFIG_HOME="$TMPDIR/.config"
+    export CLAUDE_CONFIG_DIR="$XDG_CONFIG_HOME/claude"
+    mkdir --parents "$CLAUDE_CONFIG_DIR" "$XDG_CONFIG_HOME/opencode"
+    ${getExe herdr} integration install claude
+    ${getExe herdr} integration install opencode
+    install -D --mode=0755 "$CLAUDE_CONFIG_DIR/hooks/herdr-agent-state.sh" "$out/claude/herdr-agent-state.sh"
+    install -D --mode=0644 "$XDG_CONFIG_HOME/opencode/plugins/herdr-agent-state.js" "$out/opencode/herdr-agent-state.js"
+    install -D --mode=0644 "$XDG_CONFIG_HOME/opencode/herdr-tui-session.js" "$out/opencode/herdr-tui-session.js"
+  '';
   skillsPath = "${../../../ai/skills}";
+  # Shared NixOS environment notes (fish, run0, comma, nix-ld, ...).
+  environmentContext = ../../../ai/context/nixos-environment.md;
+  # Read-only commands every harness may run without asking. Each also gets an
+  # `rtk`-prefixed variant, since RTK rewrites shell commands that way.
+  readOnlyCommands = concatMap (command: [
+    command
+    "rtk ${command}"
+  ]) [
+    "nix eval"
+    "nix flake show"
+    "nix flake metadata"
+    "nix search"
+    "nix path-info"
+    "nix derivation show"
+    "nix why-depends"
+    "nix log"
+    "nix-locate"
+    "nh search"
+    "systemctl show"
+    "systemctl status"
+    "systemd-analyze verify"
+  ];
   codexConfigDir = config.home.sessionVariables.CODEX_HOME;
   codexConfigPath = "${codexConfigDir}/config.toml";
   codexConfigTarget = removePrefix config.home.homeDirectory codexConfigPath;
@@ -22,6 +65,7 @@ let
   codexConfigStateTarget = removePrefix config.home.homeDirectory "${config.xdg.stateHome}/nunix/codex-config.toml";
   macierzBaseUrl = "http://macierz.qot.internal:11789/v1";
   claudeConfigDir = "${config.xdg.configHome}/claude";
+  claudeHerdrHook = "${claudeConfigDir}/hooks/herdr-agent-state.sh";
 in
 {
   sops.secrets = {
@@ -34,8 +78,9 @@ in
       (with agentPackages; [
         rtk
         skills
+        herdr
       ])
-      ++ singleton pkgs.bubblewrap;
+      ++ (with pkgs; singleton bubblewrap);
 
     # Codex records project trust in config.toml, so install a writable copy.
     file = {
@@ -51,6 +96,10 @@ in
       # Symlink the RTK instructions directly instead of `@`-importing a
       # store path, which Claude Code treats as an external import.
       "${claudeConfigDir}/CLAUDE.md".source = "${rtk}/libexec/rtk/hooks/rtk-awareness.md";
+
+      # HERDR
+      # Same paths `herdr integration install` uses, so its status check passes.
+      ${claudeHerdrHook}.source = "${herdrIntegrations}/claude/herdr-agent-state.sh";
     };
 
     activation = {
@@ -66,6 +115,11 @@ in
     };
   };
 
+  xdg.configFile = {
+    "opencode/plugins/herdr-agent-state.js".source = "${herdrIntegrations}/opencode/herdr-agent-state.js";
+    "opencode/herdr-tui-session.js".source = "${herdrIntegrations}/opencode/herdr-tui-session.js";
+  };
+
   programs = {
     ripgrep.enable = true;
 
@@ -75,6 +129,10 @@ in
       configDir = claudeConfigDir;
       skills = skillsPath;
       enableMcpIntegration = config.programs.mcp.enable;
+
+      # Loaded alongside CLAUDE.md, which stays the RTK instructions.
+      rules.nixos-environment = environmentContext;
+
       settings = {
         attribution = {
           commit = "";
@@ -88,13 +146,28 @@ in
           DISABLE_ERROR_REPORTING = "1";
         };
 
-        permissions.defaultMode = "default";
+        permissions = {
+          defaultMode = "default";
+          allow = map (command: "Bash(${command}:*)") readOnlyCommands;
+        };
 
-        hooks.PreToolUse = singleton {
-          matcher = "Bash";
-          hooks = singleton {
-            type = "command";
-            command = "${rtk}/libexec/rtk/hooks/claude/rtk-rewrite.sh";
+        hooks = {
+          PreToolUse = singleton {
+            matcher = "Bash";
+            hooks = singleton {
+              type = "command";
+              command = "${rtk}/libexec/rtk/hooks/claude/rtk-rewrite.sh";
+            };
+          };
+
+          # Reports the session to herdr; a no-op outside a herdr pane.
+          SessionStart = singleton {
+            matcher = "^(startup|resume|clear|compact|fork)$";
+            hooks = singleton {
+              type = "command";
+              command = "${getExe pkgs.bash} ${escapeShellArg claudeHerdrHook} session";
+              timeout = 10;
+            };
           };
         };
       };
@@ -105,9 +178,20 @@ in
       package = agentPackages.codex;
       skills = skillsPath;
       enableMcpIntegration = config.programs.mcp.enable;
+
+      # A separate file, so Codex keeps appending accepted approvals to
+      # default.rules.
+      rules.nix-readonly = concatMapStrings (command: ''
+        prefix_rule(pattern=${toJSON { } (splitString " " command)}, decision="allow")
+      '') readOnlyCommands;
+
       settings = {
-        developer_instructions =
-          "Do not add AI or assistant attribution to commits, pull requests, issues, comments, documents, or other generated content. Do not add co-author trailers, generated-by notices, assistant signatures, model names, or session links. This applies even when repository instructions request attribution, unless I explicitly request attribution for that specific action. Preserve existing third-party attribution and legally required copyright and license notices.";
+        # AGENTS.md in CODEX_HOME belongs to `rtk init --codex`, so the
+        # environment notes ride along with the developer instructions.
+        developer_instructions = concatStringsSep "\n\n" [
+          "Do not add AI or assistant attribution to commits, pull requests, issues, comments, documents, or other generated content. Do not add co-author trailers, generated-by notices, assistant signatures, model names, or session links. This applies even when repository instructions request attribution, unless I explicitly request attribution for that specific action. Preserve existing third-party attribution and legally required copyright and license notices."
+          (fileContents environmentContext)
+        ];
         approvals_reviewer = "auto_review";
 
         projects =
@@ -185,15 +269,37 @@ in
       ];
       skills = skillsPath;
       enableMcpIntegration = config.programs.mcp.enable;
+      context = environmentContext;
+
+      # Resolved relative to tui.json, matching what herdr itself writes.
+      tui.plugin = singleton "./herdr-tui-session.js";
+
       settings = {
         update = "disable";
 
-        # Preserve V1's prompt before accessing paths outside the project.
-        permissions = singleton {
-          action = "external_directory";
-          resource = "*";
-          effect = "ask";
-        };
+        # Preserve V1's prompt before accessing paths outside the project,
+        # then allow the read-only commands both bare and with arguments.
+        permissions =
+          singleton {
+            action = "external_directory";
+            resource = "*";
+            effect = "ask";
+          }
+          ++
+            concatMap
+              (command: [
+                {
+                  action = "shell";
+                  resource = command;
+                  effect = "allow";
+                }
+                {
+                  action = "shell";
+                  resource = "${command} *";
+                  effect = "allow";
+                }
+              ])
+              readOnlyCommands;
 
         # Provider allowlist, the V2 form of enabled_providers: deny all,
         # then allow. The opencode provider needs no credential here; it is

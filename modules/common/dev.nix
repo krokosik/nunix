@@ -45,6 +45,10 @@
     ];
   };
 
+  # FUSE-backed /bin and /usr/bin resolving names via the caller's PATH, so
+  # FHS shebangs like #!/bin/bash in third-party scripts work.
+  services.envfs.enable = true;
+
   environment = {
     systemPackages = with pkgs; [
       ruff # replace with uv managed in 26.11
