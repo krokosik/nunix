@@ -10,6 +10,7 @@ let
 in
 {
   imports = [
+    ./sunshine.nix
     ./build-host.nix
     ./dsearch.nix
     ./whisper-server.nix

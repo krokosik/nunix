@@ -7,6 +7,12 @@
 let
   inherit (lib.lists) singleton;
   inherit (lib.meta) getExe getExe';
+  inherit (lib.modules) mkIf;
+  inherit (lib.options) mkEnableOption mkOption;
+  inherit (lib.strings) escapeShellArgs;
+  inherit (lib.types) listOf str;
+
+  separateInstance = config.desktop.sunshineGaming.separateInstance;
 
   hyprctl = getExe' config.programs.hyprland.package "hyprctl";
   jq = getExe pkgs.jq;
@@ -27,6 +33,7 @@ let
     export PATH=${pkgs.coreutils}/bin
     stateDir="''${XDG_RUNTIME_DIR:?}/hookshot-gaming"
     umask 077
+    systemUnits=(${escapeShellArgs config.desktop.sunshineGaming.pauseSystemUnits})
 
     dispatch() {
       [[ $(${hyprctl} dispatch "$1") == ok ]]
@@ -48,6 +55,15 @@ let
         if [[ -e "$stateDir/$unit" ]]; then
           if ${systemctl} --user start "$unit"; then
             rm -- "$stateDir/$unit"
+          else
+            failed=1
+          fi
+        fi
+      done
+      for unit in "''${systemUnits[@]}"; do
+        if [[ -e "$stateDir/system-$unit" ]]; then
+          if ${systemctl} --no-ask-password start "$unit"; then
+            rm -- "$stateDir/system-$unit"
           else
             failed=1
           fi
@@ -78,6 +94,12 @@ let
             ${systemctl} --user stop "$unit"
           fi
         done
+        for unit in "''${systemUnits[@]}"; do
+          if ${systemctl} is-active --quiet "$unit"; then
+            : > "$stateDir/system-$unit"
+            ${systemctl} --no-ask-password stop "$unit"
+          fi
+        done
         while IFS= read -r monitor; do
           dispatch "hl.dsp.dpms({action=\"off\", monitor=\"$monitor\"})"
         done < "$stateDir/monitors"
@@ -88,15 +110,32 @@ let
   '';
 in
 {
-  services.sunshine.settings.output_name = "SUNSHINE";
+  options.desktop.sunshineGaming = {
+    separateInstance = mkEnableOption "attaching virtual capture to the sunshine-gaming service";
+    pauseSystemUnits = mkOption {
+      type = listOf str;
+      default = [ ];
+      description = "System services to pause during a gaming session. The session user needs permission to stop and start these units.";
+    };
+  };
 
-  # Host application entries call this with prepare and restore.
-  system.build.sunshineGamingSession = gamingSession;
+  config = {
+    services.sunshine.settings.output_name = mkIf (!separateInstance) "SUNSHINE";
 
-  environment.systemPackages = singleton gamingSession;
+    # Host application entries call this with prepare and restore.
+    system.build.sunshineGamingSession = gamingSession;
 
-  systemd.user.services.sunshine.serviceConfig = {
-    ExecStartPre = virtualDisplay;
-    ExecStopPost = "${getExe gamingSession} restore";
+    environment.systemPackages = singleton gamingSession;
+
+    systemd.user.services = {
+      sunshine.serviceConfig = mkIf (!separateInstance) {
+        ExecStartPre = virtualDisplay;
+        ExecStopPost = "${getExe gamingSession} restore";
+      };
+      sunshine-gaming.serviceConfig = mkIf separateInstance {
+        ExecStartPre = virtualDisplay;
+        ExecStopPost = "${getExe gamingSession} restore";
+      };
+    };
   };
 }
