@@ -61,10 +61,12 @@ in
     binfmt.emulatedSystems = singleton "aarch64-linux";
   };
 
-  home-manager.users.${config.nunix.self.user} = {
-    imports = [
+  home-manager = {
+    # Machine-specific layout and apps for every user
+    sharedModules = singleton ./apps;
+
+    users.${config.nunix.self.user}.imports = [
       ../../home-manager/private/desktop
-      ./apps
       ../../home-manager/rea.nix
       ../../home-manager/computer-use.nix
       ../../home-manager/agent-workspace.nix

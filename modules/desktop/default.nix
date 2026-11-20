@@ -1,3 +1,7 @@
+{ lib, ... }:
+let
+  inherit (lib.lists) singleton;
+in
 {
   imports = [
     ./aptos.nix
@@ -24,6 +28,9 @@
     ./windows-partition.nix
     ./wine.nix
   ];
+
+  # Every user on a desktop host gets the shared desktop environment
+  home-manager.sharedModules = singleton ../../home-manager/shared/desktop;
 
   services = {
     accounts-daemon.enable = true;

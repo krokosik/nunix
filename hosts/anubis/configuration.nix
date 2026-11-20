@@ -1,13 +1,4 @@
 {
-  config,
-  lib,
-  inputs,
-  ...
-}:
-let
-  inherit (lib.lists) singleton;
-in
-{
   imports = [
     ./disko-config.nix
     ./services
@@ -15,17 +6,12 @@ in
     ../../modules/server/ingress-wireguard.nix
     ../../modules/boot.nix
     ../../modules/zfs.nix
-    ../../home-manager/home-manager.nix
   ];
 
   hardware.facter.reportPath = ./facter.json;
 
   isVirtual = true; # Define if a VPS/VM or container
   latestZFSKernel = true; # Set to use latest available ZFS compatible kernel
-
-  home-manager.users.${config.nunix.self.user} = {
-    imports = singleton ../../home-manager/shared/common;
-  };
 
   role = "server"; # Set role of the machine (desktop/server)
 

@@ -92,8 +92,6 @@ let
 in
 {
   home-manager.users = genAttrs config.extraUsers (username: {
-    imports = singleton ../../home-manager/shared/desktop;
-
     home = {
       username = username;
       homeDirectory = "/home/${username}";

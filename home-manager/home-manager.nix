@@ -1,13 +1,10 @@
 {
+  config,
   inputs,
-  lib,
   outputs,
   pkgs,
   ...
 }:
-let
-  inherit (lib.lists) singleton;
-in
 {
   # HOME-MANAGER CONFIGURATION
   home-manager = {
@@ -17,6 +14,14 @@ in
     extraSpecialArgs = {
       inherit inputs outputs pkgs;
     };
-    sharedModules = singleton inputs.sops-nix.homeManagerModules.sops;
+
+    # Applies to every Home Manager user; private and desktop modules are imported per host for the primary user only
+    sharedModules = [
+      inputs.sops-nix.homeManagerModules.sops
+      ./shared/common
+    ];
+
+    # Shared modules only reach declared users, so always declare the primary one
+    users.${config.nunix.self.user} = { };
   };
 }
