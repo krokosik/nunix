@@ -21,20 +21,7 @@ let
     splitString
     ;
   agentPackages = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
-  inherit (agentPackages) rtk herdr;
-  # `herdr integration install` merges hooks into settings files that Home
-  # Manager links read-only, so it fails. Run it at build time in a scratch home
-  # and keep only the generated scripts; the config entries are declared below.
-  herdrIntegrations = pkgs.runCommand "herdr-integrations" { } /* bash */ ''
-    export HOME="$TMPDIR" XDG_CONFIG_HOME="$TMPDIR/.config"
-    export CLAUDE_CONFIG_DIR="$XDG_CONFIG_HOME/claude"
-    mkdir --parents "$CLAUDE_CONFIG_DIR" "$XDG_CONFIG_HOME/opencode"
-    ${getExe herdr} integration install claude
-    ${getExe herdr} integration install opencode
-    install -D --mode=0755 "$CLAUDE_CONFIG_DIR/hooks/herdr-agent-state.sh" "$out/claude/herdr-agent-state.sh"
-    install -D --mode=0644 "$XDG_CONFIG_HOME/opencode/plugins/herdr-agent-state.js" "$out/opencode/herdr-agent-state.js"
-    install -D --mode=0644 "$XDG_CONFIG_HOME/opencode/herdr-tui-session.js" "$out/opencode/herdr-tui-session.js"
-  '';
+  inherit (agentPackages) rtk;
   skillsPath = "${../../../ai/skills}";
   # Shared NixOS environment notes (fish, run0, comma, nix-ld, ...).
   environmentContext = ../../../ai/context/nixos-environment.md;
@@ -65,7 +52,6 @@ let
   codexConfigStateTarget = removePrefix config.home.homeDirectory "${config.xdg.stateHome}/nunix/codex-config.toml";
   macierzBaseUrl = "http://macierz.qot.internal:11789/v1";
   claudeConfigDir = "${config.xdg.configHome}/claude";
-  claudeHerdrHook = "${claudeConfigDir}/hooks/herdr-agent-state.sh";
 in
 {
   sops.secrets = {
@@ -78,7 +64,7 @@ in
       (with agentPackages; [
         rtk
         skills
-        herdr
+        herdr-app
       ])
       ++ (with pkgs; singleton bubblewrap);
 
@@ -96,10 +82,6 @@ in
       # Symlink the RTK instructions directly instead of `@`-importing a
       # store path, which Claude Code treats as an external import.
       "${claudeConfigDir}/CLAUDE.md".source = "${rtk}/libexec/rtk/hooks/rtk-awareness.md";
-
-      # HERDR
-      # Same paths `herdr integration install` uses, so its status check passes.
-      ${claudeHerdrHook}.source = "${herdrIntegrations}/claude/herdr-agent-state.sh";
     };
 
     activation = {
@@ -113,11 +95,6 @@ in
         CODEX_HOME=${escapeShellArg codexConfigDir} ${getExe rtk} init --global --codex
       '';
     };
-  };
-
-  xdg.configFile = {
-    "opencode/plugins/herdr-agent-state.js".source = "${herdrIntegrations}/opencode/herdr-agent-state.js";
-    "opencode/herdr-tui-session.js".source = "${herdrIntegrations}/opencode/herdr-tui-session.js";
   };
 
   programs = {
@@ -157,16 +134,6 @@ in
             hooks = singleton {
               type = "command";
               command = "${rtk}/libexec/rtk/hooks/claude/rtk-rewrite.sh";
-            };
-          };
-
-          # Reports the session to herdr; a no-op outside a herdr pane.
-          SessionStart = singleton {
-            matcher = "^(startup|resume|clear|compact|fork)$";
-            hooks = singleton {
-              type = "command";
-              command = "${getExe pkgs.bash} ${escapeShellArg claudeHerdrHook} session";
-              timeout = 10;
             };
           };
         };
@@ -270,9 +237,6 @@ in
       skills = skillsPath;
       enableMcpIntegration = config.programs.mcp.enable;
       context = environmentContext;
-
-      # Resolved relative to tui.json, matching what herdr itself writes.
-      tui.plugin = singleton "./herdr-tui-session.js";
 
       settings = {
         update = "disable";
