@@ -7,6 +7,7 @@
 let
   inherit (lib.lists) singleton;
   inherit (lib.meta) getExe getExe';
+  inherit (lib.modules) mkBefore;
   inherit (lib.strings) escapeShellArg;
 
   gamingSession = getExe config.system.build.sunshineGamingSession;
@@ -69,7 +70,8 @@ in
     pauseSystemUnits = singleton "whisper-server.service";
   };
 
-  security.polkit.extraConfig = /* javascript */ ''
+  # Run this exception before the general wheel authentication rule.
+  security.polkit.extraConfig = mkBefore /* javascript */ ''
     polkit.addRule(function(action, subject) {
       if (subject.user == "${config.nunix.self.user}" &&
           action.id == "org.freedesktop.systemd1.manage-units" &&
