@@ -6,21 +6,44 @@
 }:
 let
   inherit (lib.lists) singleton;
-  inherit (lib.meta) getExe;
+  inherit (lib.meta) getExe getExe';
+  inherit (lib.strings) escapeShellArg;
 
   gamingSession = getExe config.system.build.sunshineGamingSession;
   sunshine = getExe config.services.sunshine.package;
   stateDir = "${config.users.users.${config.nunix.self.user}.home}/.local/state/sunshine-gaming";
+  hookshotDirectory = "${config.users.users.${config.nunix.self.user}.home}/media/games/Hookshot/bin";
+  hookshot = escapeShellArg "${hookshotDirectory}/hookshot";
+  launchHookshot = pkgs.writeShellScript "launch-hookshot" /* bash */ ''
+    set -e
+    cd -- ${escapeShellArg hookshotDirectory}
+    exec ${hookshot}
+  '';
+
+  prepareGamingSession = {
+    do = "${gamingSession} prepare";
+    undo = "${gamingSession} restore";
+  };
 
   apps = (pkgs.formats.json { }).generate "sunshine-gaming-apps.json" {
     env = { };
-    apps = singleton {
-      name = "Gaming Desktop";
-      prep-cmd = singleton {
-        do = "${gamingSession} prepare";
-        undo = "${gamingSession} restore";
-      };
-    };
+    apps = [
+      {
+        name = "Gaming Desktop";
+        output = "${stateDir}/applications.log";
+        prep-cmd = singleton prepareGamingSession;
+      }
+      {
+        name = "Hookshot";
+        output = "${stateDir}/applications.log";
+        cmd = "${launchHookshot}";
+        auto-detach = false;
+        prep-cmd = [
+          { do = "${getExe' pkgs.coreutils "test"} -x ${hookshot}"; }
+          prepareGamingSession
+        ];
+      }
+    ];
   };
 
   settings = (pkgs.formats.keyValue { }).generate "sunshine-gaming.conf" {

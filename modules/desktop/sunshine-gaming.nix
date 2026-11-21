@@ -36,7 +36,12 @@ let
     systemUnits=(${escapeShellArgs config.desktop.sunshineGaming.pauseSystemUnits})
 
     dispatch() {
-      [[ $(${hyprctl} dispatch "$1") == ok ]]
+      local result
+      if result=$(${hyprctl} dispatch "$1" 2>&1) && [[ $result == ok ]]; then
+        return 0
+      fi
+      printf 'Hyprland dispatch failed (%s): %s\n' "$1" "$result" >&2
+      return 1
     }
 
     restore() {
@@ -81,7 +86,7 @@ let
         restore
         ${virtualDisplay}
         mkdir -- "$stateDir"
-        trap 'restore || true' ERR
+        trap 'printf "Gaming session setup failed: %s\n" "$BASH_COMMAND" >&2; restore || true' ERR
         monitors=$(${hyprctl} -j monitors)
         ${jq} --raw-output '.[] | select(.name != "SUNSHINE" and .dpmsStatus) | .name' <<< "$monitors" > "$stateDir/monitors"
         ${jq} --raw-output '.[] | select(.name != "SUNSHINE" and .focused) | .name' <<< "$monitors" > "$stateDir/focus"
