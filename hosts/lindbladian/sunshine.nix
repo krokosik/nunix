@@ -11,6 +11,7 @@ let
   inherit (lib.strings) escapeShellArg;
 
   gamingSession = getExe config.system.build.sunshineGamingSession;
+  hyprctl = getExe' config.programs.hyprland.package "hyprctl";
   sunshine = getExe config.services.sunshine.package;
   stateDir = "${config.users.users.${config.nunix.self.user}.home}/.local/state/sunshine-gaming";
   hookshotDirectory = "${config.users.users.${config.nunix.self.user}.home}/media/games/Hookshot/bin";
@@ -25,6 +26,40 @@ let
     do = "${gamingSession} prepare";
     undo = "${gamingSession} restore";
   };
+
+  # A saved fullscreen output can override the focused workspace on launch.
+  hookshotWindowRule = pkgs.writeShellScript "sunshine-hookshot-window-rule" /* bash */ ''
+    set -eu
+    case "$1" in
+      enable)
+        lua='
+          if not nunix_sunshine_hookshot_rule then
+            nunix_sunshine_hookshot_rule = hl.window_rule({
+              name = "sunshine-hookshot",
+              match = { class = "io[.]github[.]NotRexed[.]Hookshot" },
+              workspace = "49",
+              suppress_event = "fullscreenoutput",
+              idle_inhibit = "always",
+            })
+          end
+          nunix_sunshine_hookshot_rule:set_enabled(true)
+        '
+        ;;
+      disable)
+        lua='
+          if nunix_sunshine_hookshot_rule then
+            nunix_sunshine_hookshot_rule:set_enabled(false)
+          end
+        '
+        ;;
+      *) exit 2 ;;
+    esac
+    result=$(${hyprctl} eval "$lua")
+    if [[ $result != ok ]]; then
+      printf '%s\n' "$result" >&2
+      exit 1
+    fi
+  '';
 
   apps = (pkgs.formats.json { }).generate "sunshine-gaming-apps.json" {
     env = { };
@@ -42,6 +77,10 @@ let
         prep-cmd = [
           { do = "${getExe' pkgs.coreutils "test"} -x ${hookshot}"; }
           prepareGamingSession
+          {
+            do = "${hookshotWindowRule} enable";
+            undo = "${hookshotWindowRule} disable";
+          }
         ];
       }
     ];

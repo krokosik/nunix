@@ -17,6 +17,7 @@ let
   hyprctl = getExe' config.programs.hyprland.package "hyprctl";
   jq = getExe pkgs.jq;
   systemctl = getExe' pkgs.systemd "systemctl";
+  loginctl = getExe' pkgs.systemd "loginctl";
 
   virtualDisplay = pkgs.writeShellScript "sunshine-virtual-display" /* bash */ ''
     set -eu
@@ -82,6 +83,13 @@ let
 
     case "$1" in
       prepare)
+        # DMS owns the session lock. Stopping it while locked orphans the lock.
+        session=$(${loginctl} show-user "$UID" --property Display --value)
+        if [[ -z "$session" ]] || [[ $(${loginctl} show-session "$session" --property LockedHint --value) != no ]]; then
+          printf 'Unlock the local desktop before starting the Sunshine gaming session.\n' >&2
+          exit 1
+        fi
+
         # Recover a previous session if Hyprland exited during cleanup.
         restore
         ${virtualDisplay}
