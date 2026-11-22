@@ -6,7 +6,7 @@
   ...
 }:
 let
-  inherit (lib.attrsets) genAttrs;
+  inherit (lib.attrsets) genAttrs listToAttrs nameValuePair;
   inherit (lib.generators) toJSON;
   inherit (lib.hm.dag) entryAfter;
   inherit (lib.lists) concatMap singleton;
@@ -55,6 +55,28 @@ let
   codexConfigStateTarget = removePrefix config.home.homeDirectory "${config.xdg.stateHome}/nunix/codex-config.toml";
   macierzBaseUrl = "http://macierz.qot.internal:11789/v1";
   claudeConfigDir = "${config.xdg.configHome}/claude";
+  # Skills from the schematic-figure repo. patent-drawing expects
+  # schematic-figure to sit beside it, so both go in every skills directory.
+  schematicFigureSkillFiles = listToAttrs (
+    concatMap
+      (
+        skillsDir:
+        map (
+          skill:
+          nameValuePair "${skillsDir}/${skill}" {
+            source = "${inputs.schematic-figure}/.claude/skills/${skill}";
+          }
+        ) [
+          "schematic-figure"
+          "patent-drawing"
+        ]
+      )
+      [
+        "${claudeConfigDir}/skills"
+        "${codexConfigDir}/skills"
+        "${config.xdg.configHome}/opencode/skills"
+      ]
+  );
 in
 {
   sops.secrets = {
@@ -85,7 +107,8 @@ in
       # Symlink the RTK instructions directly instead of `@`-importing a
       # store path, which Claude Code treats as an external import.
       "${claudeConfigDir}/CLAUDE.md".source = "${rtk}/libexec/rtk/hooks/rtk-awareness.md";
-    };
+    }
+    // schematicFigureSkillFiles;
 
     activation = {
       # `rtk init --opencode` also installs the Claude Code integration, which

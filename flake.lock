@@ -1297,10 +1297,27 @@
         "nixpkgs": "nixpkgs_8",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "rea-flake": "rea-flake",
+        "schematic-figure": "schematic-figure",
         "sops-nix": "sops-nix",
         "stylix": "stylix",
         "voxtype": "voxtype",
         "zen-browser": "zen-browser"
+      }
+    },
+    "schematic-figure": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1791985991,
+        "narHash": "sha256-WRSvxfTVL4KpyQAIN9YK3PAaxyulYWU/78ebzBZwPvY=",
+        "owner": "lgwrightlab",
+        "repo": "schematic-figure",
+        "rev": "09d8b6e98d04b91de6e8b6632b3356b9fc237417",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lgwrightlab",
+        "repo": "schematic-figure",
+        "type": "github"
       }
     },
     "sops-nix": {
