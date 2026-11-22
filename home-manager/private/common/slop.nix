@@ -55,21 +55,66 @@ let
   codexConfigStateTarget = removePrefix config.home.homeDirectory "${config.xdg.stateHome}/nunix/codex-config.toml";
   macierzBaseUrl = "http://macierz.qot.internal:11789/v1";
   claudeConfigDir = "${config.xdg.configHome}/claude";
-  # Skills from the schematic-figure repo. patent-drawing expects
-  # schematic-figure to sit beside it, so both go in every skills directory.
-  schematicFigureSkillFiles = listToAttrs (
+  # Skills hosted on GitHub come from non-flake inputs; ai/skills holds only
+  # personal ones. Each entry links the named skill folders under `src` into
+  # every harness's skills directory.
+  externalSkills = [
+    # patent-drawing expects schematic-figure to sit beside it.
+    {
+      src = "${inputs.schematic-figure}/.claude/skills";
+      names = [
+        "schematic-figure"
+        "patent-drawing"
+      ];
+    }
+    {
+      src = "${inputs.obsidian-skills}/plugins/obsidian/skills";
+      names = [
+        "defuddle"
+        "json-canvas"
+        "knap"
+        "obsidian-bases"
+        "obsidian-cli"
+        "obsidian-headless"
+        "obsidian-markdown"
+      ];
+    }
+    # Leaves out Anthropic-branded skills, claude-api (built into Claude Code)
+    # and the always-on nudges (academy-guide, discernment-nudge).
+    {
+      src = "${inputs.anthropic-skills}/skills";
+      names = [
+        "algorithmic-art"
+        "canvas-design"
+        "doc-coauthoring"
+        "docx"
+        "frontend-design"
+        "mcp-builder"
+        "pdf"
+        "pptx"
+        "skill-creator"
+        "theme-factory"
+        "web-artifacts-builder"
+        "webapp-testing"
+        "xlsx"
+      ];
+    }
+    {
+      src = "${inputs.tutor-skills}/skills";
+      names = [
+        "tutor"
+        "tutor-setup"
+      ];
+    }
+  ];
+  externalSkillFiles = listToAttrs (
     concatMap
       (
         skillsDir:
-        map (
-          skill:
-          nameValuePair "${skillsDir}/${skill}" {
-            source = "${inputs.schematic-figure}/.claude/skills/${skill}";
-          }
-        ) [
-          "schematic-figure"
-          "patent-drawing"
-        ]
+        concatMap (
+          { src, names }:
+          map (name: nameValuePair "${skillsDir}/${name}" { source = "${src}/${name}"; }) names
+        ) externalSkills
       )
       [
         "${claudeConfigDir}/skills"
@@ -108,7 +153,7 @@ in
       # store path, which Claude Code treats as an external import.
       "${claudeConfigDir}/CLAUDE.md".source = "${rtk}/libexec/rtk/hooks/rtk-awareness.md";
     }
-    // schematicFigureSkillFiles;
+    // externalSkillFiles;
 
     activation = {
       # `rtk init --opencode` also installs the Claude Code integration, which
@@ -150,7 +195,7 @@ in
         };
 
         permissions = {
-          defaultMode = "default";
+          defaultMode = "auto";
           allow = map (command: "Bash(${command}:*)") readOnlyCommands;
         };
 

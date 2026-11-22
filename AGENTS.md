@@ -66,6 +66,16 @@ skill for the full migration runbook and postgres patterns.
 - When dealing with psql, prefer single-string queries over a sequence of psql commands.
 - nix Comma is installed, meaning that if an executable is not found on the system, prepend the invocation with a comma "," to fetch from nixpkgs. For example `, cowsay dupa`
 
+## Agent skills
+
+- Skills hosted on GitHub are added as non-flake inputs (`flake = false`)
+  in `flake.nix`, under `# AGENT SKILLS`. List the skill folders to link in
+  `externalSkills` in `home-manager/private/common/slop.nix`, which links
+  them into the Claude Code, Codex and OpenCode skills directories. Update
+  one with `nix flake update <input>`.
+- `ai/skills/` is only for personal skills written and maintained in this
+  repo. Never copy a third-party skill into it.
+
 ## Commands
 
 Enter the devshell (provides `nh`, `sops`, `age`, `ssh-to-age`,

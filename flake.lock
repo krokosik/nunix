@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "anthropic-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794838967,
+        "narHash": "sha256-Gr9LatjawHHK9uKpoclWoiDHZ0NTpP3/4Pmeatl8p/Q=",
+        "owner": "anthropics",
+        "repo": "skills",
+        "rev": "e4bb5d960d87126ff3b3a8af1a104b7db67560ba",
+        "type": "github"
+      },
+      "original": {
+        "owner": "anthropics",
+        "repo": "skills",
+        "type": "github"
+      }
+    },
     "authentik-nix": {
       "inputs": {
         "authentik-src": "authentik-src",
@@ -1205,6 +1221,22 @@
         "type": "github"
       }
     },
+    "obsidian-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1795194247,
+        "narHash": "sha256-L6qIfM2TKp+g3j0J2SxfWf5qeqahCe7+YcSOMPoePOs=",
+        "owner": "kepano",
+        "repo": "obsidian-skills",
+        "rev": "b110b2f8e9eb1f287892f937050dfd40af862cbb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kepano",
+        "repo": "obsidian-skills",
+        "type": "github"
+      }
+    },
     "pyproject-build-systems": {
       "inputs": {
         "nixpkgs": [
@@ -1275,6 +1307,7 @@
     },
     "root": {
       "inputs": {
+        "anthropic-skills": "anthropic-skills",
         "authentik-nix": "authentik-nix",
         "dank-greeter": "dank-greeter",
         "deploy-rs": "deploy-rs",
@@ -1296,10 +1329,12 @@
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_8",
         "nixpkgs-unstable": "nixpkgs-unstable",
+        "obsidian-skills": "obsidian-skills",
         "rea-flake": "rea-flake",
         "schematic-figure": "schematic-figure",
         "sops-nix": "sops-nix",
         "stylix": "stylix",
+        "tutor-skills": "tutor-skills",
         "voxtype": "voxtype",
         "zen-browser": "zen-browser"
       }
@@ -1588,6 +1623,22 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "tutor-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1772289568,
+        "narHash": "sha256-voor1MJ6M0zOO7jWBwJk2HNdtWj7J+P0cpzGEyI2uPE=",
+        "owner": "bevibing",
+        "repo": "tutor-skills",
+        "rev": "397110c9fefbc6bd5444277686600aec28063c05",
+        "type": "github"
+      },
+      "original": {
+        "owner": "bevibing",
+        "repo": "tutor-skills",
         "type": "github"
       }
     },

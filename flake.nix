@@ -43,8 +43,24 @@
       flake = false;
     };
 
+    # AGENT SKILLS
     schematic-figure = {
       url = "github:lgwrightlab/schematic-figure";
+      flake = false;
+    };
+
+    obsidian-skills = {
+      url = "github:kepano/obsidian-skills";
+      flake = false;
+    };
+
+    anthropic-skills = {
+      url = "github:anthropics/skills";
+      flake = false;
+    };
+
+    tutor-skills = {
+      url = "github:bevibing/tutor-skills";
       flake = false;
     };
 
