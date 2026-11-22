@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   ...
@@ -6,6 +7,7 @@
 let
   inherit (lib.attrsets) attrNames;
   inherit (lib.lists) singleton;
+  inherit (lib.strings) hasPrefix removePrefix;
   vscode-extensions = pkgs.nix-vscode-extensions.vscode-marketplace-release;
   open-vsx = pkgs.nix-vscode-extensions.open-vsx-release;
   vscode-extensions-universal = pkgs.nix-vscode-extensions.vscode-marketplace-release-universal;
@@ -21,37 +23,54 @@ let
       '';
     });
 
+  # VSCodium joins these onto $HOME, so they must be relative to it.
+  homePrefix = "${config.home.homeDirectory}/";
+  dataDir =
+    assert hasPrefix homePrefix config.xdg.dataHome;
+    removePrefix homePrefix config.xdg.dataHome;
+  dataFolder = "${dataDir}/codium";
+  sharedDataFolder = "${dataDir}/codium-shared";
+
   # trick to not clutter $HOME
   vscodium = pkgs.unstable.vscodium.overrideAttrs (oldAttrs: {
+    nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ pkgs.python3 ];
+
     postPatch = (oldAttrs.postPatch or "") + /* bash */ ''
       substituteInPlace resources/app/product.json \
         --replace-fail '"dataFolderName": ".vscode-oss"' \
-        '"dataFolderName": ".local/share/codium"'
+          '"dataFolderName": "${dataFolder}"' \
+        --replace-fail '"sharedDataFolderName": ".vscode-oss-shared"' \
+          '"sharedDataFolderName": "${sharedDataFolder}"'
 
-      # Each bundle embeds its own product configuration, including GUI helpers.
-      for bundle in \
-        out/cli.js \
-        out/mainImpl.js \
-        out/vs/code/node/cliProcessMain.js \
-        out/vs/code/electron-utility/sharedProcess/sharedProcessMain.js \
-        out/vs/platform/agentHost/node/agentHostMain.js \
-        out/vs/platform/terminal/node/ptyHostMain.js \
-        out/vs/sessions/sessions.desktop.main.js \
-        out/vs/workbench/api/node/extensionHostProcess.js \
-        out/vs/workbench/api/worker/extensionHostWorkerMain.js \
-        out/vs/workbench/contrib/debug/node/telemetryApp.js \
-        out/vs/workbench/workbench.desktop.main.js
-      do
-        substituteInPlace "resources/app/$bundle" \
-          --replace-fail 'dataFolderName:".vscode-oss"' \
-          'dataFolderName:".local/share/codium"'
+      # Each bundle embeds its own copy of the product configuration, so patch
+      # every one that mentions the folders instead of keeping a list in sync.
+      bundles=$(grep -rlE 'dataFolderName:"\.vscode-oss(-shared)?"' resources/app/out)
+      [ -n "$bundles" ] || { echo "no bundles embed dataFolderName" >&2; exit 1; }
+      for bundle in $bundles; do
+        sed -i \
+          -e 's|sharedDataFolderName:"\.vscode-oss-shared"|sharedDataFolderName:"${sharedDataFolder}"|g' \
+          -e 's|dataFolderName:"\.vscode-oss"|dataFolderName:"${dataFolder}"|g' \
+          "$bundle"
       done
     '';
 
     postFixup = (oldAttrs.postFixup or "") + /* bash */ ''
+      # The patched bundles no longer match product.json's checksums, which
+      # makes the integrity check report the installation as corrupt.
+      python3 - "$out/lib/vscode/resources/app" <<'EOF'
+      import base64, hashlib, json, pathlib, sys
+      app = pathlib.Path(sys.argv[1])
+      product = app / "product.json"
+      data = json.loads(product.read_text())
+      for rel in data.get("checksums", {}):
+          digest = hashlib.sha256((app / "out" / rel).read_bytes()).digest()
+          data["checksums"][rel] = base64.b64encode(digest).decode().rstrip("=")
+      product.write_text(json.dumps(data, indent="\t"))
+      EOF
+
       # The Rust CLI has its own compiled-in default, independent of product.json.
       wrapProgram "$out/lib/vscode/bin/codium-tunnel" \
-        --run 'export VSCODE_CLI_DATA_DIR="''${VSCODE_CLI_DATA_DIR:-$HOME/.local/share/codium/cli}"'
+        --run 'export VSCODE_CLI_DATA_DIR="''${VSCODE_CLI_DATA_DIR:-${config.xdg.dataHome}/codium/cli}"'
     '';
   });
 
@@ -306,7 +325,7 @@ in
     profiles = profiles;
   };
 
-  home.file.".vscode-oss/extensions".target = ".local/share/codium/extensions";
+  home.file.".vscode-oss/extensions".target = "${dataFolder}/extensions";
 
   stylix.targets.vscodium.profileNames = attrNames profiles;
 }
