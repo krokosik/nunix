@@ -120,6 +120,8 @@ Read by other modules — set per-host in `hosts/<name>/configuration.nix`:
 
 ## Conventions
 
+- State management: whenever possible, rely on systemd for state management over
+  bash scripting and other unstructured approaches.
 - Boot: `modules/boot.nix` = systemd-boot (used by osiris/anubis);
   `modules/boot-limine.nix` = Limine + secure boot + plymouth (for future
   desktops). README notes Hetzner VMs need grub (as of 2025-08).

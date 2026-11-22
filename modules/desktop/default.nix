@@ -21,7 +21,6 @@ in
     ./pipewire.nix
     ./plymouth.nix
     ./samba-mounts.nix
-    ./sunshine.nix
     ./tailscale.nix
     ./theme.nix
     ./tlp.nix

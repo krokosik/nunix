@@ -10,7 +10,6 @@ in
 {
   imports = [
     ./udmabuf.nix
-    ./sunshine.nix
     ./disko-config.nix
     ./fbcon-fix.nix
     inputs.nixos-hardware.nixosModules.lenovo-legion-15ach6h-nvidia

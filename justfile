@@ -112,6 +112,43 @@ oidc-secrets app host="osiris":
     git -C "$secrets_repo" push
     nix flake update my-secrets
 
+# Pair a Moonlight client with Sunshine using the PIN Moonlight shows. Prompts for the Sunshine web UI password.
+[group("utils")]
+sunshine-pair pin name=localhost host="lindbladian" user="admin":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [[ ! "{{pin}}" =~ ^[0-9]{4}$ ]]; then
+      printf 'PIN must be the 4 digits Moonlight shows\n' >&2
+      exit 1
+    fi
+    read -rsp 'Sunshine password for {{user}}: ' password
+    echo
+
+    # curl reads credentials from a config on stdin, keeping them out of argv.
+    escape() { local s=${1//\\/\\\\}; printf '%s' "${s//\"/\\\"}"; }
+    api() {
+      {
+        printf 'user = "%s"\n' "$(escape '{{user}}':"$password")"
+        if [[ $# -gt 0 ]]; then printf 'json = "%s"\n' "$(escape "$1")"; fi
+      } | ssh '{{host}}' curl --silent --show-error --insecure --config - https://localhost:47990/api/pin
+    }
+
+    # Moonlight must be showing the PIN, which leaves a pending pairing request.
+    pending=$(api | jq --compact-output '.pairings')
+    if [[ $(jq length <<< "$pending") != 1 ]]; then
+      printf 'Expected exactly one pending pairing request, got: %s\n' "$pending" >&2
+      exit 1
+    fi
+    body=$(jq --compact-output --arg pin '{{pin}}' --arg name '{{name}}' \
+      '{pairing_id: .[0].id, pin: $pin, name: $name}' <<< "$pending")
+    response=$(api "$body")
+    if jq --exit-status '.status == true' <<< "$response" >/dev/null 2>&1; then
+      printf 'Paired %s with %s\n' '{{name}}' '{{host}}'
+    else
+      printf 'Pairing failed: %s\n' "$response" >&2
+      exit 1
+    fi
+
 # Repair the Nix store by verifying and checking the contents, and attempting to repair any issues found.
 [group("nix utils")]
 repair-store:

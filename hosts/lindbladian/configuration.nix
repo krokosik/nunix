@@ -75,8 +75,6 @@ in
   };
 
   services = {
-    sunshine.enable = true;
-
     # COMPUTER USE ACCESSIBILITY
     gnome.at-spi2-core.enable = true;
   };
