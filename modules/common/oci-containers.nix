@@ -27,6 +27,8 @@
 }:
 let
   inherit (lib.attrsets) mapAttrs mapAttrsToList optionalAttrs;
+  inherit (lib.strings) concatStringsSep;
+  inherit (lib.lists) concatMap;
   inherit (lib.lists)
     concatLists
     optional
@@ -106,6 +108,18 @@ in
                 Supplementary host groups for the svc user (e.g. for device
                 access). When set, `--group-add=keep-groups` passes them into
                 the container.
+              '';
+            };
+            hostPorts = mkOption {
+              type = listOf port;
+              default = [ ];
+              example = [ 5432 ];
+              description = ''
+                Host loopback TCP ports the container reaches as 127.0.0.1:<port>
+                (pasta `-T`). Connections arrive on the host from 127.0.0.1, so
+                host services (e.g. postgres) can keep their loopback-only rules.
+                `host.containers.internal` instead arrives from the host's LAN
+                address.
               '';
             };
             port = mkOption {
@@ -217,7 +231,16 @@ in
                 ++ optional (
                   svc.ctrUid != 0
                 ) "--userns=keep-id:uid=${toString svc.ctrUid},gid=${toString svc.ctrGid}"
-                ++ optional (svc.extraGroups != [ ]) "--group-add=keep-groups";
+                ++ optional (svc.extraGroups != [ ]) "--group-add=keep-groups"
+                ++ optional (svc.hostPorts != [ ]) (
+                  "--network=pasta:"
+                  + concatStringsSep "," (
+                    concatMap (p: [
+                      "-T"
+                      (toString p)
+                    ]) svc.hostPorts
+                  )
+                );
               }
               (optionalAttrs (svc.port != null) {
                 ports = singleton "127.0.0.1:${toString svc.port}:${toString svc.containerPort}";

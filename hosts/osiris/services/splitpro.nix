@@ -35,6 +35,7 @@ in
     uid = 2004;
     ctrUid = 1234;
     port = 3000;
+    hostPorts = singleton 5432; # postgres, seen from 127.0.0.1
     stateDirs = singleton "/var/lib/splitpro/uploads";
   };
 
@@ -60,7 +61,7 @@ in
         NEXTAUTH_SECRET=${config.sops.placeholder.nextauth_secret}
         DATABASE_URL=postgresql://${db}:${
           config.sops.placeholder.${config.mkPostgresServices.splitpro.secretName}
-        }@host.containers.internal:5432/${db}
+        }@127.0.0.1:5432/${db}
         AUTHENTIK_ID=${config.sops.placeholder.${oidc.credentials.clientId.secretName}}
         AUTHENTIK_SECRET=${config.sops.placeholder.${oidc.credentials.clientSecret.secretName}}
         WEB_PUSH_PUBLIC_KEY=${config.sops.placeholder.webpush_public_key}

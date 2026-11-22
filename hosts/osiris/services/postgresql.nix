@@ -28,7 +28,7 @@ in
       sops-managed password. The helper provisions the db + role +
       rotation oneshot; the svc module is responsible for plumbing
       the password into its own env file and pointing the upstream
-      service at host.containers.internal:5432.
+      service at 127.0.0.1:5432 (containers: `mkContainerServices.<n>.hostPorts`).
     '';
     type = attrsOf (
       submodule (
@@ -97,14 +97,12 @@ in
         enableTCPIP = true;
 
         # Peer auth for native services on the Unix socket; scram for TCP.
-        # Rootless container svcs reach postgres via host.containers.internal
-        # (pasta). TODO: once the source address is confirmed in the
-        # postgres log, drop the former docker-bridge 172.16.0.0/12 rule.
+        # Rootless containers reach it through a pasta loopback forward
+        # (`mkContainerServices.<n>.hostPorts`), arriving from 127.0.0.1.
         authentication = mkOverride 10 /* conf */ ''
           local all all                peer
           host  all all 127.0.0.1/32   scram-sha-256
           host  all all ::1/128        scram-sha-256
-          host  all all 172.16.0.0/12  scram-sha-256
         '';
       };
     }
