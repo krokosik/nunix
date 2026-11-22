@@ -4,10 +4,11 @@ let
 in
 {
   # BentoPDF - Privacy-first PDF toolkit
-  # Container runs as UID 101 (image default)
+  # Image runs as UID 101; keep-id maps it onto the host `bentopdf` user.
   mkContainerServices.bentopdf = {
+    uid = 2001;
+    ctrUid = 101;
     port = 3023;
-    manageUser = false;
     containerPort = 8080;
   };
 
@@ -30,7 +31,7 @@ in
   };
 
   mkObservabilityServices.bentopdf = {
-    units = singleton "docker-bentopdf.service";
+    units = singleton config.mkContainerServices.bentopdf.serviceUnit;
     probes.public = {
       url = config.mkTraefikServices.bentopdf.fullHostname;
       module = "http_reachable";

@@ -8,8 +8,7 @@ let
   name = "splitpro";
   db = config.mkPostgresServices.splitpro.dbName;
   oidc = config.mkAuthentik.oidcApps.splitpro;
-  containerUser = config.nunix.self.user; # UID/GID 1000 on osiris
-  containerUnit = "${config.virtualisation.oci-containers.backend}-${name}.service";
+  containerUnit = config.mkContainerServices.${name}.serviceUnit;
 in
 {
   mkPostgresServices.splitpro = {
@@ -31,7 +30,10 @@ in
     };
   };
 
+  # Image runs as UID 1234; keep-id maps it onto the host `splitpro` user.
   mkContainerServices.splitpro = {
+    uid = 2004;
+    ctrUid = 1234;
     port = 3000;
     stateDirs = singleton "/var/lib/splitpro/uploads";
   };
@@ -58,7 +60,7 @@ in
         NEXTAUTH_SECRET=${config.sops.placeholder.nextauth_secret}
         DATABASE_URL=postgresql://${db}:${
           config.sops.placeholder.${config.mkPostgresServices.splitpro.secretName}
-        }@host.docker.internal:5432/${db}
+        }@host.containers.internal:5432/${db}
         AUTHENTIK_ID=${config.sops.placeholder.${oidc.credentials.clientId.secretName}}
         AUTHENTIK_SECRET=${config.sops.placeholder.${oidc.credentials.clientSecret.secretName}}
         WEB_PUSH_PUBLIC_KEY=${config.sops.placeholder.webpush_public_key}
@@ -66,7 +68,8 @@ in
         WEB_PUSH_EMAIL=${config.sops.placeholder.webpush_email}
       '';
 
-      owner = containerUser;
+      # Rootless podman reads --env-file as the svc user.
+      owner = name;
       restartUnits = singleton containerUnit;
     };
   };
@@ -86,7 +89,6 @@ in
 
   virtualisation.oci-containers.containers.splitpro = {
     image = "ossapps/splitpro:v2.1.5";
-    extraOptions = singleton "--add-host=host.docker.internal:host-gateway";
     volumes = singleton "/var/lib/splitpro/uploads:/app/uploads";
     environment = {
       HOSTNAME = "0.0.0.0";

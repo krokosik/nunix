@@ -168,13 +168,6 @@ in
             insecure = false;
           };
 
-          # DOCKER PROVIDER
-          providers.docker = {
-            endpoint = "unix:///var/run/docker.sock";
-            exposedByDefault = false;
-            network = "traefik_proxy";
-          };
-
           # LET'S ENCRYPT (CLOUDFLARE)
           certificatesResolvers.cfResolver.acme = {
             dnsChallenge = {
@@ -252,13 +245,9 @@ in
     }
 
     (mkIf cfg.enable {
-      users.users.traefik.extraGroups = singleton "docker";
-
       systemd.services.traefik = {
-        requires = singleton "docker.service";
         wants = singleton "network-online.target";
         after = [
-          "docker.service"
           "network-online.target"
           "systemd-resolved.service"
         ];

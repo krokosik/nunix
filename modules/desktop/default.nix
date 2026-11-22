@@ -20,6 +20,7 @@ in
     ./peripherals.nix
     ./pipewire.nix
     ./plymouth.nix
+    ./podman.nix
     ./samba-mounts.nix
     ./tailscale.nix
     ./theme.nix

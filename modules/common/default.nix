@@ -12,6 +12,7 @@
     ./fwupd.nix
     ./firewall.nix
     ./nix.nix
+    ./oci-containers.nix
     ./niks3.nix
     ./options.nix
     ./observability.nix

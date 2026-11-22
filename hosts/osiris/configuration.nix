@@ -19,7 +19,6 @@ in
     ../../modules/boot.nix
     ../../modules/btop-intel-gpu.nix
     ../../modules/disable-deep-sleep.nix
-    ../../modules/oci-containers.nix
     ../../modules/intel-gpu.nix
     ../../modules/zfs.nix
     inputs.nixos-hardware.nixosModules.common-pc-ssd
@@ -39,6 +38,7 @@ in
   role = "server"; # Set role of the machine (desktop/server)
 
   mkAuthentik.google.enable = true;
+  mkContainers.enable = true;
 
   services = {
     # Unused SSD with pending/reallocated sectors; not part of either ZFS pool.

@@ -129,11 +129,11 @@ this repo, rebuild, and verify before deleting the old data directory.
 # Services
 
 To avoid Nix bloat and having to repeat the same service configuration across multiple services,
-helper options should exist in `modules/oci-containers.nix` and shared services like Postgres, Traefik
+helper options should exist in `modules/common/oci-containers.nix` and shared services like Postgres, Traefik
 or Authentik. If the helper options are insufficient for a service, it should be expanded to cover
 the additional use case. A reference implementation is in `hosts/osiris/services/splitpro.nix` which
 connects to Postgres in `hosts/osiris/services/postgresql.nix`, Traefik in `hosts/osiris/services/traefik.nix`,
-and uses the helper options in `modules/oci-containers.nix`. SplitPro also
+and uses the helper options in `modules/common/oci-containers.nix`. SplitPro also
 registers its OIDC provider via `mkAuthentik.oidcApps.splitpro`.
 
 ## Authentik (SSO)

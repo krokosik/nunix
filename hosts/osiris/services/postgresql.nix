@@ -97,7 +97,9 @@ in
         enableTCPIP = true;
 
         # Peer auth for native services on the Unix socket; scram for TCP.
-        # Container svcs connect from the default docker bridge.
+        # Rootless container svcs reach postgres via host.containers.internal
+        # (pasta). TODO: once the source address is confirmed in the
+        # postgres log, drop the former docker-bridge 172.16.0.0/12 rule.
         authentication = mkOverride 10 /* conf */ ''
           local all all                peer
           host  all all 127.0.0.1/32   scram-sha-256

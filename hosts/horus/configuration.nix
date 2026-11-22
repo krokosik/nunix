@@ -16,8 +16,6 @@ in
     ../../modules/boot-limine.nix
     ../../modules/desktop
     ../../modules/desktop/cad.nix
-    # Horus is a development host; its containerized services are for development use.
-    ../../modules/oci-containers.nix
     ../../modules/hibernation.nix
     ../../modules/media-share.nix
   ];
@@ -33,6 +31,9 @@ in
   };
 
   role = "desktop";
+
+  mkContainers.enable = true;
+  desktop.podman.enable = true;
 
   desktop.windows.partition = {
     device = "/dev/disk/by-uuid/54E87E4BE87E2AFE";
