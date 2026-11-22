@@ -162,7 +162,7 @@
         lindbladian = mkSystem { host = "lindbladian"; };
       };
 
-      formatter.x86_64-linux = pkgs.nixfmt;
+      formatter.x86_64-linux = pkgs.nixfmt-tree;
 
       inherit (deployment) deploy;
 
