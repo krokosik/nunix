@@ -24,6 +24,7 @@ in
     ./tailscale.nix
     ./theme.nix
     ./tlp.nix
+    ./voxtype.nix
     ./windows-partition.nix
     ./wine.nix
   ];

@@ -41,12 +41,7 @@ in
     cores = 2;
   };
 
-  home-manager = {
-    # Offload dictation to lindbladian for every user
-    sharedModules = singleton ./voxtype-remote.nix;
-
-    users.${config.nunix.self.user}.imports = singleton ../../home-manager/private/desktop;
-  };
+  home-manager.users.${config.nunix.self.user}.imports = singleton ../../home-manager/private/desktop;
 
   system.stateVersion = "26.05";
 }

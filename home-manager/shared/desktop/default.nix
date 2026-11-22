@@ -10,6 +10,5 @@
     ./quiet-vt.nix
     ./vscodium.nix
     ./zen.nix
-    ./voxtype.nix
   ];
 }

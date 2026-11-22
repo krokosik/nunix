@@ -13,7 +13,6 @@ in
     ./sunshine.nix
     ./build-host.nix
     ./dsearch.nix
-    ./whisper-server.nix
     ./disko-config.nix
     inputs.nixos-hardware.nixosModules.common-cpu-intel-cpu-only
     inputs.nixos-hardware.nixosModules.common-gpu-nvidia-nonprime
@@ -34,6 +33,8 @@ in
   extraUsers = singleton "lab";
 
   desktop.sambaMounts.allUsers = true;
+
+  nunix.voxtype.server.enable = true;
 
   boot = {
     initrd.kernelModules = [
