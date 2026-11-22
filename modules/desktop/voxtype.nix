@@ -110,6 +110,9 @@ let
                 "graphical-session.target"
                 "pipewire.service"
                 "pipewire-pulse.service"
+                # Ordering makes systemd stop the conflicting daemon, releasing its lock,
+                # before starting the other one, in both directions.
+                "voxtype.service"
               ];
               Conflicts = singleton "voxtype.service";
               X-Restart-Triggers = singleton "${remoteConfig}";
