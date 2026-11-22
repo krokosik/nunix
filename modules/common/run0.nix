@@ -9,7 +9,11 @@ let
   inherit (lib.modules) mkIf;
 in
 {
-  environment.systemPackages = singleton pkgs.run0-sudo-shim;
+  environment = {
+    systemPackages = singleton pkgs.run0-sudo-shim;
+
+    variables.NH_ELEVATION_STRATEGY = "run0";
+  };
 
   security = {
     sudo.enable = false;
