@@ -34,3 +34,7 @@ Immich, HDR, surround passthrough and unattended headless Horus capture are defe
 The TV uses its own Stylix module with Tokyo Night Dark, the desktop wallpaper,
 Bibata cursor, and Inter font. Only the TV user's KDE and GTK targets are enabled;
 the desktop Flatpak overrides and additional font collections are not imported.
+
+osiris keeps systemd-networkd. `nm-stub.nix` runs a read-only NetworkManager
+stand-in on the system bus that always reports "connected", so Plasma's network
+applet, Discover's banner and GLib apps stop reporting no network.
