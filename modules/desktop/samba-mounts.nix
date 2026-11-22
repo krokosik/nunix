@@ -42,7 +42,10 @@ in
         "vers=3"
         "uid=${config.nunix.self.user}"
         "gid=${
-          if config.desktop.sambaMounts.allUsers then "users" else config.users.users.${config.nunix.self.user}.group
+          if config.desktop.sambaMounts.allUsers then
+            "users"
+          else
+            config.users.users.${config.nunix.self.user}.group
         }"
         "forceuid"
         "forcegid"

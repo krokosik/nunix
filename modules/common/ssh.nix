@@ -22,12 +22,10 @@ in
 {
   programs.ssh = {
     knownHosts =
-      mapAttrs (
-        name: host: {
-          hostNames = hostNamesOf name host;
-          publicKey = host.hostKey;
-        }
-      ) sshHosts
+      mapAttrs (name: host: {
+        hostNames = hostNamesOf name host;
+        publicKey = host.hostKey;
+      }) sshHosts
       // {
         # Pin GitHub's published ED25519 host key for the github-secrets alias.
         github = {

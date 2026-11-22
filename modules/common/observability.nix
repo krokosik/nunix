@@ -308,13 +308,11 @@ let
   ];
   # Copied to /run only if absent, so it keeps describing the booted generation
   # across switches until the next reboot clears /run
-  bootedMetrics = pkgs.writeText "booted.prom" (
-    /* prometheus */ ''
-      # HELP node_booted_system_info Boot components of the generation this host booted.
-      # TYPE node_booted_system_info gauge
-      node_booted_system_info{${bootLabels}} 1
-    ''
-  );
+  bootedMetrics = pkgs.writeText "booted.prom" (/* prometheus */ ''
+    # HELP node_booted_system_info Boot components of the generation this host booted.
+    # TYPE node_booted_system_info gauge
+    node_booted_system_info{${bootLabels}} 1
+  '');
   bootedMetricsDirectory = "/run/nunix-booted-system";
   remoteMetricsUrl = "https://metrics-ingest.${config.privateDomain}/api/v1/write";
   remoteLogsUrl = "https://logs-ingest.${config.privateDomain}/insert/native";

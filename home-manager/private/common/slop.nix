@@ -27,24 +27,27 @@ let
   environmentContext = ../../../ai/context/nixos-environment.md;
   # Read-only commands every harness may run without asking. Each also gets an
   # `rtk`-prefixed variant, since RTK rewrites shell commands that way.
-  readOnlyCommands = concatMap (command: [
-    command
-    "rtk ${command}"
-  ]) [
-    "nix eval"
-    "nix flake show"
-    "nix flake metadata"
-    "nix search"
-    "nix path-info"
-    "nix derivation show"
-    "nix why-depends"
-    "nix log"
-    "nix-locate"
-    "nh search"
-    "systemctl show"
-    "systemctl status"
-    "systemd-analyze verify"
-  ];
+  readOnlyCommands =
+    concatMap
+      (command: [
+        command
+        "rtk ${command}"
+      ])
+      [
+        "nix eval"
+        "nix flake show"
+        "nix flake metadata"
+        "nix search"
+        "nix path-info"
+        "nix derivation show"
+        "nix why-depends"
+        "nix log"
+        "nix-locate"
+        "nh search"
+        "systemctl show"
+        "systemctl status"
+        "systemd-analyze verify"
+      ];
   codexConfigDir = config.home.sessionVariables.CODEX_HOME;
   codexConfigPath = "${codexConfigDir}/config.toml";
   codexConfigTarget = removePrefix config.home.homeDirectory codexConfigPath;
@@ -249,21 +252,18 @@ in
             resource = "*";
             effect = "ask";
           }
-          ++
-            concatMap
-              (command: [
-                {
-                  action = "shell";
-                  resource = command;
-                  effect = "allow";
-                }
-                {
-                  action = "shell";
-                  resource = "${command} *";
-                  effect = "allow";
-                }
-              ])
-              readOnlyCommands;
+          ++ concatMap (command: [
+            {
+              action = "shell";
+              resource = command;
+              effect = "allow";
+            }
+            {
+              action = "shell";
+              resource = "${command} *";
+              effect = "allow";
+            }
+          ]) readOnlyCommands;
 
         # Provider allowlist, the V2 form of enabled_providers: deny all,
         # then allow. The opencode provider needs no credential here; it is
