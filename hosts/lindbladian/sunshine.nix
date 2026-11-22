@@ -183,9 +183,15 @@ in
     ];
     serviceConfig = {
       ExecStartPre = "+${blankConsole}";
+      # cage waits for its primary client on SIGTERM, so end the placeholder first.
+      # pam_systemd moves cage out of this cgroup, so systemd cannot kill it itself.
+      ExecStop = "${getExe' pkgs.procps "pkill"} --parent $MAINPID";
       ExecStopPost = "+${restoreDesktop}";
     };
   };
+
+  # The cage module also starts cage-tty1 at boot; greetd must own tty1 instead.
+  systemd.targets.graphical.wants = mkForce [ ];
 
   services.greetd.settings = {
     # Persistent, so boot keeps the password greeter. Removing it arms one autologin.
