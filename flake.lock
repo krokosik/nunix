@@ -322,11 +322,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795320537,
-        "narHash": "sha256-ox/xEE/JGFLQ2obT/S8777oW3apTvtfH2Jk2M+qzdbI=",
+        "lastModified": 1795392965,
+        "narHash": "sha256-HgjIVmCQ0KQ7/qXfsyJ9ugfinb5TwKwDivZc8ecXev0=",
         "owner": "duxlabs-dev",
         "repo": "dux-plugin-registry",
-        "rev": "aae9cd944e85b75de1ba80db163c87f7dc8075f7",
+        "rev": "8e76b2210773a619eec13e5d5d3bf9a9fee9c772",
         "type": "github"
       },
       "original": {
@@ -744,11 +744,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1795326465,
-        "narHash": "sha256-3DXXvRboug7ShQxMvkOrr2CK7hLi5pH4kGJUp+XRrC4=",
+        "lastModified": 1795395764,
+        "narHash": "sha256-OR+ahE/QRMHSS3mPB/XjbXfvaIN8IgqGfD+Jsnh4n3Q=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "1e9d20fbe18f1c10bc2eaa527d6f06cec0833dbc",
+        "rev": "6a434b94efa2b508f04f5cd3c2327a8a571b553b",
         "type": "github"
       },
       "original": {
@@ -875,11 +875,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794739050,
-        "narHash": "sha256-PCGNIyAydZcdUXCxEXTjrS1+wWS+k9E+ENqBkUK2Mpg=",
+        "lastModified": 1795345257,
+        "narHash": "sha256-p1dA8lUFQTLJfDI2gaTZQ+CcMKw3nxvyHNbwpVMy2rY=",
         "owner": "nix-community",
         "repo": "nix-index-database",
-        "rev": "9bd074026d6db75b59aae8cd6071b5f2fe27a36c",
+        "rev": "905f3e6f1e78165e79457c0bbe7ec4b885a5fce1",
         "type": "github"
       },
       "original": {
