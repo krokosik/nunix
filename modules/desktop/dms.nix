@@ -1,5 +1,4 @@
 {
-  config,
   inputs,
   pkgs,
   ...
@@ -32,13 +31,6 @@
       dankKDEConnect.enable = true;
     };
 
-  };
-
-  systemd.user.services.dms.environment = {
-    inherit (config.home-manager.users.${config.nunix.self.user}.home.sessionVariables)
-      CODEX_HOME
-      CLAUDE_CONFIG_DIR
-      ;
   };
 
   # PLUGIN DEPS

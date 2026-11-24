@@ -153,4 +153,8 @@ in
       "${dataHome}/python/bin"
     ];
   };
+
+  # Session variables only reach login shells. Mirror them into the systemd
+  # user manager so services and GUI-launched apps see the same layout.
+  systemd.user.sessionVariables = config.home.sessionVariables;
 }
