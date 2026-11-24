@@ -6,6 +6,7 @@
 }:
 let
   inherit (lib.lists) singleton;
+  inherit (lib.modules) mkForce;
 in
 {
   imports = singleton inputs.dux-files.nixosModules.dux-files;
@@ -23,6 +24,11 @@ in
       desktop = "hyprland";
     };
   };
+
+  # Upstream sets `path`, which pins PATH to quickshell and systemd's
+  # defaults. Desktop entries use bare Exec names, so launching the default
+  # app fails. Drop it to inherit the user manager's session PATH.
+  systemd.user.services.dfiles.environment.PATH = mkForce null;
 
   services = {
     gvfs.enable = true;
