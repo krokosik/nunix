@@ -3,7 +3,9 @@ let
   inherit (lib.options) mkOption;
   inherit (lib.types)
     attrsOf
+    listOf
     nullOr
+    port
     str
     submodule
     ;
@@ -57,6 +59,40 @@ in
       type = str;
       default = "chimp-qilin.ts.net";
       description = "Tailscale MagicDNS suffix.";
+    };
+    grpcStore = {
+      host = mkOption {
+        type = str;
+        default = "lindbladian";
+        description = "Inventory host that runs nix-grpc-daemon.";
+      };
+      port = mkOption {
+        type = port;
+        default = 50051;
+        description = "Port that nix-grpc-daemon listens on, at the daemon host's Tailscale address.";
+      };
+      trustedHosts = mkOption {
+        type = listOf str;
+        default = [
+          "horus"
+          "isis"
+        ];
+        description = ''
+          Desktops that send their builds to the daemon, each with a
+          certificate of its own. Servers only download store paths from the
+          daemon, using one certificate that they share.
+        '';
+      };
+      url = mkOption {
+        type = str;
+        readOnly = true;
+        default =
+          let
+            inherit (config.nunix) grpcStore hosts;
+          in
+          "grpc://${hosts.${grpcStore.host}.tailscale.ipv4}:${toString grpcStore.port}";
+        description = "Address of the daemon, without query parameters.";
+      };
     };
   };
 

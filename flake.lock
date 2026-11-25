@@ -776,11 +776,11 @@
     "my-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1794829085,
-        "narHash": "sha256-D6xd8UY0Nzq4Q6TLSzVit3d2T23XjMaUerHpI08rjB0=",
+        "lastModified": 1795604726,
+        "narHash": "sha256-ZSJlB/r5oEy0FiAqdIq26od3BKKiUiEjpxiM9kqGdvc=",
         "ref": "refs/heads/main",
-        "rev": "7dae763116cd924dde87c3a41298045f3cdff7aa",
-        "revCount": 72,
+        "rev": "22c60e4c8a12c68306109d861505f862bf7187db",
+        "revCount": 76,
         "type": "git",
         "url": "ssh://git@github-secrets/krokosik/nunix-secrets.git"
       },
@@ -865,6 +865,22 @@
         "owner": "fufexan",
         "ref": "97bd4c09876482bef50fdcea8ce3c55aa8892fbf",
         "repo": "nix-gaming",
+        "type": "github"
+      }
+    },
+    "nix-grpc-store": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1795450531,
+        "narHash": "sha256-/hV+Pdut0R7NQNN2+fwbyNnErMGUvh6zl06Gbj5ifzw=",
+        "owner": "Mic92",
+        "repo": "nix-grpc-store",
+        "rev": "a40124f423bbfd129d045bdf7b1912b3187c122c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Mic92",
+        "repo": "nix-grpc-store",
         "type": "github"
       }
     },
@@ -1323,6 +1339,7 @@
         "my-secrets": "my-secrets",
         "niks3": "niks3",
         "nix-flatpak": "nix-flatpak",
+        "nix-grpc-store": "nix-grpc-store",
         "nix-index-database": "nix-index-database",
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nixflix": "nixflix",

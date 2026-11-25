@@ -1,3 +1,5 @@
 .direnv/
 blueprint.yaml
 result
+__pycache__
+.venv

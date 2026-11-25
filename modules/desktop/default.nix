@@ -17,6 +17,7 @@ in
     ./greeter.nix
     ./kdeconnect.nix
     ./network-manager.nix
+    ./nix-grpc-store.nix
     ./peripherals.nix
     ./pipewire.nix
     ./plymouth.nix

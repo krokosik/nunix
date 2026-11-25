@@ -14,6 +14,14 @@ The user is new to NixOS but an experienced sysadmin (Proxmox VMs, Docker).
   `anubis` via aarch64 emulation. Run full builds there; builds do not authorize
   deployment. Its `nunix-build-all.timer` fetches `main` into a separate checkout
   and attempts every host daily at 04:00 local time, retaining successful outputs.
+  It also runs `nix-grpc-daemon` with mTLS (`hosts/lindbladian/nix-grpc-daemon.nix`).
+  Desktops listed in `nunix.grpcStore.trustedHosts` send their builds to it
+  when they can (`modules/desktop/nix-grpc-store.nix`). They still build
+  `preferLocalBuild` derivations locally, and they build everything locally
+  while the daemon is unreachable. Servers only download store paths from it,
+  using one shared read-only certificate (`modules/server/nix-grpc-store.nix`).
+  The public certificates are stored in `nunix-secrets/nix-grpc-store/`. Issue
+  them with `just grpc-store-init` and `just grpc-store-cert <host>`.
 - Ask for confirmation before non-trivial system config changes.
 - Security is a primary concern; prefer least-privilege defaults
   (firewall on, role-gated services, immutable users).
@@ -24,7 +32,7 @@ Legacy services run as a Docker compose stack on `osiris` (see the
 `@web-services` reference in `opencode.json`). They are being migrated into
 this flake incrementally. **Prefer a native NixOS module first**, fall back
 to `virtualisation.oci-containers`/docker-compose only with justification.
-Ignore the legacy `scripts/` directory. Each migration: explain the
+Each migration: explain the
 native-module approach, ask before proceeding, note any secret wiring.
 
 **Service-first architecture**: each service module (e.g. `splitpro.nix`)
@@ -111,6 +119,15 @@ just deploy-new <host>  # nixos-anywhere + nixos-facter hardware config
 Nix store utils: `just repair-store`, `just fetch-hash <url>`,
 `just delete-broken-derivations [depth]`.
 
+`scripts/` holds small Python helpers. Run them as uv scripts, as described in
+https://docs.astral.sh/uv/guides/scripts/. Each one starts with a
+`#!/usr/bin/env -S uv run --script` shebang and an inline `# /// script` block
+that declares `requires-python` and `dependencies`. Favour the standard
+library. Add a dependency only when it is clearly better than the standard
+library or than calling a command-line tool. The `secrets` recipes
+(`oidc-secrets`, `grpc-store-init` and `grpc-store-cert`) call
+`scripts/provision-secrets.py`.
+
 Adding a host (per README): add `mkSystem` entry in `flake.nix`, add sops
 keys in `nunix-secrets`, set `networking.hostId`
 (`head -c4 /dev/urandom | od -A none -t x4`).
@@ -124,7 +141,7 @@ Read by other modules — set per-host in `hosts/<name>/configuration.nix`:
 - `isVirtual` (bool, default false) — VPS/VM/container.
 - `latestZFSKernel` (bool, default false) — pulls `zfs_unstable` + latest
   compatible kernel (see `modules/zfs.nix`).
-- `nunix.hosts.<name>` (in `modules/common/hosts.nix`) — shared device inventory: `user` (default `krokosik`), `tailscale.{ipv4,ipv6}`, `hostKey`, `userKey`. Generates ssh_config + known_hosts. Read the current host via read-only `config.nunix.self` (e.g. `config.nunix.self.user`); set values only in the inventory.
+- `nunix.hosts.<name>` (in `modules/common/hosts.nix`) — shared device inventory: `user` (default `krokosik`), `tailscale.{ipv4,ipv6}`, `hostKey`, `userKey`. Generates ssh_config + known_hosts. The fleet-wide `nunix.grpcStore.{host,port,trustedHosts}` options are defined in the same file. Read the current host via read-only `config.nunix.self` (e.g. `config.nunix.self.user`); set values only in the inventory.
 - `role` (enum `desktop|server`, default `server` — least privileged). Gate
   services on this (e.g. `docker.enableOnBoot = config.role == "server"`).
 

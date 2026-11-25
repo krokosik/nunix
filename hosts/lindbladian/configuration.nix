@@ -12,6 +12,7 @@ in
   imports = [
     ./sunshine.nix
     ./build-host.nix
+    ./nix-grpc-daemon.nix
     ./dsearch.nix
     ./disko-config.nix
     inputs.nixos-hardware.nixosModules.common-cpu-intel-cpu-only

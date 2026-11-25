@@ -43,6 +43,12 @@
       flake = false;
     };
 
+    # Its modules build their packages from our pkgs, so its own inputs are not needed
+    nix-grpc-store = {
+      url = "github:Mic92/nix-grpc-store";
+      flake = false;
+    };
+
     # AGENT SKILLS
     schematic-figure = {
       url = "github:lgwrightlab/schematic-figure";
@@ -200,6 +206,7 @@
           nix-prefetch
           just
           git
+          openssl
         ];
       };
     };
