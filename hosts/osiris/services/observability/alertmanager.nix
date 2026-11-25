@@ -8,8 +8,8 @@ let
   inherit (lib.lists) singleton;
   inherit (lib.meta) getExe';
   inherit (lib.modules) mkAfter mkForce;
-  # Alertmanager forgets sent notifications after its retention and would notify again,
-  # so a one-off repeat_interval only holds while retention is at least as long
+  # Alertmanager removes sent notifications from its state at the retention limit and
+  # would notify again, so a one-off repeat_interval only holds while retention is at least as long
   notificationRetention = "8760h";
   configuration = {
     global.telegram_bot_token_file = config.sops.secrets.alertmanager_telegram_token.path;

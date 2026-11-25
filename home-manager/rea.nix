@@ -19,7 +19,8 @@ in
   programs = {
     rea = {
       enable = true;
-      # Provide child-process ownership checks and packet analysis, including under MCP.
+      # This package provides child-process ownership checks and packet
+      # analysis, including under MCP.
       package = pkgs.symlinkJoin {
         name = "rea-with-tools";
         paths = singleton inputs.rea-flake.packages.${pkgs.stdenv.hostPlatform.system}.rea;

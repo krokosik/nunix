@@ -59,7 +59,7 @@ let
   # personal ones. Each entry links the named skill folders under `src` into
   # every harness's skills directory.
   externalSkills = [
-    # patent-drawing expects schematic-figure to sit beside it.
+    # patent-drawing needs schematic-figure linked next to it.
     {
       src = "${inputs.schematic-figure}/.claude/skills";
       names = [
@@ -79,8 +79,8 @@ let
         "obsidian-markdown"
       ];
     }
-    # Leaves out Anthropic-branded skills, claude-api (built into Claude Code)
-    # and the always-on nudges (academy-guide, discernment-nudge).
+    # This list omits Anthropic-branded skills, claude-api (built into Claude
+    # Code), and the always-on nudges (academy-guide, discernment-nudge).
     {
       src = "${inputs.anthropic-skills}/skills";
       names = [
@@ -157,8 +157,8 @@ in
 
     activation = {
       # `rtk init --opencode` also installs the Claude Code integration, which
-      # is managed declaratively below; send that part to a throwaway dir so
-      # it neither pollutes ~/.claude nor clobbers the managed config.
+      # is managed declaratively below. Send that part to a throwaway dir so
+      # that it neither pollutes ~/.claude nor clobbers the managed config.
       rtkInit = entryAfter (singleton "writeBoundary") /* bash */ ''
         rtkClaudeScratch=$(${getExe' pkgs.coreutils "mktemp"} --directory)
         CLAUDE_CONFIG_DIR="$rtkClaudeScratch" ${getExe rtk} init --global --opencode
@@ -178,7 +178,7 @@ in
       skills = skillsPath;
       enableMcpIntegration = config.programs.mcp.enable;
 
-      # Loaded alongside CLAUDE.md, which stays the RTK instructions.
+      # This file is loaded alongside CLAUDE.md, which remains the RTK instructions.
       rules.nixos-environment = environmentContext;
 
       settings = {
@@ -217,15 +217,15 @@ in
       skills = skillsPath;
       enableMcpIntegration = config.programs.mcp.enable;
 
-      # A separate file, so Codex keeps appending accepted approvals to
-      # default.rules.
+      # Write to a separate file, so Codex keeps appending accepted approvals
+      # to default.rules.
       rules.nix-readonly = concatMapStrings (command: ''
         prefix_rule(pattern=${toJSON { } (splitString " " command)}, decision="allow")
       '') readOnlyCommands;
 
       settings = {
         # AGENTS.md in CODEX_HOME belongs to `rtk init --codex`, so the
-        # environment notes ride along with the developer instructions.
+        # environment notes are included with the developer instructions.
         developer_instructions = concatStringsSep "\n\n" [
           "Do not add AI or assistant attribution to commits, pull requests, issues, comments, documents, or other generated content. Do not add co-author trailers, generated-by notices, assistant signatures, model names, or session links. This applies even when repository instructions request attribution, unless I explicitly request attribution for that specific action. Preserve existing third-party attribution and legally required copyright and license notices."
           (fileContents environmentContext)
@@ -257,8 +257,8 @@ in
           base_url = macierzBaseUrl;
           wire_api = "responses";
           # Command-backed bearer token: Codex runs this when it needs the key,
-          # trims it, and caches it in memory. Keeps the key out of the
-          # environment; mutually exclusive with env_key.
+          # trims it, and caches it in memory. It keeps the key out of the
+          # environment and is mutually exclusive with env_key.
           auth = {
             command = "${getExe' pkgs.coreutils "cat"}";
             args = singleton config.sops.secrets.strata_api_key.path;
@@ -333,9 +333,10 @@ in
             }
           ]) readOnlyCommands;
 
-        # Provider allowlist, the V2 form of enabled_providers: deny all,
-        # then allow. The opencode provider needs no credential here; it is
-        # connected with /connect and its free models show up automatically.
+        # These policies are the provider allowlist, the V2 form of
+        # enabled_providers: deny all, then allow. The opencode provider needs
+        # no credential here. It is connected with /connect, and its free
+        # models show up automatically.
         policies =
           singleton {
             action = "provider.use";

@@ -144,7 +144,7 @@ in
     '';
   };
 
-  # # iptsd exposes virtual input devices; applications need libwacom's Surface
+  # # iptsd exposes virtual input devices. Applications need libwacom's Surface
   # # bus support as well as its tablet definitions. Keep this override host-local.
   nixpkgs.overlays = singleton (
     _final: prev: {

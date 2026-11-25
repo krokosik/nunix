@@ -90,7 +90,7 @@ let
         inherit settings;
       };
 
-      # The probe picks which daemon runs: remote while the server is healthy, local otherwise.
+      # The probe picks which daemon runs: the remote one while the server is healthy, the local one otherwise.
       systemd.user = {
         services = {
           voxtype = {
@@ -110,8 +110,8 @@ let
                 "graphical-session.target"
                 "pipewire.service"
                 "pipewire-pulse.service"
-                # Ordering makes systemd stop the conflicting daemon, releasing its lock,
-                # before starting the other one, in both directions.
+                # The ordering works in both directions: systemd stops the conflicting
+                # daemon, releasing its lock, before starting the other one.
                 "voxtype.service"
               ];
               Conflicts = singleton "voxtype.service";

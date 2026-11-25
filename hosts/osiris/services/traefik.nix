@@ -94,7 +94,7 @@ in
     '';
   };
 
-  # Merging uncoditional and conditional config requires merge, since implicit
+  # Merging unconditional and conditional config requires merge, since implicit
   # config cannot coexist with explicit config (needed for mkIf).
   config = mkMerge [
     {

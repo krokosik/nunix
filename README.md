@@ -20,7 +20,7 @@ To add a host:
     a. isVirtual (bool) - set for virtual hardware (VPS or VM). Default false.
     b. latestZFSKernel (bool) - set to use latest available ZFS compatible kernel. Default false.
     c. user - set `user` in its `nunix.hosts` entry (`modules/common/hosts.nix`) to override the default krokosik.
-    d. role (desktop|server|shared) - set host role. Shared stands for a workstation also used by others. Default server.
+    d. role (desktop|server|shared) - set host role. Shared means a workstation that is also used by others. Default server.
 4. For hosts with automatic secure boot setup (limine), disable secure boot before hand and make sure it is in setup mode if available in UEFI.
 5. You can enroll the cryptroot passphrase in TPM2 via if SB is enabled. You should then switch from autologin to greeter auth (also do cryptswap if used). The id can be read by checking which partition is needed using `lsblk -f` and then comparing to symlinks in `/dev/disk/by-id`:
 ```shell
@@ -48,7 +48,7 @@ cat /tmp/nixos-anywhere-extra/etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age
 7. `just deploy-new <host>` to install NixOS and the configuration for the new host.
 8. If problems arise, add `--no-reboot` to the above command so you can
    troubleshoot the new install.
-9. Once the host boots, get its `~/.ssh/id_ed25519.pub` file and it to the `nunix-secrets` deploy keys as well as `ssh-keys.nix`
+9. Once the host boots, get its `~/.ssh/id_ed25519.pub` file and add it to the `nunix-secrets` deploy keys as well as `ssh-keys.nix`
         
 ### Desktop Samba shares
 
@@ -102,8 +102,8 @@ If the remote connection fails (2-second connection timeout), the response is
 invalid, or the request exceeds 30 seconds, the same recording is transcribed
 locally with Vulkan and `medium`. The next recording tries Lindbladian again.
 Both paths detect the language automatically for English and Polish. The
-remote response uses structured segments concatenated without added separators,
-preserving words split across segment boundaries and their original spaces.
+remote path concatenates structured segments without adding separators, so
+words split across segment boundaries keep their original spaces.
 The local CLI loads the model for each fallback recording, so offline processing remains
 slow. Hotkeys, OSD, and text insertion still belong to VoxType.
 
@@ -116,8 +116,8 @@ to confirm the chosen path. Wrapper tests run with `bash tests/voxtype-fallback.
 
 `services.postgresql.package` is pinned to a specific major
 (`postgresql_17` at time of writing) in `hosts/osiris/services/postgresql.nix` so
-that rebuilds never silently dump-and-restore the cluster. Major upgrades
-are a manual operation, following the canonical NixOS recipe:
+that a rebuild never dumps and restores the cluster without warning. Major
+upgrades are a manual operation, following the canonical NixOS recipe:
 
 - [NixOS manual — Upgrading PostgreSQL](https://nixos.org/manual/nixos/stable/#module-services-postgres-upgrading)
 
@@ -176,7 +176,7 @@ mkAuthentik.launcherApps.seerr = {
 };
 ```
 
-Each entry generates an application without a provider and a group binding
+Each entry generates an application that has no provider, plus a group binding
 that controls tile visibility. It does not protect access to the destination.
 No credentials, OIDC provider, or forward-auth configuration are created.
 The default access group is `admins`, and the default display group is
@@ -234,8 +234,8 @@ unused secret for public clients.
 **The generated blueprint sets `grant_types` explicitly.** authentik 2026.x added
 `OAuth2Provider.grant_types` (defaults to an empty list) and the
 authorize view now rejects any flow whose grant isn't listed
-(`Invalid grant_type for provider` → the app sees a malformed-request
-error and bounces back to its login page). Providers created under an
+(`Invalid grant_type for provider` → the app gets a malformed-request
+error and sends the user back to its login page). Providers created under an
 older authentik were back-filled by the migration, so the omission is
 invisible until a provider is created **fresh** on 2026.x — a new app,
 a new host, or a `recovery:all` / `bootstrap:reinstall` rebuild (which

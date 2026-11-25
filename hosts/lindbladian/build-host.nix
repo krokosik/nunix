@@ -110,7 +110,7 @@ in
       '';
     };
 
-    # Runs only after every host built; deploy-rs rolls back failed activations
+    # Runs only after every host built. deploy-rs rolls back failed activations
     services.nunix-deploy-servers = {
       description = "Deploy the freshly built nunix revision to the servers";
       wants = singleton "network-online.target";
@@ -118,10 +118,10 @@ in
         "network-online.target"
         "nunix-build-all.service"
       ];
-      # Only reachable via a fresh successful build; a manual start could deploy a stale checkout
+      # Only reachable via a fresh successful build. A manual start could deploy a stale checkout
       unitConfig.RefuseManualStart = true;
 
-      # 1 attempt + 3 retries; the window outlasts all attempts so the counter never resets mid-run
+      # 1 attempt + 3 retries. The window outlasts all attempts so the counter never resets mid-run
       startLimitBurst = 4;
       startLimitIntervalSec = 6 * 60 * 60;
       path =

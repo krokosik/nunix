@@ -3,7 +3,7 @@ let
   inherit (lib.lists) singleton;
 in
 {
-  # --no-update flag seems broken on nixos 26.05
+  # The --no-update flag seems broken on nixos 26.05
   home.packages = singleton pkgs.unstable.beeper;
 
   xdg.configFile."BeeperTexts/custom.css".text = /* css */ ''

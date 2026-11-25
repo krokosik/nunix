@@ -12,7 +12,7 @@ in
   services.smartd = {
     enable = mkIf (!config.isVirtual) true;
 
-    # These are smartd.conf directives, not CLI options; the AGENTS.md rule
+    # These are smartd.conf directives, not CLI options. The AGENTS.md rule
     # about expanding short CLI options does not apply here.
     defaults.monitored = concatStringsSep " " [
       "-a"

@@ -1,5 +1,5 @@
 {{/* All dynamic text and hrefs are escaped before assembling trusted HTML.
-     Budget the escaped output in bytes (stricter than Telegram's rune limit).
+     Measure the escaped output in bytes (stricter than Telegram's rune limit).
      Keep firing alerts first; long groups remain accessible via Alerts. */}}
 {{ define "nunix.telegram" -}}
 {{- $name := or .CommonLabels.alertname .GroupLabels.alertname "Alerts" -}}

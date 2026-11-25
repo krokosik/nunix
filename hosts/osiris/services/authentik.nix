@@ -112,7 +112,7 @@ let
   # Baseline group entries prepended to every generated blueprint. Using
   # `!KeyOf` anchors here means per-app entries in the same instance can
   # reference `grp-<name>` deterministically — authentik builds a DAG and
-  # applies in dependency order, so the cross-instance race that bit us
+  # applies in dependency order, so the cross-instance race we hit
   # (forward-auth-apps applied before the groups existed) can't recur.
   # `grp-` prefix keeps the anchor namespace clear of app `id:` anchors.
   groupsBaselineContent = /* yaml */ ''
@@ -877,7 +877,7 @@ in
 
     # Baseline groups (access hierarchy + display categories) are always
     # contributed so they exist before any app blueprint's `!Find` lookup
-    # fires. Race-resilient via worker auto-retry.
+    # runs. The worker's automatic retry covers any race there.
     {
       mkAuthentik.extraBlueprints = singleton groupsBaselineDir;
     }

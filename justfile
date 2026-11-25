@@ -17,18 +17,18 @@ deploy-local:
 deploy-remote host ip="":
     nh os switch --hostname {{host}} --target-host {{ if ip == "" { host } else { "\"$(nix eval --raw .#nixosConfigurations." + host + ".config.nunix.self.user)@" + ip + "\"" } }} --elevation-strategy passwordless .
 
-# Deploy servers with deploy-rs, rolling back on failed units or lost SSH. Run `nix flake check` for pre-deploy checks.
+# Deploy servers with deploy-rs, rolling back on failed units or a lost SSH connection. Run `nix flake check` for pre-deploy checks.
 [group("nixos deploy")]
 deploy *hosts="anubis osiris":
     deploy --skip-checks --targets {{ prepend(".#", hosts) }}
 
-# Report which servers booted an older kernel, initrd or modules than their current generation.
+# Report which servers booted a kernel, initrd or modules older than their current generation.
 [group("nixos deploy")]
 reboot-needed *hosts="anubis osiris":
     #!/usr/bin/env bash
     set -euo pipefail
     for host in {{hosts}}; do
-      # Keep the remote command valid in both bash and fish login shells; compare locally
+      # Keep the remote command valid in both bash and fish login shells. Compare locally
       if ! paths=$(ssh -o BatchMode=yes "$host" 'readlink /run/booted-system/{kernel,initrd,kernel-modules} /run/current-system/{kernel,initrd,kernel-modules}'); then
         printf '%s: check failed\n' "$host" >&2
         continue

@@ -3,7 +3,7 @@ let
   inherit (lib.modules) mkForce;
 in
 {
-  # One policy manager; thermald independently protects against overheating.
+  # TLP is the only power policy manager, and thermald independently protects against overheating.
   powerManagement.powertop.enable = mkForce false;
 
   services = {

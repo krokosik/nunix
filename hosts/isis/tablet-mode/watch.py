@@ -72,7 +72,7 @@ class Session:
         if current != desired:
             clients = json.loads(self.command("hyprctl", "-j", "clients"))
             # Layout changes can unset fullscreen. Reconciliation retries with
-            # the latest tablet state once fullscreen/maximized windows exit.
+            # the latest tablet state once no fullscreen/maximized windows remain.
             if not any(
                 client["fullscreen"] or client.get("fullscreenClient", 0)
                 for client in clients

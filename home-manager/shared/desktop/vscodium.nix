@@ -31,7 +31,7 @@ let
   dataFolder = "${dataDir}/codium";
   sharedDataFolder = "${dataDir}/codium-shared";
 
-  # trick to not clutter $HOME
+  # This trick avoids cluttering $HOME.
   vscodium = pkgs.unstable.vscodium.overrideAttrs (oldAttrs: {
     nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ pkgs.python3 ];
 

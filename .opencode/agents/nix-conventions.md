@@ -1,5 +1,5 @@
 ---
-description: Orchestrates AGENTS.md convention enforcement across the nunix flake: spawns one nix-rule subagent per convention, then exclusively owns the nixfmt, nix flake check, nix eval, and clean-branch flake-output gates.
+description: Orchestrates enforcement of the AGENTS.md conventions across the nunix flake: spawns one nix-rule subagent per convention, then runs every gate itself (nixfmt, nix flake check, nix eval, and comparing flake outputs against a clean branch).
 mode: all
 model: macierz/qwen3.8-flash-next#high
 permissions:

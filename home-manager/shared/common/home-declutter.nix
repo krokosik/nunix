@@ -24,12 +24,13 @@ in
     man.generateCaches = false;
 
     bash = {
-      # Moves ~/.bash_history to ~/.local/state/bash/history
+      # This moves ~/.bash_history to ~/.local/state/bash/history
       historyFile = "${stateHome}/bash/history";
 
       shellAliases = {
-        # nvidia-settings and code resolve through PATH on purpose: the former is
-        # provided by the installed GPU driver, the latter by the user's editor.
+        # nvidia-settings and code resolve through PATH on purpose: the
+        # installed GPU driver provides nvidia-settings, and the user's editor
+        # provides code.
         "nvidia-settings" = "nvidia-settings --config=${configHome}/nvidia/settings";
         wget = "${wgetExe} --hsts-file=${stateHome}/wget-hsts";
         code = "code --extensions-dir ${dataHome}/vscode";
@@ -155,6 +156,6 @@ in
   };
 
   # Session variables only reach login shells. Mirror them into the systemd
-  # user manager so services and GUI-launched apps see the same layout.
+  # user manager so services and GUI-launched apps get the same layout.
   systemd.user.sessionVariables = config.home.sessionVariables;
 }

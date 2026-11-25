@@ -15,7 +15,8 @@
       inherit inputs outputs pkgs;
     };
 
-    # Applies to every Home Manager user; private and desktop modules are imported per host for the primary user only
+    # These modules apply to every Home Manager user. Private and desktop
+    # modules are imported per host for the primary user only
     sharedModules = [
       inputs.sops-nix.homeManagerModules.sops
       ./shared/common

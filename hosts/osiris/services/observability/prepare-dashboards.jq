@@ -62,7 +62,7 @@ def hostvar($metric; $job): variable("host"; "label_values("+$metric+"{job=\""+$
 
 def traefik_logs: "log_type:traefik_access host:in($Host) RouterName:~\"${RouterName:regex}\"";
 # Influx display-name overrides reference labels absent from the Victoria query
-# result. Let the datasource's legendFormat name every series instead.
+# result. Instead, the datasource's legendFormat sets the name of every series.
 def datasource_display_names:
   del(.fieldConfig.defaults.displayName) |
   .fieldConfig.overrides = ((.fieldConfig.overrides // []) |

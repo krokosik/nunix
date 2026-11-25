@@ -1,24 +1,25 @@
 # OCI containers - Simple Aspect
 # Rootless Podman backend for virtualisation.oci-containers. Every container
 # runs under its own unprivileged system user (one user namespace per svc,
-# no root daemon); backend-agnostic container declarations live in their own
+# no root daemon). Backend-agnostic container declarations live in their own
 # service modules.
 #
 # `mkContainerServices.<name>` is the container analogue of `traefik.services`
 # (see traefik.nix): service modules declare the low-level plumbing that every
-# containerized svc repeats — the dedicated host user, its uid mapping into
-# the image, the state dirs, the 127.0.0.1 host-port bind and the TZ env — as
-# a one-attr declaration here, and this module emits the corresponding
-# `users.*`, `systemd.tmpfiles.rules` and `oci-containers.containers.*`
-# fragments. svc modules keep only what's genuinely svc-specific (image,
-# volumes, extra env). The `mk`-prefix marks an option owned by this flake
-# (vs upstream `virtualisation.*`).
+# containerized svc repeats as a one-attr declaration here: the dedicated host
+# user, its uid mapping into the image, the state dirs, the 127.0.0.1 host-port
+# bind and the TZ env. This module emits the corresponding `users.*`,
+# `systemd.tmpfiles.rules` and `oci-containers.containers.*` fragments. svc
+# modules keep only what's genuinely svc-specific (image, volumes, extra env).
+# The `mk`-prefix marks an option owned by this flake (vs upstream
+# `virtualisation.*`).
 #
 # Identity model: host user `<name>` (static `uid`) is mapped onto the uid
 # the image runs as (`ctrUid`/`ctrGid`) with `--userns=keep-id`, so files
-# the container writes into bind-mounted state dirs are owned by `<name>` on
-# the host. Podman's image/container storage lives in the user's home under
-# /var/lib/podman/<name> — disposable, keep it out of backups.
+# that the container writes into bind-mounted state dirs are owned by
+# `<name>` on the host. Podman's image/container storage lives in the user's
+# home under /var/lib/podman/<name>. It is disposable, so keep it out of
+# backups.
 
 {
   config,
@@ -173,7 +174,7 @@ in
 
   config = mkMerge [
     {
-      # Declaring svcs on a host without the aspect would silently emit nothing.
+      # Declaring svcs on a host without the aspect would emit nothing.
       assertions = singleton {
         assertion = svcs == { } || cfg.enable;
         message = "mkContainerServices is set but mkContainers.enable is false";
@@ -260,7 +261,7 @@ in
         };
       };
 
-      # State dirs are owned by the svc user; `Z` re-chowns pre-existing data
+      # State dirs are owned by the svc user. `Z` re-chowns pre-existing data
       # (e.g. left behind by the former rootful Docker uids) on activation.
       systemd.tmpfiles.rules = concatLists (
         mapAttrsToList (

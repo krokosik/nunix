@@ -23,8 +23,8 @@ in
       # Reuse Stylix's flattened theme without creating a symlink in the user's home.
       home.file.".themes/${config.gtk.theme.name}".enable = false;
 
-      # Some Flatpaks persist their sandbox home; home-relative theme symlinks become stale
-      # across Home Manager generations and collide with Flatpak's filesystem setup.
+      # Some Flatpaks persist their sandbox home. Home-relative theme symlinks become
+      # stale across Home Manager generations and collide with Flatpak's filesystem setup.
       xdg.dataFile."flatpak/overrides/global".text = mkForce /* ini */ ''
         [Context]
         filesystems=${osConfig.environment.etc."stylix/${config.home.username}".source}:ro;
@@ -40,7 +40,7 @@ in
     name: home:
     nameValuePair "stylix/${name}" {
       # Expose this store directory directly to Flatpak (/etc is reserved).
-      # Keep it self-contained so no additional store permissions are needed.
+      # Keep it self-contained so that no additional store permissions are needed.
       source = pkgs.callPackage (
         { runCommandLocal }:
         runCommandLocal "flatpak-gtk-theme-${name}" { } /* bash */ ''

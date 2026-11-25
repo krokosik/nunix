@@ -132,7 +132,7 @@ let
       labels = { };
     };
   };
-  # Agents see declarations from this host only. Nothing here evaluates or
+  # Agents scrape only what this host declares. Nothing here evaluates or
   # imports another nixosConfiguration to discover its services.
   scrapeTargets = localTargets // serviceTargets // postgresTarget // smartTarget;
 
@@ -300,7 +300,7 @@ let
       node_expected_system_info{${bootLabels}} 1
     ''
   );
-  # Same paths /run/current-system/{kernel,initrd,kernel-modules} link to
+  # These are the same paths that /run/current-system/{kernel,initrd,kernel-modules} link to
   bootLabels = concatStringsSep "," [
     "kernel=${toJSON "${config.boot.kernelPackages.kernel}/${config.system.boot.loader.kernelFile}"}"
     "initrd=${toJSON "${config.system.build.initialRamdisk}/${config.system.boot.loader.initrdFile}"}"
@@ -521,7 +521,7 @@ in
     services.journald = {
       upload = {
         enable = true;
-        # journal-upload keeps the structured journal format; local vlagent
+        # journal-upload keeps the structured journal format. Local vlagent
         # handles disk-backed retries when the central VictoriaLogs is offline.
         settings.Upload.URL = "http://${loopback}:9429/insert/journald";
       };
@@ -546,7 +546,7 @@ in
     };
 
     # Basic Auth and the remote-write buffer are provided by the native
-    # module; the queue must survive a restart and stay bounded.
+    # module. The queue must survive a restart and stay bounded.
     systemd.services.vmagent.serviceConfig.CacheDirectory = "vmagent";
 
     sops.secrets = {

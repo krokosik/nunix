@@ -32,8 +32,9 @@ in
 
   stylix.targets.zen-browser.profileNames = singleton "default";
 
-  # Preserve files that Home Manager will stop owning before it cleans up links.
-  # Remove once all desktops are migrated
+  # Before Home Manager cleans up its links, preserve the files it will stop
+  # owning.
+  # Remove this once all desktops are migrated
   home.activation.preserveZenProfile =
     entryBetween (singleton "linkGeneration") (singleton "writeBoundary")
       /* bash */ ''

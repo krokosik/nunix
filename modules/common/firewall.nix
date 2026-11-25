@@ -19,7 +19,7 @@ in
     nftables.enable = true;
   };
 
-  # Optimization: Prevent systemd from waiting for network online
+  # Optimization: Prevent systemd from waiting for the network to come online
   # (Optional but recommended for faster boot with VPNs)
   systemd.network.wait-online.enable = false;
   boot.initrd.systemd.network.wait-online.enable = false;

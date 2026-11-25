@@ -1,5 +1,5 @@
 ---
-description: Fixes a specified home-directory clutter path through focused research and incremental tests, recording results in HOME-CLUTTER.md.
+description: Fixes a clutter path in the home directory through focused research and incremental tests, recording results in HOME-CLUTTER.md.
 mode: subagent
 model: openai/gpt-6-sol
 ---

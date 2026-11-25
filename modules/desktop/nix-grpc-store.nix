@@ -35,7 +35,7 @@ in
   config = mkIf (elem hostName config.nunix.grpcStore.trustedHosts) {
     programs.nix-grpc-store.enable = true;
 
-    # The build hook runs as root. The user also reads the key, to run builds
+    # The build hook runs as root. The user also reads the key to run builds
     # directly with `--store grpc://…`.
     sops.secrets.nix_grpc_store_tls_key = {
       key = "nix-grpc-store/tls_key";

@@ -190,11 +190,11 @@ in
     };
   };
 
-  # The cage module also starts cage-tty1 at boot; greetd must own tty1 instead.
+  # The cage module also starts cage-tty1 at boot. greetd must own tty1 instead.
   systemd.targets.graphical.wants = mkForce [ ];
 
   services.greetd.settings = {
-    # Persistent, so boot keeps the password greeter. Removing it arms one autologin.
+    # The runfile is persistent, so boot keeps the password greeter. Removing it enables one autologin.
     general.runfile = greetdRunfile;
     initial_session = {
       inherit user;

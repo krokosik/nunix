@@ -112,7 +112,7 @@ Verification is limited to the version and launch route actually tested.
 - **Sources:** [CUDA environment variables](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/environment-variables.html),
   [GSR source](https://github.com/antonlobanovskiy/gpu-screen-recorder/blob/master/src/main.cpp),
   [xdg-ninja CUDA rule](https://github.com/b3nj5m1n/xdg-ninja/blob/main/programs/cuda.json).
-  The rule overlooks mixed profile data on this host. Context7 did not return
+  The rule does not cover mixed profile data on this host. Context7 did not return
   relevant CUDA docs; prior kernel-module issue searches found no applicable fix.
 
 ## OCI CLI — `~/.oci`
@@ -179,9 +179,10 @@ Verification is limited to the version and launch route actually tested.
   `getuid()`/`getpwuid()` and `pw_dir`, bypassing the HOME environment variable.
   No supported override surfaced in inspected code/docs.
 - **Superseded attempt:** custom bubblewrap wrapper passed protected app/state
-  tests, but required home scaffolding with ephemeral unrelated entries and
-  restrictions on atomic replacement of top-level files. Replaced by maintained
-  Flatpak packaging; removed the custom `parsec.nix` and native package/import.
+  tests, but required a fake home directory filled with temporary unrelated
+  entries and restrictions on atomic replacement of top-level files. Replaced
+  by maintained Flatpak packaging; removed the custom `parsec.nix` and native
+  package/import.
 - **Implemented (user-approved):** `com.parsecgaming.parsec` added to existing
   declarative packages in `modules/desktop/flatpak.nix` and installed system-wide
   on horus. No duplicate user installation. Native deployed launcher remains
@@ -200,7 +201,8 @@ Verification is limited to the version and launch route actually tested.
 - **Flatpak mechanism:** current [Flathub manifest](https://github.com/flathub/com.parsecgaming.parsec/blob/master/com.parsecgaming.parsec.yml)
   uses `--persist=.` without host/home filesystem access, specifically to retain
   login/settings from hardcoded home paths. Flatpak manages the persistent home
-  under `~/.var/app/com.parsecgaming.parsec`, avoiding bespoke home scaffolding.
+  under `~/.var/app/com.parsecgaming.parsec`, so no hand-built fake home
+  structure is needed.
   Manifest requests X11, PulseAudio, network, all devices and notifications.
   Login/streaming still needs testing. Do not grant host/home access,
   which defeats this persistence mechanism. Verified manifest and Flatpak persist

@@ -150,7 +150,7 @@ in
         {
           alert = "SmartDiskDeteriorating";
           # ATA attributes are gauges; NVMe media errors are a counter. Only
-          # growth alerts on historical reallocations/media errors, not totals.
+          # alert on growth in historical reallocations/media errors, not totals.
           expr = /* promql */ ''
             max by (host, environment, instance, device) (
               (smartctl_device_attribute{job="host/smartctl",attribute_id=~"197|198",attribute_value_type="raw"} > 0)

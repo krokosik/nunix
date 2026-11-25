@@ -121,7 +121,7 @@ The query directly affects the quality of results. Be specific and include relev
 | Bad     | `"auth"`                                                   |
 | Bad     | `"hooks"`                                                  |
 
-Use the user's full question as the query when possible, vague one-word queries return generic results.
+Use the user's full question as the query when possible. Vague one-word queries return generic results.
 
 The output contains two types of content: **code snippets** (titled, with language-tagged blocks) and **info snippets** (prose explanations with breadcrumb context).
 

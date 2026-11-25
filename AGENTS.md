@@ -13,7 +13,7 @@ The user is new to NixOS but an experienced sysadmin (Proxmox VMs, Docker).
 - `lindbladian` is the designated build host for all flake hosts, including
   `anubis` via aarch64 emulation. Run full builds there; builds do not authorize
   deployment. Its `nunix-build-all.timer` fetches `main` into a separate checkout
-  and attempts every host daily at 04:00 local time, retaining successful outputs.
+  and tries to build every host daily at 04:00 local time, keeping successful outputs.
   It also runs `nix-grpc-daemon` with mTLS (`hosts/lindbladian/nix-grpc-daemon.nix`).
   Desktops listed in `nunix.grpcStore.trustedHosts` send their builds to it
   when they can (`modules/desktop/nix-grpc-store.nix`). They still build
@@ -66,7 +66,7 @@ skill for the full migration runbook and postgres patterns.
   on. Always prefer new (nix3) commands.
 - Never use python to parse json if jq can do it fine, jq avoids permission
   prompts.
-- When investigating with `nix eval`, always bundle multiple invocation together,
+- When investigating with `nix eval`, always bundle multiple invocations together,
   returning a single curated json object.
 - When checking systemd unit properties, use `systemctl show <unit> -P <property1> -P <property2>`
   rather than calling `systemctl cat` and parsing the output.
@@ -137,7 +137,7 @@ Searching nixos options, also useful for checking if a package is natively suppo
 
 ## Custom options (`modules/common/options.nix`)
 
-Read by other modules — set per-host in `hosts/<name>/configuration.nix`:
+Other modules read these options. Set them per-host in `hosts/<name>/configuration.nix`:
 - `isVirtual` (bool, default false) — VPS/VM/container.
 - `latestZFSKernel` (bool, default false) — pulls `zfs_unstable` + latest
   compatible kernel (see `modules/zfs.nix`).
@@ -166,8 +166,8 @@ Read by other modules — set per-host in `hosts/<name>/configuration.nix`:
   never `inherit (lib) foo` unless `foo` has no submodule path.
 - Use inherit for all lib functions, i.e. prefer `singleton` over `lib.lists.singleton`
 - Always prefer `${somePkg}` over bare command names or full calls in scripts and shell aliases. Remember
-  that for explicit binary names, there is getExe'. Use `package = getExe somePkg` in let blocks.
-  Note that for shell abreviations, it is expected for the program to be in path, so always use
+  that `getExe'` exists for explicit binary names. Use `package = getExe somePkg` in let blocks.
+  Note that a shell abbreviation expects the program to be on PATH, so always use
   bare command names.
 - For attr enumeration, such as specifying dependencies or vscode extensions, remember
   to use `with`.
@@ -195,7 +195,7 @@ Read by other modules — set per-host in `hosts/<name>/configuration.nix`:
   attribute rather than a separate `let` binding.
 - Do not use `builtins.` in modules.
 - Never use `rec` ever. Worst case, define a custom `fix`.
-- Do not use shortform CLI arguments if longform exists in source files. It's
-  only OK for interactive use. (and never when providing scripts to the user)
+- Do not use shortform CLI arguments if a longform exists in source files. Shortform
+  flags are OK only for interactive use, never when providing scripts to the user.
 - Never use `toString` for paths that need to preserve derivation contexts.
   Always `"${path}"`.

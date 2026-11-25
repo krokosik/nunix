@@ -30,7 +30,7 @@ let
 in
 {
   boot = {
-    # Note this might jump back and forth as kernels are added or removed.
+    # Note that this might jump back and forth as kernels are added or removed.
     kernelPackages = mkIf config.latestZFSKernel latestKernelPackage;
 
     supportedFilesystems = singleton "zfs";

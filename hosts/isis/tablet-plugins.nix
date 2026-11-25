@@ -32,7 +32,7 @@ let
           "-Dhyprgrass-pulse=true"
           "-Dhyprgrass-backlight=true"
         ];
-        # Border holds should not resize tiled gaps in the scrolling layout.
+        # A border hold should not resize the gaps between tiled windows in the scrolling layout.
         postPatch = (old.postPatch or "") + /* bash */ ''
           substituteInPlace src/GestureManager.cpp \
             --replace-fail 'if (w && !w->isFullscreen()) {' \

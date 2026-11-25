@@ -63,7 +63,7 @@ let
     };
   };
 
-  # Stable 26.05 HM doesn't know about ignorePatterns, evaluate on 26.11+.
+  # Stable 26.05 HM doesn't know about ignorePatterns. Evaluate on 26.11+.
   syncthingFolders = mapAttrs (_: folder: removeAttrs folder (singleton "ignorePatterns")) folders;
 
   # Generate .stignore for folders that define ignorePatterns.

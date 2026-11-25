@@ -1,8 +1,8 @@
 {
   # Osiris exports its media dataset as the NFSv4 root.
-  # Mount on demand so an unavailable server does not delay boot.
+  # Mount on demand so that an unavailable server does not delay boot.
   fileSystems."/mnt/media" = {
-    # The short hostname resolves through Tailscale; this export is LAN-only.
+    # The short hostname resolves through Tailscale. This export is LAN-only.
     device = "192.168.1.17:/";
     fsType = "nfs";
     options = [

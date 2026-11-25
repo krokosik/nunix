@@ -1,23 +1,23 @@
 # Surface tablet mode
 
 `../tablet-mode.nix` is imported only by `isis`. The primary user's graphical
-session runs `surface-tablet-mode.service`; it discovers the Surface KIP switch
+session runs `surface-tablet-mode.service`. It discovers the Surface KIP switch
 by its evdev name and `EV_SW/SW_TABLET_MODE` capability. It reads `EVIOCGSW` at
 startup and after input wakeups, with periodic reconciliation for dropped events,
-resume, Hyprland reloads and DMS restarts. Keyboard presence is never consulted.
+resume, Hyprland reloads and DMS restarts. Keyboard presence is never checked.
 
 The watcher changes the running Lua-configured compositor using `hyprctl eval`.
 Scrolling defaults are part of Home Manager's existing `hl.config` output, not
 the synchronized `hypr/dms` directory. The normal layout is captured from the
-running configuration; the declarative layout (or `dwindle`) is the fallback if
+running configuration. The declarative layout (or `dwindle`) is the fallback if
 the watcher starts while a previous scrolling override is still active.
 
 Layout changes wait while any window is fullscreen or maximized, including on
 other workspaces, so attaching or detaching the Type Cover does not interrupt
 fullscreen playback through a layout switch. Other tablet overrides and services
 still follow the switch immediately. The two-second reconciliation applies the
-layout for the latest switch state once no fullscreen/maximized windows remain;
-intermediate mode changes are not queued.
+layout for the latest switch state once no fullscreen/maximized windows remain.
+Intermediate mode changes are not queued.
 
 ## DMS RUNTIME OVERRIDE
 
@@ -44,28 +44,28 @@ screen assignment, rendering and space reservation. Settings editors and IPC
 setters still access the original dock configurations. Island rendering and the
 shared layout resolver use the same runtime sizing, including frame bars.
 Bar padding follows upstream's `barInnerPaddingDefault` when a bar has no
-explicit padding; tablet mode applies its minimum on top of that default.
+explicit padding. Tablet mode applies its minimum on top of that default.
 
 ## KEYBOARD AND FUTURE GESTURES
 
 `surface-tablet-osk.service` has no login enablement. The watcher starts it only
 in tablet mode, with wvkbd 0.21 from the already-pinned unstable input, using
-`--auto --hidden`. Visibility follows Wayland text-input requests; applications
+`--auto --hidden`. Visibility follows Wayland text-input requests. Applications
 that do not issue those requests will not summon the keyboard. Laptop mode
 removes its runtime activation marker and stops the service.
 
 The package includes upstream PR 126's `--auto` re-entrancy fix: Wayland
 round-trips during `show()` can otherwise create multiple orphaned keyboard
-surfaces when moving between text-input clients. A second patch commits
+surfaces when focus moves between text-input clients. A second patch commits
 input-method activation on `done` and applies visibility outside the Wayland
-callbacks, so focus handoff cannot leave a stale hide request. Heights are
+callbacks, so that focus handoff cannot leave a stale hide request. Heights are
 300 logical pixels in landscape and 360 in portrait, configured through the
 service environment.
 
 Hardware discovery and `Session.apply` are separate. The same policy controls
 `surface-tablet-rotation.service`, which runs a pinned Lua-compatible
-iio-hyprland in tablet mode. It rotates `eDP-1` and touchscreen/stylus input;
-stopping it restores landscape without modifying synchronized monitor files.
+iio-hyprland in tablet mode. It rotates `eDP-1` and touchscreen/stylus input.
+Stopping it restores landscape without modifying synchronized monitor files.
 
 `../tablet-plugins.nix` also loads hyprgrass, hyprgrass-pulse and
 hyprgrass-backlight. They use the newer source from the pinned unstable input
@@ -87,16 +87,17 @@ The watcher retries registration after compositor config reloads or plugin start
 | Two-finger hold, then drag | Move a floating window |
 | One-finger border/corner hold, then drag | Resize a floating window |
 
-Holds activate after 500 ms. Floating border grab areas expand to 24 logical
-pixels in both modes; a narrow hyprgrass build patch restricts border resizing
-to floating windows. Center holds and floating drags are guarded against the
+Holds activate after 500 ms. The grab areas along floating-window borders
+expand to 24 logical pixels in both modes. A narrow hyprgrass build patch
+restricts border resizing to floating windows. Center holds and floating drags
+are guarded against the
 wrong layout/window type. Ordinary one-finger holds inside applications and
 two-finger pinches remain available to applications.
 
 Scrolling-layout navigation uses direct touch rather than a compositor swipe.
 Workspace swipes use sensitivity 2.0, a gesture scale of 2.0 and a 0.05
 cancellation ratio, tuned interactively on this Surface. Sensitivity also
-divides finger drift tolerance; keeping it below 4.0 makes finger placement
+divides finger drift tolerance. Keeping it below 4.0 makes finger placement
 more forgiving, while the separate gesture scale shortens workspace travel.
 The hardware tablet switch does not disable gestures or change their tuning.
 

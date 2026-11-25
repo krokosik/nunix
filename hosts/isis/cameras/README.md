@@ -10,7 +10,7 @@ standard libcamera and PipeWire, so GTK, Ghostty, FFmpeg and other applications
 do not rebuild merely because of the camera patches.
 
 Applications using cameras through PipeWire receive the tuned stream. Direct
-libcamera consumers must use the patched package explicitly; installing the
+libcamera consumers must use the patched package explicitly. Installing the
 `cam` tool alone would not tune PipeWire's camera capture.
 
 ## Calibration
@@ -29,7 +29,7 @@ blobs are retained under `/etc/libcamera/surface-pro-8/aiqb` after deployment.
 They are tuning for the identified module variants, not a measurement of this
 individual tablet. No Microsoft blobs or derived YAML are committed here.
 
-The rear tuning assumes a zero sensor black-level target; the accompanying
+The rear tuning assumes a zero sensor black-level target. The accompanying
 kernel patch programs that target after each mode table. The front tuning
 retains the generator's pedestal workaround. Factory color correction remains
 imperfect, and this software ISP does not provide the complete Windows lens
@@ -52,9 +52,9 @@ shading, noise reduction, or sharpening pipeline.
   repository, matching its generated rear tuning.
 
 These apply after nixos-hardware's Surface patches for Linux 7.3.1. Recheck
-them when updating the Surface kernel; remove local changes once upstream
+them when updating the Surface kernel. Remove local changes once upstream
 includes equivalent fixes. The old driver's missing OV13858 selection API is
-not repaired here; libcamera currently supplies fallback crop properties.
+not repaired here. libcamera currently supplies fallback crop properties.
 
 ## Verification after deployment and reboot
 
@@ -62,7 +62,8 @@ List cameras and request 1280x960 output from the front camera's 1296x972
 binned sensor mode. The software debayer crops a few edge pixels, so requesting
 1296 output pixels can instead select the full-resolution sensor mode.
 Output resolution alone does not prove sensor binning: inspect
-the selected sensor format in libcamera logs or the media graph while active.
+the selected sensor format in libcamera logs or the media graph while the
+camera is active.
 
 ```bash
 cam --list
@@ -71,22 +72,22 @@ cam --camera 1 --stream width=1280,height=720 --capture=60
 media-ctl --print-topology
 ```
 
-`--capture` without `--file` discards frames. Camera indices can change; select
-the front/back IDs reported by `cam --list` if needed. Repeat capture to check
-restart behavior. Confirm the logs load `ov5693.yaml` and `ov13858.yaml` rather
+`--capture` without `--file` discards frames. Camera indices can change. Select
+the front/back IDs reported by `cam --list` if needed. Repeat the capture to check
+restart behavior. Confirm that the logs load `ov5693.yaml` and `ov13858.yaml` rather
 than `uncalibrated.yaml`, then check indoor/daylight colors and rear orientation
 in the desktop camera application.
 
 Keep PipeWire as the first application path. V4L2-only applications may need
-an additional on-demand v4l2-relayd/v4l2loopback setup; it is not enabled here.
-If cameras disappear only after boot, inspect software ISP DMA allocation and
-logind device ACL timing before adding broader device permissions.
+to set up v4l2-relayd/v4l2loopback on demand. That setup is not enabled here.
+If cameras disappear only after boot, inspect the software ISP's DMA allocation
+and the timing of logind's device ACLs before adding broader device permissions.
 
 ## Sources
 
 - [Camera repository](https://github.com/fildunsky/linux-surface-pro8-cameras/tree/6fe8974fba84d7abbe4f1df6c23e6f5edfd4699c)
 - [Microsoft Surface Pro 8 downloads](https://www.microsoft.com/en-us/download/details.aspx?id=103503)
 
-The upstream calibration guide's download ID 104114 is incorrect; use 103503.
+The upstream calibration guide's download ID 104114 is incorrect. Use 103503.
 When updating the MSI, update its hash and verify its File-table identifiers
 before changing the two hardcoded extraction keys in `tuning.nix`.

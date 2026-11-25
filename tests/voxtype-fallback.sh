@@ -52,7 +52,7 @@ for TEST_CASE in success split empty bad_segment malformed invalid offline timeo
 done
 export TEST_CASE=offline TEST_LOCAL_STATUS=42
 if bash hosts/isis/voxtype-fallback.sh --file audio --output-file result; then
-  echo 'Local failure was swallowed' >&2
+  echo 'Local failure was not propagated' >&2
   exit 1
 else
   test "$?" -eq 42

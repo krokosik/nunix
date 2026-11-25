@@ -17,7 +17,7 @@ def replace(path, old, new, count=1):
 
 
 # SettingsStore serializes only SettingsSpec keys. Keep runtime overrides out
-# of dockConfigs and barConfigs so saving or syncing settings cannot persist them.
+# of dockConfigs and barConfigs so that saving or syncing settings cannot persist them.
 replace("Common/SettingsData.qml", "    property var dockConfigs: Spec.SPEC.dockConfigs.def", """    property bool tabletModeEnabled: false
     readonly property real effectiveFrameBarSize: tabletModeEnabled ? Math.max(64, frameBarSize) : frameBarSize
     readonly property var effectiveDockConfigs: dockConfigs.map(config => effectiveDockConfig(config))
