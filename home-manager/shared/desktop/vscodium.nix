@@ -196,7 +196,7 @@ let
     james-yu.latex-workshop
     tecosaur.latex-utilities
     myriad-dreamin.tinymist
-    tomoki1207.pdf
+    dominikpeters.texpresso-basic
   ];
 
   profiles = {
