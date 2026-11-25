@@ -20,9 +20,7 @@ in
 
   programs.autodesk-inventor = {
     enable = true;
-    versions = [
-      "2027"
-    ];
+    versions = singleton "2027";
   };
 
   home-manager.users.${config.nunix.self.user}.wayland.windowManager.hyprland.extraConfig =
