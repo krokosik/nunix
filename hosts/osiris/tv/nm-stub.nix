@@ -21,168 +21,171 @@ let
   busName = "org.freedesktop.NetworkManager";
   user = "nm-stub";
 
-  nmStub = pkgs.writers.writePython3Bin "nm-stub" {
-    libraries = singleton pkgs.python3Packages.dbus-next;
-    # dbus-next uses D-Bus signatures ("ao") as annotations; flake8 reads them as names.
-    flakeIgnore = [
-      "E501"
-      "F722"
-      "F821"
-    ];
-  } /* python */ ''
-    import asyncio
+  nmStub =
+    pkgs.writers.writePython3Bin "nm-stub"
+      {
+        libraries = singleton pkgs.python3Packages.dbus-next;
+        # dbus-next uses D-Bus signatures ("ao") as annotations; flake8 reads them as names.
+        flakeIgnore = [
+          "E501"
+          "F722"
+          "F821"
+        ];
+      }
+      /* python */ ''
+        import asyncio
 
-    from dbus_next import BusType, PropertyAccess
-    from dbus_next.aio import MessageBus
-    from dbus_next.service import ServiceInterface, dbus_property, method
+        from dbus_next import BusType, PropertyAccess
+        from dbus_next.aio import MessageBus
+        from dbus_next.service import ServiceInterface, dbus_property, method
 
-    NM_STATE_CONNECTED_GLOBAL = 70
-    NM_CONNECTIVITY_FULL = 4
-    NM_METERED_NO = 2
+        NM_STATE_CONNECTED_GLOBAL = 70
+        NM_CONNECTIVITY_FULL = 4
+        NM_METERED_NO = 2
 
-    READ = PropertyAccess.READ
-
-
-    class NetworkManager(ServiceInterface):
-        def __init__(self):
-            super().__init__("${busName}")
-
-        @method()
-        def GetDevices(self) -> "ao":
-            return []
-
-        @method()
-        def GetAllDevices(self) -> "ao":
-            return []
-
-        @method()
-        def GetPermissions(self) -> "a{ss}":
-            return {}
-
-        @method(name="state")
-        def state_(self) -> "u":
-            return NM_STATE_CONNECTED_GLOBAL
-
-        @method()
-        def CheckConnectivity(self) -> "u":
-            return NM_CONNECTIVITY_FULL
-
-        @dbus_property(access=READ)
-        def Devices(self) -> "ao":
-            return []
-
-        @dbus_property(access=READ)
-        def AllDevices(self) -> "ao":
-            return []
-
-        @dbus_property(access=READ)
-        def Checkpoints(self) -> "ao":
-            return []
-
-        @dbus_property(access=READ)
-        def ActiveConnections(self) -> "ao":
-            return []
-
-        @dbus_property(access=READ)
-        def PrimaryConnection(self) -> "o":
-            return "/"
-
-        @dbus_property(access=READ)
-        def PrimaryConnectionType(self) -> "s":
-            return "802-3-ethernet"
-
-        @dbus_property(access=READ)
-        def ActivatingConnection(self) -> "o":
-            return "/"
-
-        @dbus_property(access=READ)
-        def NetworkingEnabled(self) -> "b":
-            return True
-
-        @dbus_property(access=READ)
-        def WirelessEnabled(self) -> "b":
-            return False
-
-        @dbus_property(access=READ)
-        def WirelessHardwareEnabled(self) -> "b":
-            return False
-
-        @dbus_property(access=READ)
-        def WwanEnabled(self) -> "b":
-            return False
-
-        @dbus_property(access=READ)
-        def WwanHardwareEnabled(self) -> "b":
-            return False
-
-        @dbus_property(access=READ)
-        def Startup(self) -> "b":
-            return False
-
-        @dbus_property(access=READ)
-        def Version(self) -> "s":
-            return "1.50.0"
-
-        @dbus_property(access=READ)
-        def Capabilities(self) -> "au":
-            return []
-
-        @dbus_property(access=READ)
-        def State(self) -> "u":
-            return NM_STATE_CONNECTED_GLOBAL
-
-        @dbus_property(access=READ)
-        def Connectivity(self) -> "u":
-            return NM_CONNECTIVITY_FULL
-
-        @dbus_property(access=READ)
-        def ConnectivityCheckAvailable(self) -> "b":
-            return False
-
-        @dbus_property(access=READ)
-        def ConnectivityCheckEnabled(self) -> "b":
-            return False
-
-        @dbus_property(access=READ)
-        def Metered(self) -> "u":
-            return NM_METERED_NO
-
-        @dbus_property(access=READ)
-        def GlobalDnsConfiguration(self) -> "a{sv}":
-            return {}
+        READ = PropertyAccess.READ
 
 
-    class Settings(ServiceInterface):
-        def __init__(self):
-            super().__init__("${busName}.Settings")
+        class NetworkManager(ServiceInterface):
+            def __init__(self):
+                super().__init__("${busName}")
 
-        @method()
-        def ListConnections(self) -> "ao":
-            return []
+            @method()
+            def GetDevices(self) -> "ao":
+                return []
 
-        @dbus_property(access=READ)
-        def Connections(self) -> "ao":
-            return []
+            @method()
+            def GetAllDevices(self) -> "ao":
+                return []
 
-        @dbus_property(access=READ)
-        def Hostname(self) -> "s":
-            return "${config.networking.hostName}"
+            @method()
+            def GetPermissions(self) -> "a{ss}":
+                return {}
 
-        @dbus_property(access=READ)
-        def CanModify(self) -> "b":
-            return False
+            @method(name="state")
+            def state_(self) -> "u":
+                return NM_STATE_CONNECTED_GLOBAL
+
+            @method()
+            def CheckConnectivity(self) -> "u":
+                return NM_CONNECTIVITY_FULL
+
+            @dbus_property(access=READ)
+            def Devices(self) -> "ao":
+                return []
+
+            @dbus_property(access=READ)
+            def AllDevices(self) -> "ao":
+                return []
+
+            @dbus_property(access=READ)
+            def Checkpoints(self) -> "ao":
+                return []
+
+            @dbus_property(access=READ)
+            def ActiveConnections(self) -> "ao":
+                return []
+
+            @dbus_property(access=READ)
+            def PrimaryConnection(self) -> "o":
+                return "/"
+
+            @dbus_property(access=READ)
+            def PrimaryConnectionType(self) -> "s":
+                return "802-3-ethernet"
+
+            @dbus_property(access=READ)
+            def ActivatingConnection(self) -> "o":
+                return "/"
+
+            @dbus_property(access=READ)
+            def NetworkingEnabled(self) -> "b":
+                return True
+
+            @dbus_property(access=READ)
+            def WirelessEnabled(self) -> "b":
+                return False
+
+            @dbus_property(access=READ)
+            def WirelessHardwareEnabled(self) -> "b":
+                return False
+
+            @dbus_property(access=READ)
+            def WwanEnabled(self) -> "b":
+                return False
+
+            @dbus_property(access=READ)
+            def WwanHardwareEnabled(self) -> "b":
+                return False
+
+            @dbus_property(access=READ)
+            def Startup(self) -> "b":
+                return False
+
+            @dbus_property(access=READ)
+            def Version(self) -> "s":
+                return "1.50.0"
+
+            @dbus_property(access=READ)
+            def Capabilities(self) -> "au":
+                return []
+
+            @dbus_property(access=READ)
+            def State(self) -> "u":
+                return NM_STATE_CONNECTED_GLOBAL
+
+            @dbus_property(access=READ)
+            def Connectivity(self) -> "u":
+                return NM_CONNECTIVITY_FULL
+
+            @dbus_property(access=READ)
+            def ConnectivityCheckAvailable(self) -> "b":
+                return False
+
+            @dbus_property(access=READ)
+            def ConnectivityCheckEnabled(self) -> "b":
+                return False
+
+            @dbus_property(access=READ)
+            def Metered(self) -> "u":
+                return NM_METERED_NO
+
+            @dbus_property(access=READ)
+            def GlobalDnsConfiguration(self) -> "a{sv}":
+                return {}
 
 
-    async def main():
-        bus = await MessageBus(bus_type=BusType.SYSTEM).connect()
-        bus.export("/org/freedesktop/NetworkManager", NetworkManager())
-        bus.export("/org/freedesktop/NetworkManager/Settings", Settings())
-        await bus.request_name("${busName}")
-        await bus.wait_for_disconnect()
+        class Settings(ServiceInterface):
+            def __init__(self):
+                super().__init__("${busName}.Settings")
+
+            @method()
+            def ListConnections(self) -> "ao":
+                return []
+
+            @dbus_property(access=READ)
+            def Connections(self) -> "ao":
+                return []
+
+            @dbus_property(access=READ)
+            def Hostname(self) -> "s":
+                return "${config.networking.hostName}"
+
+            @dbus_property(access=READ)
+            def CanModify(self) -> "b":
+                return False
 
 
-    asyncio.run(main())
-  '';
+        async def main():
+            bus = await MessageBus(bus_type=BusType.SYSTEM).connect()
+            bus.export("/org/freedesktop/NetworkManager", NetworkManager())
+            bus.export("/org/freedesktop/NetworkManager/Settings", Settings())
+            await bus.request_name("${busName}")
+            await bus.wait_for_disconnect()
+
+
+        asyncio.run(main())
+      '';
 
   # Only the stub user may own the name; anyone may read from it.
   dbusPolicy = pkgs.writeTextDir "share/dbus-1/system.d/nm-stub.conf" /* xml */ ''
