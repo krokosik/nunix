@@ -10,7 +10,6 @@
     moonlight-qt
     pinta
     proton-vpn
-    zotero
   ];
 
   programs.obsidian = {

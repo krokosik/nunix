@@ -7,6 +7,7 @@
     ./gitea-cli.nix
     ./restic.nix
     ./syncthing.nix
+    ./zotero.nix
   ];
 
 }

@@ -106,6 +106,10 @@ let
         "tutor-setup"
       ];
     }
+    {
+      src = "${inputs.zotero-mcp}/src/zotero_mcp/skills";
+      names = singleton "zotero-cli";
+    }
   ];
   externalSkillFiles = listToAttrs (
     concatMap
