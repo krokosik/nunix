@@ -21,6 +21,8 @@
       ./shared/common
     ];
 
+    backupFileExtension = "bak";
+
     # Shared modules only reach declared users, so always declare the primary one
     users.${config.nunix.self.user} = { };
   };
