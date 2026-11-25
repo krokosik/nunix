@@ -19,7 +19,7 @@ in
   };
 
   services.niks3-auto-upload = {
-    enable = true;
+    enable = false;
     serverUrl = "https://niks3.${config.privateDomain}";
     authTokenFile = config.sops.secrets.niks3_api_token.path;
   };
