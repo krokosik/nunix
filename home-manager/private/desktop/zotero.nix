@@ -32,6 +32,36 @@ in
   home.packages = with pkgs; [
     zotero
     (zoteroMcp.overridePythonAttrs (old: {
+      dependencies =
+        (old.dependencies or [ ])
+        ++ (with pkgs.python3Packages; [
+          # Upstream's semantic extra, including local embedding support.
+          chromadb
+          sentence-transformers
+          openai
+          google-genai
+          tiktoken
+          # Upstream's pdf extra; scite uses requests from the base package.
+          pymupdf
+        ]);
+
+      # Expose Scite alongside the usual tools unless the client chooses another set.
+      makeWrapperArgs = (old.makeWrapperArgs or [ ]) ++ [
+        "--set-default"
+        "ZOTERO_MCP_TOOLSETS"
+        "default,scite"
+      ];
+
+      pythonImportsCheck = (old.pythonImportsCheck or [ ]) ++ [
+        "chromadb"
+        "sentence_transformers"
+        "openai"
+        "google.genai"
+        "tiktoken"
+        "pymupdf"
+        "zotero_mcp.scite_client"
+      ];
+
       preBuild = (old.preBuild or "") + /* bash */ ''
         install -D --mode=0644 ${zoteroAgent}/zotero-agent.xpi src/zotero_mcp/chat_plugin/zotero-agent.xpi
       '';

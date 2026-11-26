@@ -14,6 +14,12 @@
     llm-agents.url = "github:numtide/llm-agents.nix";
     rea-flake.url = "github:Fractal-Tess/rea-flake";
 
+    # zotero-cli, its agent skill and the source of the Zotero Agent plugin
+    zotero-mcp = {
+      url = "github:54yyyu/zotero-mcp";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
     nix-flatpak.url = "github:gmodena/nix-flatpak/v0.8.0";
