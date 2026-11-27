@@ -699,20 +699,20 @@
         "nix-overlayfs": "nix-overlayfs",
         "nixpkgs": "nixpkgs_4",
         "winum": "winum",
-        "winum-candidates": "winum-candidates"
+        "winum-install": "winum-install"
       },
       "locked": {
-        "lastModified": 1794912587,
-        "narHash": "sha256-2X2lqvNoHojUkSTBprIdg+W36GYQuA77zMrv76qT/Zk=",
-        "owner": "Harvi654",
-        "repo": "Autodesk-Inventor-for-Linux",
-        "rev": "ea69397658af3403e3566b28daf7fd577859b12e",
+        "lastModified": 1795730623,
+        "narHash": "sha256-WYOLKGalpizPbe8jhzceDKiP3yZQKrc6SMqXZUv5hok=",
+        "owner": "krokosik",
+        "repo": "Autodesk-Inventor-for-Nix",
+        "rev": "92f7769f2aec5867d5610860c7b436d5388a0b46",
         "type": "github"
       },
       "original": {
-        "owner": "Harvi654",
-        "ref": "v0.4.0",
-        "repo": "Autodesk-Inventor-for-Linux",
+        "owner": "krokosik",
+        "ref": "v0.4.1",
+        "repo": "Autodesk-Inventor-for-Nix",
         "type": "github"
       }
     },
@@ -914,17 +914,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1794852263,
-        "narHash": "sha256-tR2gHVtTOgdY4j8b7BJAlaDWlZB0cSx/hB84VQT8zpg=",
+        "lastModified": 1795713879,
+        "narHash": "sha256-QcmO/KwQzZAACfvamrrxnx9+7hhGG8AT9v+PgxNh0KQ=",
         "owner": "krokosik",
         "repo": "nix-overlayfs",
-        "rev": "182757dbf0057db8f067d9675f1cda3f0faf4176",
+        "rev": "cd01ba181042f6bd781cf190e63a1e1464a658fa",
         "type": "github"
       },
       "original": {
         "owner": "krokosik",
         "repo": "nix-overlayfs",
-        "rev": "182757dbf0057db8f067d9675f1cda3f0faf4176",
+        "rev": "cd01ba181042f6bd781cf190e63a1e1464a658fa",
         "type": "github"
       }
     },
@@ -1741,34 +1741,34 @@
     "winum": {
       "flake": false,
       "locked": {
-        "lastModified": 1794502212,
-        "narHash": "sha256-K+jZcFdBcg4gqD38Y/d6o5NSv/6afSwgqi7goSt/4hU=",
+        "lastModified": 1795645018,
+        "narHash": "sha256-ZSCt0bLg6SAITPkhYnjI6EiS5WIv72Iu7Q5GyNlLWnE=",
         "owner": "Harvi654",
         "repo": "winum",
-        "rev": "98a6feda5d55b739c9fdfd363b060631a2004447",
+        "rev": "ec9fd62ed2128e0584f3efed4c83a7211af84407",
         "type": "github"
       },
       "original": {
         "owner": "Harvi654",
+        "ref": "winum-11.22-3",
         "repo": "winum",
-        "rev": "98a6feda5d55b739c9fdfd363b060631a2004447",
         "type": "github"
       }
     },
-    "winum-candidates": {
+    "winum-install": {
       "flake": false,
       "locked": {
-        "lastModified": 1794502212,
-        "narHash": "sha256-K+jZcFdBcg4gqD38Y/d6o5NSv/6afSwgqi7goSt/4hU=",
+        "lastModified": 1795645018,
+        "narHash": "sha256-ZSCt0bLg6SAITPkhYnjI6EiS5WIv72Iu7Q5GyNlLWnE=",
         "owner": "Harvi654",
         "repo": "winum",
-        "rev": "98a6feda5d55b739c9fdfd363b060631a2004447",
+        "rev": "ec9fd62ed2128e0584f3efed4c83a7211af84407",
         "type": "github"
       },
       "original": {
         "owner": "Harvi654",
+        "ref": "winum-11.22-3",
         "repo": "winum",
-        "rev": "98a6feda5d55b739c9fdfd363b060631a2004447",
         "type": "github"
       }
     },
