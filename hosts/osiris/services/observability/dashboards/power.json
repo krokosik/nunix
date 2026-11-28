@@ -27,8 +27,8 @@
           "type": "prometheus",
           "uid": "victoriametrics"
         },
-        "query": "label_values(node_uname_info{job=\"host/node\"}, host)",
-        "definition": "label_values(node_uname_info{job=\"host/node\"}, host)",
+        "query": "label_values(node_rapl_package_joules_total{job=\"host/node\",path!~\".*mmio.*\"}, host)",
+        "definition": "label_values(node_rapl_package_joules_total{job=\"host/node\",path!~\".*mmio.*\"}, host)",
         "refresh": 1,
         "multi": false,
         "includeAll": false,

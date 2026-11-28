@@ -294,5 +294,12 @@ else
   else . end |
   legacy_panels
 end |
+# Apply after normalization: clearing imported selections must not discard the
+# preferred host. Multi-value selectors store their selection as arrays.
+.templating.list |= map(
+  if .type == "query" and (.name | ascii_downcase) == "host" then
+    .current = (if .multi then {text:["osiris"],value:["osiris"]}
+                else {text:"osiris",value:"osiris"} end)
+  else . end) |
 if ([.. | objects | .datasource? // empty | select(type == "object") | .type | select(. != "prometheus" and . != "victoriametrics-logs-datasource" and . != "datasource" and . != "grafana")] | length) > 0
 then error("Unsupported datasource in " + $name) else . end

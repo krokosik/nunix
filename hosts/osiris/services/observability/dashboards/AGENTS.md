@@ -22,6 +22,9 @@ linked through `externalSkills` in `home-manager/private/common/slop.nix`.
 - Scope host metrics with the inventory's `host` label and the appropriate
   `job`, such as `host/node`. Use variables when the dashboard supports several
   hosts. Validate label names against live data before adding queries.
+- Default host selectors to osiris through `../prepare-dashboards.jq`, after
+  imported selections have been cleared. The power dashboard should list only
+  hosts with RAPL energy readings, excluding cloud VMs without those counters.
 
 ## DESIGN
 

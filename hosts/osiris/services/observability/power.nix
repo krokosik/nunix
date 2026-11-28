@@ -1,4 +1,4 @@
-interaction_length{
+{
   config,
   lib,
   ...
