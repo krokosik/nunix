@@ -56,6 +56,11 @@
     };
 
     # AGENT SKILLS
+    grafana-skills = {
+      url = "github:grafana/skills";
+      flake = false;
+    };
+
     schematic-figure = {
       url = "github:lgwrightlab/schematic-figure";
       flake = false;

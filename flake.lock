@@ -673,6 +673,22 @@
         "type": "github"
       }
     },
+    "grafana-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793134833,
+        "narHash": "sha256-PAeYV+ZJWO6eoz+w2v0TsD3TYbkfWnvVrx3yHXmtkNU=",
+        "owner": "grafana",
+        "repo": "skills",
+        "rev": "8fb72a527961f05e708f53d2a0500709e12d7970",
+        "type": "github"
+      },
+      "original": {
+        "owner": "grafana",
+        "repo": "skills",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -1332,6 +1348,7 @@
         "dms-plugin-registry": "dms-plugin-registry",
         "dsearch": "dsearch",
         "dux-files": "dux-files",
+        "grafana-skills": "grafana-skills",
         "home-manager": "home-manager",
         "inventor": "inventor",
         "lazyvim": "lazyvim",

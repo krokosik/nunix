@@ -59,6 +59,10 @@ let
   # personal ones. Each entry links the named skill folders under `src` into
   # every harness's skills directory.
   externalSkills = [
+    {
+      src = "${inputs.grafana-skills}/skills/grafana-core";
+      names = singleton "dashboarding";
+    }
     # patent-drawing needs schematic-figure linked next to it.
     {
       src = "${inputs.schematic-figure}/.claude/skills";
