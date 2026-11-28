@@ -1,0 +1,985 @@
+{
+  "id": null,
+  "uid": "nunix-power",
+  "title": "Power consumption",
+  "description": "CPU package power and energy, with activity context for comparing idle-power changes. Excludes wall-socket electricity.",
+  "schemaVersion": 39,
+  "version": 2,
+  "editable": false,
+  "tags": [
+    "power",
+    "energy",
+    "infrastructure"
+  ],
+  "timezone": "browser",
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "host",
+        "label": "Host",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "victoriametrics"
+        },
+        "query": "label_values(node_uname_info{job=\"host/node\"}, host)",
+        "definition": "label_values(node_uname_info{job=\"host/node\"}, host)",
+        "refresh": 1,
+        "multi": false,
+        "includeAll": false,
+        "current": {
+          "text": "osiris",
+          "value": "osiris"
+        },
+        "options": []
+      }
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 10,
+      "title": "CPU power now",
+      "type": "stat",
+      "description": "CPU package power, averaged over the rate interval. Excludes drives, PSU losses and TV. Duplicate MMIO counters are excluded.",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "watt",
+          "decimals": 1,
+          "min": 0,
+          "noValue": "Unavailable",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#56B4E9"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(node_rapl_package_joules_total{host=~\"$host\",job=\"host/node\",path!~\".*mmio.*\"}[$__rate_interval])",
+          "legendFormat": "",
+          "editorMode": "code",
+          "range": false,
+          "instant": true
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "textMode": "value",
+        "wideLayout": true,
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "text": {
+          "valueSize": 36
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Average power",
+      "type": "stat",
+      "description": "Average power across observed samples in the selected range. Gaps are excluded; this is not a whole-system measurement.",
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "watt",
+          "decimals": 1,
+          "min": 0,
+          "noValue": "Unavailable",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#E69F00"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "avg_over_time((rate(node_rapl_package_joules_total{host=~\"$host\",job=\"host/node\",path!~\".*mmio.*\"}[2m]))[$__range:1m])",
+          "legendFormat": "",
+          "editorMode": "code",
+          "range": false,
+          "instant": true
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "textMode": "value",
+        "wideLayout": true,
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "text": {
+          "valueSize": 36
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "CPU energy",
+      "type": "stat",
+      "description": "CPU package energy in Wh. Missing scrapes, counter wraps and outages can reduce accuracy.",
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix: Wh",
+          "decimals": 2,
+          "min": 0,
+          "noValue": "Unavailable",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#009E73"
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "increase(node_rapl_package_joules_total{host=~\"$host\",job=\"host/node\",path!~\".*mmio.*\"}[$__range]) / 3600",
+          "legendFormat": "",
+          "editorMode": "code",
+          "range": false,
+          "instant": true
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "textMode": "value",
+        "wideLayout": true,
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "text": {
+          "valueSize": 36
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Energy telemetry",
+      "type": "stat",
+      "description": "Reporting: scrape and RAPL collector succeeded. Check access: scrape or collector failed. Unavailable: no matching series.",
+      "gridPos": {
+        "x": 18,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "noValue": "Unavailable",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Check access",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "Reporting",
+                  "color": "green"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "node_scrape_collector_success{host=~\"$host\",job=\"host/node\",collector=\"rapl\"} * on(host,job,instance) up{host=~\"$host\",job=\"host/node\"}",
+          "legendFormat": "",
+          "editorMode": "code",
+          "range": false,
+          "instant": true
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "textMode": "value",
+        "wideLayout": true,
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "text": {
+          "valueSize": 26
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "CPU package power",
+      "type": "timeseries",
+      "description": "CPU package only. The smoothed line helps compare quiet periods before and after changes. Core and graphics domains are already included in the package.",
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 16,
+        "h": 10
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "watt",
+          "decimals": 1,
+          "min": 0,
+          "noValue": "Unavailable",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#56B4E9"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "axisBorderShow": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "10-minute average"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#E69F00"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    6,
+                    4
+                  ]
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(node_rapl_package_joules_total{host=~\"$host\",job=\"host/node\",path!~\".*mmio.*\"}[$__rate_interval])",
+          "legendFormat": "Package",
+          "editorMode": "code",
+          "range": true,
+          "instant": false
+        },
+        {
+          "refId": "B",
+          "expr": "avg_over_time((rate(node_rapl_package_joules_total{host=~\"$host\",job=\"host/node\",path!~\".*mmio.*\"}[$__rate_interval]))[10m:30s])",
+          "legendFormat": "10-minute average",
+          "editorMode": "code",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc",
+          "hideZeros": false
+        }
+      }
+    },
+    {
+      "id": 11,
+      "title": "CPU core power",
+      "type": "timeseries",
+      "description": "Energy used by CPU cores, already included in package power. Uncore diagnostics are available in the collapsed section below.",
+      "gridPos": {
+        "x": 16,
+        "y": 4,
+        "w": 8,
+        "h": 10
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "watt",
+          "decimals": 1,
+          "min": 0,
+          "noValue": "Unavailable",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#CC79A7"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "axisBorderShow": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(node_rapl_core_joules_total{host=~\"$host\",job=\"host/node\",path!~\".*mmio.*\"}[$__rate_interval])",
+          "legendFormat": "CPU cores",
+          "editorMode": "code",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc",
+          "hideZeros": false
+        }
+      }
+    },
+    {
+      "id": 12,
+      "type": "row",
+      "title": "Activity behind the power draw",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 6,
+      "title": "CPU busy",
+      "type": "timeseries",
+      "description": "CPU accounting activity; low usage does not guarantee hardware sleep. Use turbostat to check C-state residency.",
+      "gridPos": {
+        "x": 0,
+        "y": 15,
+        "w": 8,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "min": 0,
+          "noValue": "Unavailable",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#56B4E9"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "axisBorderShow": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "max": 100
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * (1 - avg by (host) (rate(node_cpu_seconds_total{host=~\"$host\",job=\"host/node\",mode=\"idle\"}[$__rate_interval])))",
+          "legendFormat": "CPU busy",
+          "editorMode": "code",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "showLegend": false,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc",
+          "hideZeros": false
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "Disk busy",
+      "type": "timeseries",
+      "description": "Fraction of time each physical disk has I/O in progress. Activity context, not disk wattage.",
+      "gridPos": {
+        "x": 8,
+        "y": 15,
+        "w": 8,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 1,
+          "min": 0,
+          "noValue": "Unavailable",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "axisBorderShow": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "max": 1
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(node_disk_io_time_seconds_total{host=~\"$host\",job=\"host/node\",device=~\"sd[a-z]+|nvme[0-9]+n[0-9]+\"}[$__rate_interval])",
+          "legendFormat": "{{device}}",
+          "editorMode": "code",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc",
+          "hideZeros": false
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "CPU clock",
+      "type": "timeseries",
+      "description": "Scaling frequency per CPU. Frequency is context; idle-state residency and energy are needed to assess savings.",
+      "gridPos": {
+        "x": 16,
+        "y": 15,
+        "w": 8,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "hertz",
+          "decimals": 1,
+          "min": 0,
+          "noValue": "Unavailable",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "axisBorderShow": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "node_cpu_scaling_frequency_hertz{host=~\"$host\",job=\"host/node\"}",
+          "legendFormat": "Core {{cpu}}",
+          "editorMode": "code",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc",
+          "hideZeros": false
+        }
+      }
+    },
+    {
+      "id": 13,
+      "type": "row",
+      "title": "Diagnostics & measurement notes",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 22,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "id": 9,
+          "title": "Swap activity",
+          "type": "timeseries",
+          "description": "Pages moved into or out of swap per second. Sustained swapping can add CPU and storage work.",
+          "gridPos": {
+            "x": 0,
+            "y": 23,
+            "w": 8,
+            "h": 7
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "suffix: pages/s",
+              "decimals": 1,
+              "min": 0,
+              "noValue": "Unavailable",
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "#E69F00"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "showPoints": "never",
+                "spanNulls": false,
+                "axisPlacement": "auto",
+                "axisBorderShow": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "rate(node_vmstat_pswpin{host=~\"$host\",job=\"host/node\"}[$__rate_interval]) + rate(node_vmstat_pswpout{host=~\"$host\",job=\"host/node\"}[$__rate_interval])",
+              "legendFormat": "Swap in + out",
+              "editorMode": "code",
+              "range": true,
+              "instant": false
+            }
+          ],
+          "options": {
+            "legend": {
+              "showLegend": true,
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "lastNotNull",
+                "mean",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc",
+              "hideZeros": false
+            }
+          }
+        },
+        {
+          "id": 14,
+          "title": "Uncore power",
+          "type": "timeseries",
+          "description": "Hardware-defined uncore RAPL domain, included in package energy. This is not a total GPU power measurement.",
+          "gridPos": {
+            "x": 8,
+            "y": 23,
+            "w": 8,
+            "h": 7
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "watt",
+              "decimals": 1,
+              "min": 0,
+              "noValue": "Unavailable",
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "#E69F00"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "showPoints": "never",
+                "spanNulls": false,
+                "axisPlacement": "auto",
+                "axisBorderShow": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "rate(node_rapl_uncore_joules_total{host=~\"$host\",job=\"host/node\",path!~\".*mmio.*\"}[$__rate_interval])",
+              "legendFormat": "Uncore",
+              "editorMode": "code",
+              "range": true,
+              "instant": false
+            }
+          ],
+          "options": {
+            "legend": {
+              "showLegend": true,
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "lastNotNull",
+                "mean",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc",
+              "hideZeros": false
+            }
+          }
+        },
+        {
+          "id": 1,
+          "type": "text",
+          "title": "How to read these measurements",
+          "gridPos": {
+            "x": 16,
+            "y": 23,
+            "w": 8,
+            "h": 7
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "### CPU energy, not the electricity bill\nRAPL measures the processor package. Drives, the external enclosure, PSU losses and the TV require a separate meter.\n\n**Comparing changes:** use matched quiet periods and the same time range. A reboot can be marked with a Grafana annotation.\n\n**Missing readings:** check Energy telemetry. New counters need two scrapes. Gaps are never filled with zero.\n\nAverage power uses observed samples; energy totals depend on counter coverage. Hover a panel’s information icon for details."
+          }
+        }
+      ]
+    }
+  ],
+  "graphTooltip": 1
+}

@@ -18,7 +18,6 @@ in
     ../../modules/server/ingress-wireguard.nix
     ../../modules/boot.nix
     ../../modules/btop-intel-gpu.nix
-    ../../modules/disable-deep-sleep.nix
     ../../modules/intel-gpu.nix
     ../../modules/zfs.nix
     inputs.nixos-hardware.nixosModules.common-pc-ssd

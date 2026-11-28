@@ -7,6 +7,7 @@
     ./vmagent.nix
     ./alertmanager.nix
     ./grafana.nix
+    ./power.nix
     ./ingress.nix
     ./rules.nix
   ];
