@@ -7,7 +7,7 @@ let
   dashboard = file: "${config.mkTraefikServices.grafana.fullHostname}/d/${(importJSON file).uid}";
   hostDashboard = "${dashboard ./dashboards/node_exporter.json}?var-host={{ $labels.host | queryEscape }}&var-job=host%2Fnode";
   postgresDashboard = "${dashboard ./dashboards/postgresql.json}?var-host={{ $labels.host | queryEscape }}&var-instance={{ $labels.instance | queryEscape }}";
-  smartDashboard = "${dashboard ./dashboards/smart.json}?var-host={{ $labels.host | queryEscape }}&var-node={{ $labels.instance | queryEscape }}&var-disk={{ $labels.device | queryEscape }}";
+  smartDashboard = "${dashboard ./dashboards/smart.json}?var-host={{ $labels.host | queryEscape }}&var-disk={{ $labels.device | queryEscape }}";
   probeDashboard = "${dashboard ./dashboards/blackbox.json}?var-host={{ $labels.host | queryEscape }}&var-ip_family={{ $labels.ip_family | queryEscape }}&var-instance={{ $labels.instance | queryEscape }}";
   withDashboard =
     url:
